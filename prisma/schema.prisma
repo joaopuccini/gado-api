@@ -1,0 +1,430 @@
+// ============================================
+// GADO API — Prisma Schema
+// ============================================
+// Multi-tenant: schema gado_fazendas (shared) + fazenda_{id} (per-tenant)
+// NOTE: Prisma doesn't natively support dynamic schemas.
+// We use SET search_path in PrismaService for tenant isolation.
+// This schema represents the UNION of all tables.
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["gado_fazendas", "public"]
+}
+
+// ============================================
+// SCHEMA: gado_fazendas (Shared / SaaS Admin)
+// ============================================
+
+model Usuario {
+  id               Int       @id @default(autoincrement())
+  nome             String
+  email            String    @unique
+  password         String
+  celular          String?
+  admin            Boolean   @default(false)
+  suporte          Boolean   @default(false)
+  acesso_geral     Boolean   @default(true)
+  acesso_animais   Boolean   @default(false)
+  acesso_dashboard Boolean   @default(false)
+  acesso_custos    Boolean   @default(false)
+  acesso_caixa     Boolean   @default(false)
+  acesso_vendas    Boolean   @default(false)
+  acesso_saldo     Boolean   @default(false)
+  acesso_manejo    Boolean   @default(false)
+  acesso_racas     Boolean   @default(false)
+  acesso_lotes     Boolean   @default(false)
+  acesso_pastos    Boolean   @default(false)
+  acesso_clientes  Boolean   @default(false)
+  inativo          Boolean   @default(false)
+  excluido         Boolean   @default(false)
+  excluido_data    DateTime?
+  createdAt        DateTime  @default(now()) @map("createAt")
+
+  @@map("usuarios")
+  @@schema("gado_fazendas")
+}
+
+model Fazenda {
+  id               Int       @id @default(autoincrement())
+  id_usuarios      Int[]
+  nome             String?
+  status           String    @default("PENDENTE") // ATIVO, BLOQUEADO, PENDENTE
+  saldo            Float     @default(0)
+  celular          String?
+  validade         DateTime?
+  cpf_cnpj         String?   @unique
+  nome_proprietario String?
+  cep              String?
+  cidade           String?
+  bairro           String?
+  endereco         String?
+  estado           String?
+  numero           Int?
+  observacao       String?
+  excluido         Boolean   @default(false)
+  excluido_data    DateTime?
+  createdAt        DateTime  @default(now()) @map("createAt")
+
+  mensalidades     PlanoMensalidade[]
+
+  @@map("fazendas")
+  @@schema("gado_fazendas")
+}
+
+model Plano {
+  id          Int       @id @default(autoincrement())
+  meses       Int
+  valor       Float
+  observacao  String
+  excluido    Boolean   @default(false)
+  excluido_data DateTime?
+  createdAt   DateTime  @default(now()) @map("createAt")
+
+  mensalidades PlanoMensalidade[]
+
+  @@map("planos")
+  @@schema("gado_fazendas")
+}
+
+model PlanoMensalidade {
+  id              Int       @id @default(autoincrement())
+  id_plano        Int
+  id_fazenda      Int
+  status          String    @default("DEVE") // DEVE, PAGO
+  vencimento      DateTime  @default(now())
+  valor_pagamento Float?
+  data_pagamento  DateTime?
+  excluido        Boolean   @default(false)
+  excluido_data   DateTime?
+  createdAt       DateTime  @default(now()) @map("createAt")
+
+  plano           Plano     @relation(fields: [id_plano], references: [id])
+  fazenda         Fazenda   @relation(fields: [id_fazenda], references: [id])
+
+  @@map("plano_mensalidades")
+  @@schema("gado_fazendas")
+}
+
+// ============================================
+// SCHEMA: fazenda_{id} (Per-Tenant)
+// ============================================
+// NOTE: These models use the default schema from DATABASE_URL.
+// At runtime, PrismaService sets search_path to fazenda_{id}.
+
+model Animal {
+  id               Int       @id @default(autoincrement())
+  id_usuario_nome  String[]
+  id_lote          Int
+  id_raca          Int
+  id_cliente       Int?
+  id_pasto         Int
+  matriz           Boolean?
+  nome             String?
+  status           String    @default("ATIVO") // ATIVO, VENDIDO, MORTO
+  sexo             String?
+  nascimento       DateTime?
+  numero_brinco    Float?    @default(0)
+  data_entrada     DateTime  @default(now())
+  preco_kilo       Float?    @default(0)
+  peso             Float?    @default(0)
+  tipo_compra      String?   // OLHO, KILO, NASCIMENTO
+  total            Float?    @default(0)
+  valor_custo_final Float?   @default(0)
+  castrado         Boolean?  @default(false)
+  observacao       String?
+  excluido         Boolean   @default(false)
+  excluido_data    DateTime?
+  createdAt        DateTime  @default(now()) @map("createAt")
+
+  lote             Lote      @relation(fields: [id_lote], references: [id])
+  raca             Raca      @relation(fields: [id_raca], references: [id])
+  cliente          Cliente?  @relation(fields: [id_cliente], references: [id])
+  pasto            Pasto     @relation(fields: [id_pasto], references: [id])
+
+  vacinacoes       Vacinacao[]
+  fotos            Foto[]
+  kilos            Kilo[]
+  manejoComoVaca   ManejoReproducao[] @relation("AnimalVaca")
+  manejoComoBoi    ManejoReproducao[] @relation("AnimalBoi")
+  movimentosPasto  MovimentoAnimalPasto[]
+  movimentosLote   MovimentoLote[]
+  custoAnimais     CustoAnimal[]
+  vendaAnimais     VendaAnimal[]
+
+  @@map("animais")
+  @@schema("public")
+}
+
+model Lote {
+  id          Int       @id @default(autoincrement())
+  descricao   String
+  excluido    Boolean   @default(false)
+  excluido_data DateTime?
+  createdAt   DateTime  @default(now()) @map("createAt")
+
+  animais     Animal[]
+  movimentosOrigem  MovimentoLote[] @relation("LoteOrigem")
+  movimentosDestino MovimentoLote[] @relation("LoteDestino")
+
+  @@map("lotes")
+  @@schema("public")
+}
+
+model Raca {
+  id          Int       @id @default(autoincrement())
+  descricao   String
+  excluido    Boolean   @default(false)
+  excluido_data DateTime?
+  createdAt   DateTime  @default(now()) @map("createAt")
+
+  animais     Animal[]
+
+  @@map("racas")
+  @@schema("public")
+}
+
+model Pasto {
+  id          Int       @id @default(autoincrement())
+  descricao   String
+  excluido    Boolean   @default(false)
+  excluido_data DateTime?
+  createdAt   DateTime  @default(now()) @map("createAt")
+
+  animais     Animal[]
+  movimentosOrigem  MovimentoAnimalPasto[] @relation("PastoOrigem")
+  movimentosDestino MovimentoAnimalPasto[] @relation("PastoDestino")
+
+  @@map("pastos")
+  @@schema("public")
+}
+
+model Cliente {
+  id          Int       @id @default(autoincrement())
+  nome        String
+  celular     String?
+  cpf_cnpj    String?
+  cep         String?
+  cidade      String?
+  bairro      String?
+  endereco    String?
+  estado      String?
+  numero      Int?
+  observacao  String?
+  excluido    Boolean   @default(false)
+  excluido_data DateTime?
+  createdAt   DateTime  @default(now()) @map("createAt")
+
+  animais     Animal[]
+  vendas      Venda[]
+
+  @@map("clientes")
+  @@schema("public")
+}
+
+model CustoTipo {
+  id          Int       @id @default(autoincrement())
+  descricao   String
+  excluido    Boolean   @default(false)
+  excluido_data DateTime?
+  createdAt   DateTime  @default(now()) @map("createAt")
+
+  custos      Custo[]
+
+  @@map("custo_tipos")
+  @@schema("public")
+}
+
+model Custo {
+  id              Int       @id @default(autoincrement())
+  id_animais      Int[]
+  id_custo_tipos  Int?
+  qtd_animais     Int       @default(0)
+  descricao       String?
+  valor_custo     Float?    @default(0)
+  data_custo      DateTime  @default(now())
+  excluido        Boolean   @default(false)
+  excluido_data   DateTime?
+  createdAt       DateTime  @default(now()) @map("createAt")
+
+  custoTipo       CustoTipo? @relation(fields: [id_custo_tipos], references: [id])
+  custoAnimais    CustoAnimal[]
+
+  @@map("custo")
+  @@schema("public")
+}
+
+model CustoAnimal {
+  id           Int       @id @default(autoincrement())
+  id_custo     Int
+  id_animal    Int
+  valor_cabeca Float?    @default(0)
+  excluido     Boolean   @default(false)
+  excluido_data DateTime?
+  createdAt    DateTime  @default(now()) @map("createAt")
+
+  custo        Custo     @relation(fields: [id_custo], references: [id])
+  animal       Animal    @relation(fields: [id_animal], references: [id])
+
+  @@map("custo_animais")
+  @@schema("public")
+}
+
+model Venda {
+  id           Int       @id @default(autoincrement())
+  id_animais   Int[]
+  id_cliente   Int
+  qtd_animais  Int       @default(1)
+  valor_venda  Float?
+  valor_custo  Float?
+  data_venda   DateTime  @default(now())
+  observacao   String?
+  excluido     Boolean   @default(false)
+  excluido_data DateTime?
+  createdAt    DateTime  @default(now()) @map("createAt")
+
+  cliente      Cliente   @relation(fields: [id_cliente], references: [id])
+  vendaAnimais VendaAnimal[]
+
+  @@map("venda")
+  @@schema("public")
+}
+
+model VendaAnimal {
+  id               Int       @id @default(autoincrement())
+  id_venda         Int
+  id_animal        Int
+  valor_final      Float?
+  valor_custo_final Float?
+  kilo_final       Float?
+  excluido         Boolean   @default(false)
+  excluido_data    DateTime?
+  createdAt        DateTime  @default(now()) @map("createAt")
+
+  venda            Venda     @relation(fields: [id_venda], references: [id])
+  animal           Animal    @relation(fields: [id_animal], references: [id])
+
+  @@map("venda_animais")
+  @@schema("public")
+}
+
+model Caixa {
+  id              Int       @id @default(autoincrement())
+  descricao       String
+  valor           Float
+  id_usuario_nome String[]
+  operacao        String
+  data_operacao   DateTime  @default(now())
+  excluido        Boolean   @default(false)
+  excluido_data   DateTime?
+  createdAt       DateTime  @default(now()) @map("createAt")
+
+  @@map("caixa")
+  @@schema("public")
+}
+
+model Vacinacao {
+  id              Int       @id @default(autoincrement())
+  id_animal       Int
+  data_vacinacao  DateTime  @default(now())
+  observacao      String?
+  excluido        Boolean   @default(false)
+  excluido_data   DateTime?
+  createdAt       DateTime  @default(now()) @map("createAt")
+
+  animal          Animal    @relation(fields: [id_animal], references: [id])
+
+  @@map("vacinacao")
+  @@schema("public")
+}
+
+model Foto {
+  id              Int       @id @default(autoincrement())
+  id_animal       Int
+  descricao_foto  String?
+  caminho         String?
+  data_foto       DateTime?
+  excluido        Boolean   @default(false)
+  excluido_data   DateTime?
+  createdAt       DateTime  @default(now()) @map("createAt")
+
+  animal          Animal    @relation(fields: [id_animal], references: [id])
+
+  @@map("fotos")
+  @@schema("public")
+}
+
+model Kilo {
+  id           Int       @id @default(autoincrement())
+  id_animal    Int
+  peso         Float?
+  data_pesagem DateTime  @default(now())
+  observacao   String?
+  excluido     Boolean   @default(false)
+  excluido_data DateTime?
+  createdAt    DateTime  @default(now()) @map("createAt")
+
+  animal       Animal    @relation(fields: [id_animal], references: [id])
+
+  @@map("kilos")
+  @@schema("public")
+}
+
+model ManejoReproducao {
+  id          Int       @id @default(autoincrement())
+  id_animal   Int       // Vaca
+  id_boi      Int       // Boi
+  data_corre  DateTime  @default(now())
+  observacao  String?
+  excluido    Boolean   @default(false)
+  excluido_data DateTime?
+  createdAt   DateTime  @default(now()) @map("createAt")
+
+  animal      Animal    @relation("AnimalVaca", fields: [id_animal], references: [id])
+  boi         Animal    @relation("AnimalBoi", fields: [id_boi], references: [id])
+
+  @@map("manejo_reproducao")
+  @@schema("public")
+}
+
+model MovimentoAnimalPasto {
+  id              Int       @id @default(autoincrement())
+  id_animal       Int
+  id_pasto_origem Int
+  id_pasto_destino Int
+  data_movimento  DateTime  @default(now())
+  observacao      String?
+  excluido        Boolean   @default(false)
+  excluido_data   DateTime?
+  createdAt       DateTime  @default(now()) @map("createAt")
+
+  animal          Animal    @relation(fields: [id_animal], references: [id])
+  pastoOrigem     Pasto     @relation("PastoOrigem", fields: [id_pasto_origem], references: [id])
+  pastoDestino    Pasto     @relation("PastoDestino", fields: [id_pasto_destino], references: [id])
+
+  @@map("movimento_animal_pasto")
+  @@schema("public")
+}
+
+model MovimentoLote {
+  id              Int       @id @default(autoincrement())
+  id_animal       Int
+  id_lote_origem  Int
+  id_lote_destino Int
+  data_movimento  DateTime  @default(now())
+  observacao      String?
+  excluido        Boolean   @default(false)
+  excluido_data   DateTime?
+  createdAt       DateTime  @default(now()) @map("createAt")
+
+  animal          Animal    @relation(fields: [id_animal], references: [id])
+  loteOrigem      Lote      @relation("LoteOrigem", fields: [id_lote_origem], references: [id])
+  loteDestino     Lote      @relation("LoteDestino", fields: [id_lote_destino], references: [id])
+
+  @@map("movimento_lote")
+  @@schema("public")
+}
