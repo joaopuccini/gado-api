@@ -9,9 +9,10 @@ export declare class DashboardController {
             mortes: number;
             lotes: number;
             pastos: number;
+            pesoMedio: string | number;
         };
         financeiro: {
-            saldo_caixa: number;
+            saldo_caixa: number | import("@prisma/client-runtime-utils").Decimal;
         };
     }>;
     getTotalMachoFemea(): Promise<{
@@ -19,21 +20,19 @@ export declare class DashboardController {
         qtd: number;
     }[]>;
     getTotalCusto(): Promise<{
-        sucesso: boolean;
-        data: {
-            qtd_animais: number;
-            valor_animais_sem_custo: number;
-            valor_custo: number;
-            valor_total: number;
-        };
+        qtd_animais: number;
+        valor_animais_sem_custo: number;
+        valor_custo: number;
+        valor_total: number;
     }>;
-    getTotalLPRC(query: any): Promise<{
-        sucesso: boolean;
-        data: any;
-    }>;
+    getTotalLPRC(query: any): Promise<any>;
     getTotalTipoCusto(): Promise<never[]>;
     getTotal12Meses(): Promise<{
-        sucesso: boolean;
-        data: unknown;
-    }>;
+        data_mes: string;
+        valor_total: number;
+    }[]>;
+    getEvolucaoPeso(): Promise<{
+        mes: string;
+        pesoMedio: string;
+    }[]>;
 }

@@ -12,38 +12,38 @@ import { PaginationDto } from '../common/dto';
 export class VacinacaoController {
     constructor(private readonly service: VacinacaoService) { }
 
-    @Post('cadastrar')
+    @Post()
     @ApiOperation({ summary: 'Cadastrar vacinação' })
     async create(@Body() dto: CreateVacinacaoDto) {
         const response = await this.service.create(dto);
-        return { message: 'Sucesso ao cadastrar!', response };
+        return response;
     }
 
-    @Get('buscar')
+    @Get()
     @ApiOperation({ summary: 'Listar vacinações' })
     async findAll(@Query() p: PaginationDto) {
         const data = await this.service.findAll({ skip: p.skip, take: p.limit, include: { animal: true } });
-        return { sucesso: true, data };
+        return data;
     }
 
-    @Get('buscarum/:id')
+    @Get(':id')
     @ApiOperation({ summary: 'Buscar vacinação' })
     async findOne(@Param('id', ParseIntPipe) id: number) {
         const data = await this.service.findOne(id, { animal: true });
-        return { sucesso: true, data };
+        return data;
     }
 
-    @Patch('editar/:id')
+    @Patch(':id')
     @ApiOperation({ summary: 'Editar vacinação' })
     async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateVacinacaoDto) {
         const data = await this.service.update(id, dto);
-        return { sucesso: true, data };
+        return data;
     }
 
-    @Delete('deletar/:id')
+    @Delete(':id')
     @ApiOperation({ summary: 'Excluir vacinação' })
     async remove(@Param('id', ParseIntPipe) id: number) {
         const data = await this.service.remove(id);
-        return { sucesso: true, data };
+        return data;
     }
 }

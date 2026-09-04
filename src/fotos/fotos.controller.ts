@@ -12,38 +12,38 @@ import { PaginationDto } from '../common/dto';
 export class FotosController {
     constructor(private readonly service: FotosService) { }
 
-    @Post('cadastrar')
+    @Post()
     @ApiOperation({ summary: 'Cadastrar foto' })
     async create(@Body() dto: CreateFotoDto) {
         const response = await this.service.create(dto);
-        return { message: 'Sucesso ao cadastrar!', response };
+        return response;
     }
 
-    @Get('buscar')
+    @Get()
     @ApiOperation({ summary: 'Listar fotos' })
     async findAll(@Query() p: PaginationDto) {
         const data = await this.service.findAll({ skip: p.skip, take: p.limit, include: { animal: true } });
-        return { sucesso: true, data };
+        return data;
     }
 
-    @Get('buscarum/:id')
+    @Get(':id')
     @ApiOperation({ summary: 'Buscar foto' })
     async findOne(@Param('id', ParseIntPipe) id: number) {
         const data = await this.service.findOne(id, { animal: true });
-        return { sucesso: true, data };
+        return data;
     }
 
-    @Patch('editar/:id')
+    @Patch(':id')
     @ApiOperation({ summary: 'Editar foto' })
     async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateFotoDto) {
         const data = await this.service.update(id, dto);
-        return { sucesso: true, data };
+        return data;
     }
 
-    @Delete('deletar/:id')
+    @Delete(':id')
     @ApiOperation({ summary: 'Excluir foto' })
     async remove(@Param('id', ParseIntPipe) id: number) {
         const data = await this.service.remove(id);
-        return { sucesso: true, data };
+        return data;
     }
 }

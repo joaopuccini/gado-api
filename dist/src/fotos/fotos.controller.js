@@ -26,28 +26,28 @@ let FotosController = class FotosController {
     }
     async create(dto) {
         const response = await this.service.create(dto);
-        return { message: 'Sucesso ao cadastrar!', response };
+        return response;
     }
     async findAll(p) {
         const data = await this.service.findAll({ skip: p.skip, take: p.limit, include: { animal: true } });
-        return { sucesso: true, data };
+        return data;
     }
     async findOne(id) {
         const data = await this.service.findOne(id, { animal: true });
-        return { sucesso: true, data };
+        return data;
     }
     async update(id, dto) {
         const data = await this.service.update(id, dto);
-        return { sucesso: true, data };
+        return data;
     }
     async remove(id) {
         const data = await this.service.remove(id);
-        return { sucesso: true, data };
+        return data;
     }
 };
 exports.FotosController = FotosController;
 __decorate([
-    (0, common_1.Post)('cadastrar'),
+    (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Cadastrar foto' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -55,7 +55,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], FotosController.prototype, "create", null);
 __decorate([
-    (0, common_1.Get)('buscar'),
+    (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'Listar fotos' }),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -63,7 +63,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], FotosController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.Get)('buscarum/:id'),
+    (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Buscar foto' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
@@ -71,7 +71,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], FotosController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Patch)('editar/:id'),
+    (0, common_1.Patch)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Editar foto' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -80,7 +80,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], FotosController.prototype, "update", null);
 __decorate([
-    (0, common_1.Delete)('deletar/:id'),
+    (0, common_1.Delete)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Excluir foto' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),

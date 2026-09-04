@@ -1,0 +1,242 @@
+// ============================================
+// SCHEMA ADMIN: gado_admin
+// Gestão SaaS, billing, tenant provisioning
+// Baseado no padrão epi-management-api
+// ============================================
+
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../node_modules/@prisma/client-admin"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["gado_admin"]
+}
+
+model Organizacao {
+  id           String              @id @default(uuid()) @db.Uuid
+  razaoSocial  String              @db.VarChar(200)
+  nomeFantasia String              @db.VarChar(200)
+  cnpj         String?             @unique @db.VarChar(18)
+  email        String              @db.VarChar(150)
+  telefone     String?             @db.VarChar(20)
+  subdomain    String              @unique @db.VarChar(63)
+  schemaName   String              @unique @db.VarChar(63)
+  status       OrganizacaoStatus   @default(TRIAL)
+  createdAt    DateTime            @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime            @updatedAt @db.Timestamptz(6)
+
+  assinaturas    Assinatura[]
+  tenantRegistry TenantRegistry?
+  acessos        AcessoOrganizacao[]
+  convites       Convite[]
+
+  @@map("organizacoes")
+  @@schema("gado_admin")
+}
+
+model Plano {
+  id            String   @id @default(uuid()) @db.Uuid
+  nome          String   @db.VarChar(100)
+  maxUsuarios   Int
+  maxFazendas   Int      @default(1)
+  precoMensal   Decimal  @db.Decimal(10, 2)
+  ativo         Boolean  @default(true)
+  createdAt     DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @db.Timestamptz(6)
+
+  assinaturas Assinatura[]
+
+  @@map("planos")
+  @@schema("gado_admin")
+}
+
+model Assinatura {
+  id              String           @id @default(uuid()) @db.Uuid
+  organizacaoId   String           @db.Uuid
+  planoId         String           @db.Uuid
+  status          AssinaturaStatus @default(ATIVA)
+  dataInicio      DateTime         @db.Date
+  dataVencimento  DateTime         @db.Date
+  diaVencimento   Int
+  gracePeriodDias Int              @default(7)
+  createdAt       DateTime         @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime         @updatedAt @db.Timestamptz(6)
+
+  organizacao Organizacao @relation(fields: [organizacaoId], references: [id])
+  plano       Plano      @relation(fields: [planoId], references: [id])
+  pagamentos  Pagamento[]
+
+  @@map("assinaturas")
+  @@schema("gado_admin")
+}
+
+model Pagamento {
+  id            String          @id @default(uuid()) @db.Uuid
+  assinaturaId  String          @db.Uuid
+  valor         Decimal         @db.Decimal(10, 2)
+  competencia   String          @db.VarChar(7) // "2026-09"
+  status        PagamentoStatus @default(PENDENTE)
+  dataPagamento DateTime?       @db.Date
+  observacao    String?
+  createdAt     DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime        @updatedAt @db.Timestamptz(6)
+
+  assinatura Assinatura @relation(fields: [assinaturaId], references: [id])
+
+  @@map("pagamentos")
+  @@schema("gado_admin")
+}
+
+model TenantRegistry {
+  id            String               @id @default(uuid()) @db.Uuid
+  organizacaoId String               @unique @db.Uuid
+  subdomain     String               @unique @db.VarChar(63)
+  schemaName    String               @unique @db.VarChar(63)
+  status        TenantRegistryStatus @default(PROVISIONANDO)
+  provisionedAt DateTime?            @db.Timestamptz(6)
+  createdAt     DateTime             @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime             @updatedAt @db.Timestamptz(6)
+
+  organizacao Organizacao @relation(fields: [organizacaoId], references: [id])
+
+  @@map("tenant_registry")
+  @@schema("gado_admin")
+}
+
+model AdminUser {
+  id        String    @id @default(uuid()) @db.Uuid
+  nome      String    @db.VarChar(200)
+  email     String    @unique @db.VarChar(150)
+  senhaHash String    @db.VarChar(255)
+  role      AdminRole @default(SUPPORT)
+  ativo     Boolean   @default(true)
+  createdAt DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @db.Timestamptz(6)
+
+  @@map("admin_users")
+  @@schema("gado_admin")
+}
+
+model UsuarioGlobal {
+  id            String       @id @default(uuid()) @db.Uuid
+  nome          String       @db.VarChar(200)
+  email         String       @unique @db.VarChar(150)
+  senhaHash     String?      @db.VarChar(255)
+  googleId      String?      @unique @db.VarChar(255)
+  fotoUrl       String?      @db.VarChar(500)
+  authProvider  AuthProvider @default(EMAIL)
+  ativo         Boolean      @default(true)
+  createdAt     DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime     @updatedAt @db.Timestamptz(6)
+
+  acessos  AcessoOrganizacao[]
+  convites Convite[]           @relation("ConviteConvidadoPor")
+
+  @@map("usuarios_globais")
+  @@schema("gado_admin")
+}
+
+model AcessoOrganizacao {
+  id              String          @id @default(uuid()) @db.Uuid
+  usuarioGlobalId String          @db.Uuid
+  organizacaoId   String          @db.Uuid
+  role            RoleOrganizacao @default(CONVIDADO)
+  status          StatusAcesso    @default(PENDENTE)
+  createdAt       DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime        @updatedAt @db.Timestamptz(6)
+
+  usuario     UsuarioGlobal @relation(fields: [usuarioGlobalId], references: [id], onDelete: Cascade)
+  organizacao Organizacao   @relation(fields: [organizacaoId], references: [id], onDelete: Cascade)
+
+  @@unique([usuarioGlobalId, organizacaoId])
+  @@map("acesso_organizacoes")
+  @@schema("gado_admin")
+}
+
+model Convite {
+  id              String        @id @default(uuid()) @db.Uuid
+  email           String        @db.VarChar(150)
+  organizacaoId   String        @db.Uuid
+  convidadoPorId  String        @db.Uuid
+  token           String        @unique @db.VarChar(255)
+  role            RoleOrganizacao @default(CONVIDADO)
+  status          StatusConvite @default(PENDENTE)
+  expiresAt       DateTime      @db.Timestamptz(6)
+  createdAt       DateTime      @default(now()) @db.Timestamptz(6)
+
+  organizacao  Organizacao   @relation(fields: [organizacaoId], references: [id])
+  convidadoPor UsuarioGlobal @relation("ConviteConvidadoPor", fields: [convidadoPorId], references: [id])
+
+  @@map("convites")
+  @@schema("gado_admin")
+}
+
+// --- Enums Admin ---
+
+enum OrganizacaoStatus {
+  TRIAL
+  ATIVO
+  SUSPENSO
+  CANCELADO
+  @@schema("gado_admin")
+}
+
+enum AssinaturaStatus {
+  ATIVA
+  VENCIDA
+  CANCELADA
+  @@schema("gado_admin")
+}
+
+enum PagamentoStatus {
+  PENDENTE
+  PAGO
+  ATRASADO
+  @@schema("gado_admin")
+}
+
+enum TenantRegistryStatus {
+  PROVISIONANDO
+  ATIVO
+  BLOQUEADO
+  REMOVIDO
+  @@schema("gado_admin")
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  SUPPORT
+  @@schema("gado_admin")
+}
+
+enum AuthProvider {
+  EMAIL
+  GOOGLE
+  @@schema("gado_admin")
+}
+
+enum RoleOrganizacao {
+  PROPRIETARIO
+  CONVIDADO
+  @@schema("gado_admin")
+}
+
+enum StatusAcesso {
+  PENDENTE
+  ATIVO
+  RECUSADO
+  REVOGADO
+  SOLICITADO
+  @@schema("gado_admin")
+}
+
+enum StatusConvite {
+  PENDENTE
+  ACEITO
+  EXPIRADO
+  CANCELADO
+  @@schema("gado_admin")
+}

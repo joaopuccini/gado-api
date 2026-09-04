@@ -14,7 +14,6 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PastosController = void 0;
 const common_1 = require("@nestjs/common");
-const passport_1 = require("@nestjs/passport");
 const swagger_1 = require("@nestjs/swagger");
 const pastos_service_1 = require("./pastos.service");
 const pasto_dto_1 = require("./dto/pasto.dto");
@@ -26,28 +25,28 @@ let PastosController = class PastosController {
     }
     async create(dto) {
         const response = await this.service.create(dto);
-        return { message: 'Sucesso ao cadastrar!', response };
+        return response;
     }
     async findAll(p) {
         const data = await this.service.findAll({ skip: p.skip, take: p.limit });
-        return { sucesso: true, data };
+        return data;
     }
     async findOne(id) {
         const data = await this.service.findOne(id);
-        return { sucesso: true, data };
+        return data;
     }
     async update(id, dto) {
         const data = await this.service.update(id, dto);
-        return { sucesso: true, data };
+        return data;
     }
     async remove(id) {
         const data = await this.service.remove(id);
-        return { sucesso: true, data };
+        return data;
     }
 };
 exports.PastosController = PastosController;
 __decorate([
-    (0, common_1.Post)('cadastrar'),
+    (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Cadastrar pasto' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -55,7 +54,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PastosController.prototype, "create", null);
 __decorate([
-    (0, common_1.Get)('buscar'),
+    (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'Listar pastos' }),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -63,7 +62,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PastosController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.Get)('buscarum/:id'),
+    (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Buscar pasto' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
@@ -71,7 +70,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PastosController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Patch)('editar/:id'),
+    (0, common_1.Patch)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Editar pasto' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
@@ -80,7 +79,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PastosController.prototype, "update", null);
 __decorate([
-    (0, common_1.Delete)('deletar/:id'),
+    (0, common_1.Delete)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Excluir pasto' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
@@ -89,8 +88,6 @@ __decorate([
 ], PastosController.prototype, "remove", null);
 exports.PastosController = PastosController = __decorate([
     (0, swagger_1.ApiTags)('Pastos'),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     (0, common_1.Controller)('pastos'),
     __metadata("design:paramtypes", [pastos_service_1.PastosService])
 ], PastosController);

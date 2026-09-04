@@ -33,78 +33,48 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-const client_1 = require("@prisma/client");
-const adapter_pg_1 = require("@prisma/adapter-pg");
+const client_admin_1 = require("@prisma/client-admin");
 const bcrypt = __importStar(require("bcrypt"));
 require("dotenv/config");
-const adapter = new adapter_pg_1.PrismaPg({ connectionString: process.env.DATABASE_URL });
-const prisma = new client_1.PrismaClient({ adapter });
 async function main() {
     console.log('🌱 Iniciando seeding...');
+    const adminClient = new client_admin_1.PrismaClient();
+    console.log('🔌 Conectado ao schema admin');
     const planos = [
-        { meses: 1, valor: 50.0, observacao: 'Plano Mensal' },
-        { meses: 6, valor: 250.0, observacao: 'Plano Semestral (Bônus 1 mês)' },
-        { meses: 12, valor: 450.0, observacao: 'Plano Anual (Bônus 3 meses)' },
+        { nome: 'Trial', maxUsuarios: 1, maxFazendas: 1, precoMensal: 0.0, ativo: true },
+        { nome: 'Plano Pro', maxUsuarios: 5, maxFazendas: 3, precoMensal: 199.9, ativo: true },
+        { nome: 'Plano Enterprise', maxUsuarios: 99, maxFazendas: 99, precoMensal: 499.9, ativo: true },
     ];
     for (const plano of planos) {
-        await prisma.plano.upsert({
-            where: { id: planos.indexOf(plano) + 1 },
+        await adminClient.plano.upsert({
+            where: { id: '00000000-0000-0000-0000-000000000000' },
             update: {},
-            create: {
-                id: planos.indexOf(plano) + 1,
-                ...plano,
-            },
+            create: plano,
+        }).catch(async () => {
+            const exists = await adminClient.plano.findFirst({ where: { nome: plano.nome } });
+            if (!exists)
+                await adminClient.plano.create({ data: plano });
         });
     }
-    console.log('✅ Planos criados');
+    console.log('✅ Planos SaaS criados');
     const hashedPassword = await bcrypt.hash('admin123', 10);
-    const admin = await prisma.usuario.upsert({
+    const globalAdmin = await adminClient.adminUser.upsert({
         where: { email: 'admin@gado.com.br' },
         update: {},
         create: {
-            nome: 'Administrador Gado',
+            nome: 'Administrador Global',
             email: 'admin@gado.com.br',
-            password: hashedPassword,
-            admin: true,
-            suporte: true,
-            acesso_geral: true,
+            senhaHash: hashedPassword,
+            role: 'SUPER_ADMIN',
         },
     });
-    console.log(`✅ Usuário admin criado: ${admin.email}`);
-    const fazenda = await prisma.fazenda.upsert({
-        where: { id: 1 },
-        update: {},
-        create: {
-            id: 1,
-            nome: 'Fazenda Modelo',
-            status: 'ATIVO',
-            id_usuarios: [admin.id],
-            nome_proprietario: 'Admin',
-            cidade: 'Goiânia',
-            estado: 'GO',
-        },
-    });
-    console.log(`✅ Fazenda inicial criada: ${fazenda.nome}`);
-    await prisma.planoMensalidade.upsert({
-        where: { id: 1 },
-        update: {},
-        create: {
-            id: 1,
-            id_fazenda: fazenda.id,
-            id_plano: 1,
-            status: 'PAGO',
-            valor_pagamento: 50.0,
-            data_pagamento: new Date(),
-        },
-    });
-    console.log('🏁 Seed finalizado com sucesso!');
+    console.log(`✅ Admin global criado: ${globalAdmin.email}`);
+    await adminClient.$disconnect();
+    console.log('🏁 Seed finalizado com sucesso! \nNota: O provisionamento de clientes é automático via SocialProvisioningService no primeiro login com Google (ex: joaoppuccini@gmail.com).');
 }
 main()
     .catch((e) => {
     console.error('❌ Erro no seed:', e);
     process.exit(1);
-})
-    .finally(async () => {
-    await prisma.$disconnect();
 });
 //# sourceMappingURL=seed.js.map

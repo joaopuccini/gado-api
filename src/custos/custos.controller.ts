@@ -12,32 +12,32 @@ import { PaginationDto } from '../common/dto';
 export class CustosController {
     constructor(private readonly custoService: CustosService) { }
 
-    @Post('cadastrar')
+    @Post()
     @ApiOperation({ summary: 'Lançar custo (distribuído entre animais)' })
     async createCusto(@Body() dto: CreateCustoDto) {
         const response = await this.custoService.create(dto);
-        return { message: 'Sucesso ao cadastrar!', response };
+        return response;
     }
 
-    @Get('buscar')
+    @Get()
     @ApiOperation({ summary: 'Listar custos' })
     async findAll(@Query() p: PaginationDto) {
         const data = await this.custoService.findAll({ skip: p.skip, take: p.limit, include: { custoTipo: true } });
-        return { sucesso: true, data };
+        return data;
     }
 
-    @Get('buscarum/:id')
+    @Get(':id')
     @ApiOperation({ summary: 'Buscar um custo' })
     async findOne(@Param('id', ParseIntPipe) id: number) {
         const data = await this.custoService.findOne(id);
-        return { sucesso: true, data };
+        return data;
     }
 
-    @Delete('deletar/:id')
+    @Delete(':id')
     @ApiOperation({ summary: 'Excluir custo' })
     async removeCusto(@Param('id', ParseIntPipe) id: number) {
         const data = await this.custoService.remove(id);
-        return { sucesso: true, data };
+        return data;
     }
 }
 
@@ -48,17 +48,17 @@ export class CustosController {
 export class CustosTipoController {
     constructor(private readonly tipoService: CustoTiposService) { }
 
-    @Post('cadastrar')
+    @Post()
     @ApiOperation({ summary: 'Criar tipo de custo' })
     async createTipo(@Body() dto: CreateCustoTipoDto) {
         const response = await this.tipoService.create(dto);
-        return { message: 'Sucesso ao cadastrar!', response };
+        return response;
     }
 
-    @Get('buscar')
+    @Get()
     @ApiOperation({ summary: 'Listar tipos de custo' })
     async findTipos(@Query() p: PaginationDto) {
         const data = await this.tipoService.findAll({ skip: p.skip, take: p.limit });
-        return { sucesso: true, data };
+        return data;
     }
 }

@@ -87,7 +87,10 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^uuid$": "<rootDir>/../test/mocks/uuid.ts"
+    }
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

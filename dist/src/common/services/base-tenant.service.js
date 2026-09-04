@@ -2,69 +2,60 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BaseTenantService = void 0;
 const common_1 = require("@nestjs/common");
-const context_1 = require("../context");
 class BaseTenantService {
-    prisma;
-    constructor(prisma) {
-        this.prisma = prisma;
+    tenantPrisma;
+    constructor(tenantPrisma) {
+        this.tenantPrisma = tenantPrisma;
     }
-    async withTenant(operation) {
-        const fazendaId = context_1.RequestContext.getFazendaId();
-        if (!fazendaId) {
-            throw new common_1.NotFoundException('Fazenda não identificada no contexto');
-        }
-        await this.prisma.$executeRawUnsafe(`SET search_path TO "fazenda_${fazendaId}", public`);
-        try {
-            return await operation();
-        }
-        finally {
-            await this.prisma.$executeRawUnsafe(`SET search_path TO "gado_fazendas", public`);
-        }
+    getTenantClient() {
+        return this.tenantPrisma.getClient();
     }
     async create(dto) {
-        return this.withTenant(() => this.getDelegate().create({ data: dto }));
+        const tenant = this.getTenantClient();
+        const data = { ...dto, ativo: true };
+        return this.getDelegate(tenant).create({ data });
     }
     async findAll(options) {
-        return this.withTenant(async () => {
-            const where = { ...options?.where, excluido: false };
-            const [data, total] = await Promise.all([
-                this.getDelegate().findMany({
-                    where,
-                    skip: options?.skip,
-                    take: options?.take,
-                    include: options?.include,
-                    orderBy: { id: 'asc' },
-                }),
-                this.getDelegate().count({ where }),
-            ]);
-            return { data, total };
-        });
+        const tenant = this.getTenantClient();
+        const where = { ...options?.where, ativo: true };
+        const [data, total] = await Promise.all([
+            this.getDelegate(tenant).findMany({
+                where,
+                skip: options?.skip,
+                take: options?.take,
+                include: options?.include,
+                orderBy: { id: 'asc' },
+            }),
+            this.getDelegate(tenant).count({ where }),
+        ]);
+        return { data, total };
     }
     async findOne(id, include) {
-        return this.withTenant(async () => {
-            const record = await this.getDelegate().findFirst({
-                where: { id, excluido: false },
-                include,
-            });
-            if (!record) {
-                throw new common_1.NotFoundException(`${this.modelName} #${id} não encontrado`);
-            }
-            return record;
+        const tenant = this.getTenantClient();
+        const record = await this.getDelegate(tenant).findFirst({
+            where: { id, ativo: true },
+            include,
         });
+        if (!record) {
+            throw new common_1.NotFoundException(`${this.modelName} #${id} não encontrado`);
+        }
+        return record;
     }
     async update(id, dto) {
+        const tenant = this.getTenantClient();
         await this.findOne(id);
-        return this.withTenant(() => this.getDelegate().update({
+        return this.getDelegate(tenant).update({
             where: { id },
             data: dto,
-        }));
+        });
     }
     async remove(id) {
+        const tenant = this.getTenantClient();
         await this.findOne(id);
-        return this.withTenant(() => this.getDelegate().update({
+        return this.getDelegate(tenant).update({
             where: { id },
-            data: { excluido: true, excluido_data: new Date() },
-        }));
+            data: { ativo: false },
+        });
     }
 }
 exports.BaseTenantService = BaseTenantService;

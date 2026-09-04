@@ -12,38 +12,38 @@ import { PaginationDto } from '../common/dto';
 export class RacasController {
     constructor(private readonly service: RacasService) { }
 
-    @Post('cadastrar')
+    @Post()
     @ApiOperation({ summary: 'Cadastrar raça' })
     async create(@Body() dto: CreateRacaDto) {
         const response = await this.service.create(dto);
-        return { message: 'Sucesso ao cadastrar!', response };
+        return response;
     }
 
-    @Get('buscar')
+    @Get()
     @ApiOperation({ summary: 'Listar raças' })
     async findAll(@Query() p: PaginationDto) {
         const data = await this.service.findAll({ skip: p.skip, take: p.limit });
-        return { sucesso: true, data };
+        return data;
     }
 
-    @Get('buscarum/:id')
+    @Get(':id')
     @ApiOperation({ summary: 'Buscar raça por ID' })
     async findOne(@Param('id', ParseIntPipe) id: number) {
         const data = await this.service.findOne(id);
-        return { sucesso: true, data };
+        return data;
     }
 
-    @Patch('editar/:id')
+    @Patch(':id')
     @ApiOperation({ summary: 'Editar raça' })
     async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateRacaDto) {
         const data = await this.service.update(id, dto);
-        return { sucesso: true, data };
+        return data;
     }
 
-    @Delete('deletar/:id')
+    @Delete(':id')
     @ApiOperation({ summary: 'Excluir raça' })
     async remove(@Param('id', ParseIntPipe) id: number) {
         const data = await this.service.remove(id);
-        return { sucesso: true, data };
+        return data;
     }
 }

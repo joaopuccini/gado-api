@@ -9,10 +9,11 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UpdateAnimalDto = exports.CreateAnimalDto = void 0;
+exports.TransferirAnimalDto = exports.UpdateAnimalDto = exports.CreateAnimalDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 class CreateAnimalDto {
+    fazendaId;
     id_usuario_nome;
     id_lote;
     id_raca;
@@ -34,6 +35,12 @@ class CreateAnimalDto {
     observacao;
 }
 exports.CreateAnimalDto = CreateAnimalDto;
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'ID da fazenda (útil quando Matriz cria para Filha)', example: 2 }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsInt)(),
+    __metadata("design:type", Number)
+], CreateAnimalDto.prototype, "fazendaId", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ description: 'Nomes dos usuários responsáveis', example: ['João', 'Maria'] }),
     (0, class_validator_1.IsOptional)(),
@@ -286,4 +293,35 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateAnimalDto.prototype, "observacao", void 0);
+class TransferirAnimalDto {
+    fazendaDestinoId;
+    pastoDestinoId;
+    loteDestinoId;
+    observacao;
+}
+exports.TransferirAnimalDto = TransferirAnimalDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'ID da Fazenda de destino' }),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", Number)
+], TransferirAnimalDto.prototype, "fazendaDestinoId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'ID do Pasto na fazenda destino' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsInt)(),
+    __metadata("design:type", Number)
+], TransferirAnimalDto.prototype, "pastoDestinoId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'ID do Lote na fazenda destino' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsInt)(),
+    __metadata("design:type", Number)
+], TransferirAnimalDto.prototype, "loteDestinoId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Observações sobre a transferência' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], TransferirAnimalDto.prototype, "observacao", void 0);
 //# sourceMappingURL=animal.dto.js.map

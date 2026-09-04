@@ -4,27 +4,12 @@ import { PaginationDto } from '../common/dto';
 export declare class ClientesController {
     private readonly service;
     constructor(service: ClientesService);
-    create(dto: CreateClienteDto): Promise<{
-        message: string;
-        response: unknown;
-    }>;
+    create(dto: CreateClienteDto): Promise<any>;
     findAll(p: PaginationDto): Promise<{
-        sucesso: boolean;
-        data: {
-            data: any;
-            total: any;
-        };
-    }>;
-    findOne(id: number): Promise<{
-        sucesso: boolean;
         data: any;
+        total: any;
     }>;
-    update(id: number, dto: UpdateClienteDto): Promise<{
-        sucesso: boolean;
-        data: unknown;
-    }>;
-    remove(id: number): Promise<{
-        sucesso: boolean;
-        data: unknown;
-    }>;
+    findOne(id: number): Promise<any>;
+    update(id: number, dto: UpdateClienteDto): Promise<any>;
+    remove(id: number): Promise<any>;
 }

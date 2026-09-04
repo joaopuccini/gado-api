@@ -12,52 +12,52 @@ var CustosService_1, CustoTiposService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CustoTiposService = exports.CustosService = void 0;
 const common_1 = require("@nestjs/common");
-const prisma_service_1 = require("../prisma/prisma.service");
+const tenant_prisma_service_1 = require("../tenant/tenant-prisma.service");
 const services_1 = require("../common/services");
 let CustosService = CustosService_1 = class CustosService extends services_1.BaseTenantService {
     logger = new common_1.Logger(CustosService_1.name);
     modelName = 'Custo';
-    constructor(prisma) { super(prisma); }
-    getDelegate() { return this.prisma.custo; }
+    constructor(tenantPrisma) { super(tenantPrisma); }
+    getDelegate(tenant) { return tenant.custo; }
     async create(dto) {
-        return this.withTenant(async () => {
-            const custo = await this.prisma.custo.create({
-                data: {
-                    id_animais: dto.id_animais,
-                    id_custo_tipos: dto.id_custo_tipos,
-                    qtd_animais: dto.id_animais.length,
-                    descricao: dto.descricao,
-                    valor_custo: dto.valor_custo,
-                    data_custo: dto.data_custo ? new Date(dto.data_custo) : new Date(),
-                },
-            });
+        const tenant = this.getTenantClient();
+        const custo = await tenant.custo.create({
+            data: {
+                categoriaCustoId: dto.id_custo_tipos,
+                descricao: dto.descricao,
+                valorTotal: dto.valor_custo,
+                dataCusto: dto.data_custo ? new Date(dto.data_custo) : new Date(),
+                ativo: true,
+            },
+        });
+        if (dto.id_animais && dto.id_animais.length > 0) {
             const valorPorCabeca = dto.valor_custo / dto.id_animais.length;
             const custoAnimaisData = dto.id_animais.map(animalId => ({
-                id_custo: custo.id,
-                id_animal: animalId,
-                valor_cabeca: valorPorCabeca,
+                custoId: custo.id,
+                animalId: animalId,
+                valorCabeca: valorPorCabeca,
             }));
-            await this.prisma.custoAnimal.createMany({
+            await tenant.custoAnimal.createMany({
                 data: custoAnimaisData,
             });
-            return custo;
-        });
+        }
+        return custo;
     }
 };
 exports.CustosService = CustosService;
 exports.CustosService = CustosService = CustosService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [tenant_prisma_service_1.TenantPrismaService])
 ], CustosService);
 let CustoTiposService = CustoTiposService_1 = class CustoTiposService extends services_1.BaseTenantService {
     logger = new common_1.Logger(CustoTiposService_1.name);
-    modelName = 'Custo Tipo';
-    constructor(prisma) { super(prisma); }
-    getDelegate() { return this.prisma.custoTipo; }
+    modelName = 'CategoriaCusto';
+    constructor(tenantPrisma) { super(tenantPrisma); }
+    getDelegate(tenant) { return tenant.categoriaCusto; }
 };
 exports.CustoTiposService = CustoTiposService;
 exports.CustoTiposService = CustoTiposService = CustoTiposService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [tenant_prisma_service_1.TenantPrismaService])
 ], CustoTiposService);
 //# sourceMappingURL=custos.service.js.map

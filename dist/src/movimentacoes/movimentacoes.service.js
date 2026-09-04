@@ -12,28 +12,28 @@ var MovimentoPastoService_1, MovimentoLoteService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MovimentoLoteService = exports.MovimentoPastoService = void 0;
 const common_1 = require("@nestjs/common");
-const prisma_service_1 = require("../prisma/prisma.service");
+const tenant_prisma_service_1 = require("../tenant/tenant-prisma.service");
 const services_1 = require("../common/services");
 let MovimentoPastoService = MovimentoPastoService_1 = class MovimentoPastoService extends services_1.BaseTenantService {
     logger = new common_1.Logger(MovimentoPastoService_1.name);
     modelName = 'Movimentação Pasto';
-    constructor(prisma) { super(prisma); }
-    getDelegate() { return this.prisma.movimentoAnimalPasto; }
+    constructor(tenantPrisma) { super(tenantPrisma); }
+    getDelegate(tenant) { return tenant.movimentoAnimalPasto; }
 };
 exports.MovimentoPastoService = MovimentoPastoService;
 exports.MovimentoPastoService = MovimentoPastoService = MovimentoPastoService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [tenant_prisma_service_1.TenantPrismaService])
 ], MovimentoPastoService);
 let MovimentoLoteService = MovimentoLoteService_1 = class MovimentoLoteService extends services_1.BaseTenantService {
     logger = new common_1.Logger(MovimentoLoteService_1.name);
     modelName = 'Movimentação Lote';
-    constructor(prisma) { super(prisma); }
-    getDelegate() { return this.prisma.movimentoLote; }
+    constructor(tenantPrisma) { super(tenantPrisma); }
+    getDelegate(tenant) { return tenant.movimentoLote; }
 };
 exports.MovimentoLoteService = MovimentoLoteService;
 exports.MovimentoLoteService = MovimentoLoteService = MovimentoLoteService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [tenant_prisma_service_1.TenantPrismaService])
 ], MovimentoLoteService);
 //# sourceMappingURL=movimentacoes.service.js.map

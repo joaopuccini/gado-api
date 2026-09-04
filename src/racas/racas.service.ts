@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { TenantPrismaService } from '../tenant/tenant-prisma.service';
 import { BaseTenantService } from '../common/services';
 import { CreateRacaDto, UpdateRacaDto } from './dto/raca.dto';
 
@@ -8,7 +8,8 @@ export class RacasService extends BaseTenantService<CreateRacaDto, UpdateRacaDto
     protected readonly logger = new Logger(RacasService.name);
     protected readonly modelName = 'Raça';
 
-    constructor(prisma: PrismaService) { super(prisma); }
+    constructor(tenantPrisma: TenantPrismaService) { super(tenantPrisma); }
 
-    protected getDelegate() { return this.prisma.raca; }
+    protected getDelegate(tenant: any) { return tenant.raca; }
 }
+

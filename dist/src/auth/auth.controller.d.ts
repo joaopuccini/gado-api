@@ -1,76 +1,45 @@
+import type { Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
 export declare class AuthController {
     private readonly authService;
     constructor(authService: AuthService);
     login(dto: LoginDto): Promise<{
+        needSelection: boolean;
         id_fazendas: number[];
-        user: {
+        fazendas: {
             id: number;
             nome: string;
-            email: string;
-            admin?: undefined;
-            suporte?: undefined;
-            acesso_geral?: undefined;
-            acesso_animais?: undefined;
-            acesso_dashboard?: undefined;
-            acesso_custos?: undefined;
-            acesso_caixa?: undefined;
-            acesso_vendas?: undefined;
-            acesso_saldo?: undefined;
-            acesso_manejo?: undefined;
-            acesso_racas?: undefined;
-            acesso_lotes?: undefined;
-            acesso_pastos?: undefined;
-            acesso_clientes?: undefined;
+        }[];
+        user: {
+            id: any;
+            nome: any;
+            email: any;
+            fotoUrl?: undefined;
+            tenantId?: undefined;
             fazenda?: undefined;
+            permissoes?: undefined;
         };
         token?: undefined;
     } | {
         token: string;
         user: {
-            id: number;
-            nome: string;
-            email: string;
-            admin: boolean;
-            suporte: boolean;
-            acesso_geral: boolean;
-            acesso_animais: boolean;
-            acesso_dashboard: boolean;
-            acesso_custos: boolean;
-            acesso_caixa: boolean;
-            acesso_vendas: boolean;
-            acesso_saldo: boolean;
-            acesso_manejo: boolean;
-            acesso_racas: boolean;
-            acesso_lotes: boolean;
-            acesso_pastos: boolean;
-            acesso_clientes: boolean;
+            id: any;
+            nome: any;
+            email: any;
+            fotoUrl: any;
+            tenantId: any;
             fazenda: {
                 id: number;
-                nome: string | null;
+                nome: string;
+                role: import("@prisma/client").$Enums.RoleFazenda;
             };
+            permissoes: ("animais:ler" | "animais:criar" | "animais:editar" | "animais:excluir" | "financeiro:ler" | "financeiro:criar" | "financeiro:editar" | "financeiro:excluir" | "configuracoes:gerenciar" | "sanidade:ler" | "sanidade:criar" | "sanidade:gerenciar" | "manejo:ler" | "manejo:criar" | "manejo:gerenciar" | "pesagens:ler" | "pesagens:criar" | "dashboard:ler" | "dashboard:criar" | "dashboard:editar" | "dashboard:excluir" | "dashboard:gerenciar" | "animais:gerenciar" | "pesagens:editar" | "pesagens:excluir" | "pesagens:gerenciar" | "sanidade:editar" | "sanidade:excluir" | "manejo:editar" | "manejo:excluir" | "financeiro:gerenciar" | "pastos:ler" | "pastos:criar" | "pastos:editar" | "pastos:excluir" | "pastos:gerenciar" | "lotes:ler" | "lotes:criar" | "lotes:editar" | "lotes:excluir" | "lotes:gerenciar" | "racas:ler" | "racas:criar" | "racas:editar" | "racas:excluir" | "racas:gerenciar" | "clientes:ler" | "clientes:criar" | "clientes:editar" | "clientes:excluir" | "clientes:gerenciar" | "fotos:ler" | "fotos:criar" | "fotos:editar" | "fotos:excluir" | "fotos:gerenciar" | "movimentacoes:ler" | "movimentacoes:criar" | "movimentacoes:editar" | "movimentacoes:excluir" | "movimentacoes:gerenciar" | "configuracoes:ler" | "configuracoes:criar" | "configuracoes:editar" | "configuracoes:excluir")[];
         };
+        needSelection?: undefined;
         id_fazendas?: undefined;
-    }>;
-    register(dto: RegisterDto): Promise<{
-        id: number;
-        nome: string;
-        email: string;
+        fazendas?: undefined;
     }>;
     googleAuth(): Promise<void>;
-    googleAuthRedirect(req: any): Promise<{
-        token: string;
-        user: {
-            id: number;
-            nome: string;
-            email: string;
-            admin: boolean;
-            fazenda: {
-                id: number;
-                nome: string | null;
-            } | null;
-        };
-    }>;
+    googleAuthRedirect(req: any, res: Response): Promise<void>;
 }

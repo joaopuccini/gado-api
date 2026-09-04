@@ -12,31 +12,31 @@ import { PaginationDto } from '../common/dto';
 export class VendasController {
     constructor(private readonly service: VendasService) { }
 
-    @Post('cadastrar')
+    @Post()
     @ApiOperation({ summary: 'Registrar venda' })
     async create(@Body() dto: CreateVendaDto) {
         const response = await this.service.create(dto);
-        return { message: 'Sucesso ao cadastrar!', response };
+        return response;
     }
 
-    @Get('buscar')
+    @Get()
     @ApiOperation({ summary: 'Listar vendas' })
     async findAll(@Query() p: PaginationDto) {
         const data = await this.service.findAll({ skip: p.skip, take: p.limit, include: { cliente: true } });
-        return { sucesso: true, data };
+        return data;
     }
 
-    @Get('buscarum/:id')
+    @Get(':id')
     @ApiOperation({ summary: 'Detalhes da venda' })
     async findOne(@Param('id', ParseIntPipe) id: number) {
         const data = await this.service.findOne(id, { cliente: true, vendaAnimais: { include: { animal: true } } });
-        return { sucesso: true, data };
+        return data;
     }
 
-    @Delete('deletar/:id')
+    @Delete(':id')
     @ApiOperation({ summary: 'Excluir venda' })
     async remove(@Param('id', ParseIntPipe) id: number) {
         const data = await this.service.remove(id);
-        return { sucesso: true, data };
+        return data;
     }
 }

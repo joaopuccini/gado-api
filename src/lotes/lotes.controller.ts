@@ -15,38 +15,38 @@ import { PaginationDto } from '../common/dto';
 export class LotesController {
     constructor(private readonly service: LotesService) { }
 
-    @Post('cadastrar')
+    @Post()
     @ApiOperation({ summary: 'Cadastrar lote' })
     async create(@Body() dto: CreateLoteDto) {
         const response = await this.service.create(dto);
-        return { message: 'Sucesso ao cadastrar!', response };
+        return response;
     }
 
-    @Get('buscar')
+    @Get()
     @ApiOperation({ summary: 'Listar todos os lotes' })
     async findAll(@Query() pagination: PaginationDto) {
         const data = await this.service.findAll({ skip: pagination.skip, take: pagination.limit });
-        return { sucesso: true, data };
+        return data;
     }
 
-    @Get('buscarum/:id')
+    @Get(':id')
     @ApiOperation({ summary: 'Buscar lote por ID' })
     async findOne(@Param('id', ParseIntPipe) id: number) {
         const data = await this.service.findOne(id);
-        return { sucesso: true, data };
+        return data;
     }
 
-    @Patch('editar/:id')
+    @Patch(':id')
     @ApiOperation({ summary: 'Editar lote' })
     async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateLoteDto) {
         const data = await this.service.update(id, dto);
-        return { sucesso: true, data };
+        return data;
     }
 
-    @Delete('deletar/:id')
+    @Delete(':id')
     @ApiOperation({ summary: 'Excluir lote (soft-delete)' })
     async remove(@Param('id', ParseIntPipe) id: number) {
         const data = await this.service.remove(id);
-        return { sucesso: true, data };
+        return data;
     }
 }

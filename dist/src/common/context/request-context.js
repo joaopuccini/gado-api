@@ -8,14 +8,18 @@ class RequestContext {
     static run(data, fn) {
         const context = {
             requestId: data.requestId || (0, uuid_1.v4)(),
-            fazendaId: data.fazendaId,
+            globalUserId: data.globalUserId,
             userId: data.userId,
             userEmail: data.userEmail,
+            tenantId: data.tenantId,
+            schemaName: data.schemaName,
+            fazendaId: data.fazendaId,
+            accessibleFazendaIds: data.accessibleFazendaIds,
             path: data.path,
             method: data.method,
             startTime: data.startTime || Date.now(),
         };
-        this.storage.run(context, fn);
+        return this.storage.run(context, fn);
     }
     static get() {
         return this.storage.getStore();
@@ -26,8 +30,20 @@ class RequestContext {
     static getFazendaId() {
         return this.get()?.fazendaId;
     }
+    static getAccessibleFazendaIds() {
+        return this.get()?.accessibleFazendaIds;
+    }
     static getUserId() {
         return this.get()?.userId;
+    }
+    static getGlobalUserId() {
+        return this.get()?.globalUserId;
+    }
+    static getTenantId() {
+        return this.get()?.tenantId;
+    }
+    static getSchemaName() {
+        return this.get()?.schemaName;
     }
     static set(partial) {
         const current = this.get();

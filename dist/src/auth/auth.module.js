@@ -15,6 +15,9 @@ const auth_controller_1 = require("./auth.controller");
 const auth_service_1 = require("./auth.service");
 const jwt_strategy_1 = require("./strategies/jwt.strategy");
 const google_strategy_1 = require("./strategies/google.strategy");
+const social_provisioning_service_1 = require("./services/social-provisioning.service");
+const admin_module_1 = require("../admin/admin.module");
+const tenant_module_1 = require("../tenant/tenant.module");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -32,10 +35,13 @@ exports.AuthModule = AuthModule = __decorate([
                     },
                 }),
             }),
+            (0, common_1.forwardRef)(() => admin_module_1.AdminModule),
+            (0, common_1.forwardRef)(() => tenant_module_1.TenantModule),
         ],
         controllers: [auth_controller_1.AuthController],
         providers: [
             auth_service_1.AuthService,
+            social_provisioning_service_1.SocialProvisioningService,
             jwt_strategy_1.JwtStrategy,
             ...(process.env.GOOGLE_CLIENT_ID ? [google_strategy_1.GoogleStrategy] : []),
         ],

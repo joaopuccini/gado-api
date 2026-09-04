@@ -4,22 +4,22 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { RequestContext } from '../../common/context';
 
-interface JwtPayload {
-    sub: number;
+export interface JwtPayload {
+    sub: string; // ID Global
     email: string;
     nome: string;
-    admin: boolean;
-    suporte: boolean;
+    tenantId: string;
+    schemaName: string;
+    usuarioLocalId: number;
     fazendaId: number;
-    permissoes: Record<string, boolean>;
+    role: string;
+    permissoes: string[];
 }
 
 /**
  * JWT Strategy — validates and verifies JWT tokens.
- * Uses jwt.verify() (not jwt.decode()!) — fixing the original auth vulnerability.
- *
- * Also enriches the RequestContext with user/fazenda data
- * for AsyncLocalStorage-based tracing.
+ * Enriches the RequestContext with user/tenant data
+ * for AsyncLocalStorage-based tracing and schema resolution.
  */
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -32,21 +32,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     validate(payload: JwtPayload) {
-        // Enrich AsyncLocalStorage context with user data
+        // Enrich AsyncLocalStorage context with tenant data
         RequestContext.set({
-            userId: payload.sub,
+            userId: payload.usuarioLocalId, // Prefer local user id for tenant operations
+            globalUserId: payload.sub,
+            tenantId: payload.tenantId,
+            schemaName: payload.schemaName,
             fazendaId: payload.fazendaId,
             userEmail: payload.email,
         });
 
-        return {
-            id: payload.sub,
-            email: payload.email,
-            nome: payload.nome,
-            admin: payload.admin,
-            suporte: payload.suporte,
-            fazendaId: payload.fazendaId,
-            permissoes: payload.permissoes,
-        };
+        return payload; // Retorna o payload completo para o req.user
     }
 }

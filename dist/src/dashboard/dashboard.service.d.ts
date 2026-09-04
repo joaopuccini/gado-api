@@ -1,9 +1,9 @@
-import { PrismaService } from '../prisma/prisma.service';
+import { TenantPrismaService } from '../tenant/tenant-prisma.service';
 export declare class DashboardService {
-    private readonly prisma;
+    private readonly tenantPrisma;
     private readonly logger;
-    constructor(prisma: PrismaService);
-    private withTenant;
+    constructor(tenantPrisma: TenantPrismaService);
+    private getTenantClient;
     getStats(): Promise<{
         counters: {
             ativos: number;
@@ -11,9 +11,10 @@ export declare class DashboardService {
             mortes: number;
             lotes: number;
             pastos: number;
+            pesoMedio: string | number;
         };
         financeiro: {
-            saldo_caixa: number;
+            saldo_caixa: number | import("@prisma/client-runtime-utils").Decimal;
         };
     }>;
     getTotalMachoFemea(): Promise<{
@@ -28,5 +29,12 @@ export declare class DashboardService {
     }>;
     getTotalLotesPastosRacasClientesAtivos(query: any): Promise<any>;
     getTotalPorTipoCusto(): Promise<never[]>;
-    getTotalCusto12Meses(): Promise<unknown>;
+    getTotalCusto12Meses(): Promise<{
+        data_mes: string;
+        valor_total: number;
+    }[]>;
+    getEvolucaoPeso(): Promise<{
+        mes: string;
+        pesoMedio: string;
+    }[]>;
 }

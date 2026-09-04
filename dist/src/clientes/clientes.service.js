@@ -12,17 +12,17 @@ var ClientesService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ClientesService = void 0;
 const common_1 = require("@nestjs/common");
-const prisma_service_1 = require("../prisma/prisma.service");
+const tenant_prisma_service_1 = require("../tenant/tenant-prisma.service");
 const services_1 = require("../common/services");
 let ClientesService = ClientesService_1 = class ClientesService extends services_1.BaseTenantService {
     logger = new common_1.Logger(ClientesService_1.name);
     modelName = 'Cliente';
-    constructor(prisma) { super(prisma); }
-    getDelegate() { return this.prisma.cliente; }
+    constructor(tenantPrisma) { super(tenantPrisma); }
+    getDelegate(tenant) { return tenant.cliente; }
 };
 exports.ClientesService = ClientesService;
 exports.ClientesService = ClientesService = ClientesService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [tenant_prisma_service_1.TenantPrismaService])
 ], ClientesService);
 //# sourceMappingURL=clientes.service.js.map

@@ -5,9 +5,11 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 
 // Infrastructure
 import { PrismaModule } from './prisma/prisma.module';
+import { TenantModule } from './tenant/tenant.module';
 import { RequestContextMiddleware } from './common/context/request-context.middleware';
 import { AllExceptionsFilter } from './common/filters';
-import { LoggingInterceptor, TransformInterceptor } from './common/interceptors';
+import { LoggingInterceptor, TransformInterceptor, HierarchyInterceptor } from './common/interceptors';
+import { SubscriptionGuard } from './common/guards/subscription.guard';
 
 // Feature modules
 import { AuthModule } from './auth/auth.module';
@@ -19,15 +21,25 @@ import { ClientesModule } from './clientes/clientes.module';
 import { CustosModule } from './custos/custos.module';
 import { VendasModule } from './vendas/vendas.module';
 import { CaixaModule } from './caixa/caixa.module';
-import { KilosModule } from './kilos/kilos.module';
 import { VacinacaoModule } from './vacinacao/vacinacao.module';
 import { ManejoModule } from './manejo/manejo.module';
 import { MovimentacoesModule } from './movimentacoes/movimentacoes.module';
 import { FotosModule } from './fotos/fotos.module';
 import { DashboardModule } from './dashboard/dashboard.module';
-import { FazendasModule } from './fazendas/fazendas.module';
-import { PlanosModule } from './planos/planos.module';
-import { MensalidadesModule } from './mensalidades/mensalidades.module';
+import { AdminModule } from './admin/admin.module';
+import { AlmoxarifadosModule } from './suprimentos/almoxarifados/almoxarifados.module';
+import { ProdutosModule } from './suprimentos/produtos/produtos.module';
+import { FornecedoresModule } from './suprimentos/fornecedores/fornecedores.module';
+import { MovimentoEstoqueModule } from './suprimentos/movimento-estoque/movimento-estoque.module';
+import { PedidosCompraModule } from './suprimentos/pedidos-compra/pedidos-compra.module';
+import { ContasBancariasModule } from './financeiro/contas-bancarias/contas-bancarias.module';
+import { ContasPagarModule } from './financeiro/contas-pagar/contas-pagar.module';
+import { ContasReceberModule } from './financeiro/contas-receber/contas-receber.module';
+import { TransacoesBancariasModule } from './financeiro/transacoes-bancarias/transacoes-bancarias.module';
+import { SafrasModule } from './frota/safras/safras.module';
+import { MaquinasModule } from './frota/maquinas/maquinas.module';
+import { AbastecimentosModule } from './frota/abastecimentos/abastecimentos.module';
+import { ManutencoesModule } from './frota/manutencoes/manutencoes.module';
 
 @Module({
   imports: [
@@ -38,6 +50,7 @@ import { MensalidadesModule } from './mensalidades/mensalidades.module';
     }]),
 
     PrismaModule,
+    TenantModule,
     AuthModule,
 
     // Domain Modules
@@ -49,20 +62,32 @@ import { MensalidadesModule } from './mensalidades/mensalidades.module';
     CustosModule,
     VendasModule,
     CaixaModule,
-    KilosModule,
     VacinacaoModule,
     ManejoModule,
     MovimentacoesModule,
     FotosModule,
     DashboardModule,
-    FazendasModule,
-    PlanosModule,
-    MensalidadesModule,
+    AdminModule,
+    AlmoxarifadosModule,
+    ProdutosModule,
+    FornecedoresModule,
+    MovimentoEstoqueModule,
+    PedidosCompraModule,
+    ContasBancariasModule,
+    ContasPagarModule,
+    ContasReceberModule,
+    TransacoesBancariasModule,
+    SafrasModule,
+    MaquinasModule,
+    AbastecimentosModule,
+    ManutencoesModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
     { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: HierarchyInterceptor },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: SubscriptionGuard },
   ],
 })
 export class AppModule implements NestModule {

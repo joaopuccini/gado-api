@@ -14,7 +14,6 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DashboardController = void 0;
 const common_1 = require("@nestjs/common");
-const passport_1 = require("@nestjs/passport");
 const swagger_1 = require("@nestjs/swagger");
 const dashboard_service_1 = require("./dashboard.service");
 let DashboardController = class DashboardController {
@@ -30,18 +29,21 @@ let DashboardController = class DashboardController {
     }
     async getTotalCusto() {
         const data = await this.service.getTotalCustoAnimaisComCusto();
-        return { sucesso: true, data };
+        return data;
     }
     async getTotalLPRC(query) {
         const data = await this.service.getTotalLotesPastosRacasClientesAtivos(query);
-        return { sucesso: true, data };
+        return data;
     }
     async getTotalTipoCusto() {
         return this.service.getTotalPorTipoCusto();
     }
     async getTotal12Meses() {
         const data = await this.service.getTotalCusto12Meses();
-        return { sucesso: true, data };
+        return data;
+    }
+    async getEvolucaoPeso() {
+        return this.service.getEvolucaoPeso();
     }
 };
 exports.DashboardController = DashboardController;
@@ -88,10 +90,15 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], DashboardController.prototype, "getTotal12Meses", null);
+__decorate([
+    (0, common_1.Get)('evolucao_peso'),
+    (0, swagger_1.ApiOperation)({ summary: 'Evolução de peso médio dos animais' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], DashboardController.prototype, "getEvolucaoPeso", null);
 exports.DashboardController = DashboardController = __decorate([
     (0, swagger_1.ApiTags)('Dashboard'),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     (0, common_1.Controller)('dashboard'),
     __metadata("design:paramtypes", [dashboard_service_1.DashboardService])
 ], DashboardController);

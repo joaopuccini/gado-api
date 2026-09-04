@@ -4,8 +4,8 @@ import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { DashboardService } from './dashboard.service';
 
 @ApiTags('Dashboard')
-@ApiBearerAuth()
-@UseGuards(AuthGuard('jwt'))
+// @ApiBearerAuth()
+// @UseGuards(AuthGuard('jwt'))
 @Controller('dashboard')
 export class DashboardController {
     constructor(private readonly service: DashboardService) { }
@@ -26,14 +26,14 @@ export class DashboardController {
     @ApiOperation({ summary: 'Total de custo acumulado' })
     async getTotalCusto() {
         const data = await this.service.getTotalCustoAnimaisComCusto();
-        return { sucesso: true, data };
+        return data;
     }
 
     @Get('total_lprc_ativos')
     @ApiOperation({ summary: 'Total de lotes, pastos, raças e clientes ativos' })
     async getTotalLPRC(@Query() query: any) {
         const data = await this.service.getTotalLotesPastosRacasClientesAtivos(query);
-        return { sucesso: true, data };
+        return data;
     }
 
     @Get('total_tipo_custo')
@@ -46,6 +46,12 @@ export class DashboardController {
     @ApiOperation({ summary: 'Total de custo nos últimos 12 meses' })
     async getTotal12Meses() {
         const data = await this.service.getTotalCusto12Meses();
-        return { sucesso: true, data };
+        return data;
+    }
+
+    @Get('evolucao_peso')
+    @ApiOperation({ summary: 'Evolução de peso médio dos animais' })
+    async getEvolucaoPeso() {
+        return this.service.getEvolucaoPeso();
     }
 }

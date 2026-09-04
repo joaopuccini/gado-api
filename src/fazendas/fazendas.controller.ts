@@ -5,39 +5,39 @@ import { FazendasService } from './fazendas.service';
 export class FazendasController {
     constructor(private readonly fazendasService: FazendasService) { }
 
-    @Get('buscar')
+    @Get()
     async findAll() {
         const data = await this.fazendasService.findAll();
-        return { sucesso: true, data };
+        return data;
     }
 
-    @Get('buscarum/:id')
+    @Get(':id')
     async findOne(@Param('id', ParseIntPipe) id: number) {
         const data = await this.fazendasService.findOne(id);
-        return { sucesso: true, data };
+        return data;
     }
 
     @Get('buscar_fazendas_usuario')
     async findByUserId(@Query('usuarioId', ParseIntPipe) usuarioId: number) {
         const data = await this.fazendasService.findByUserId(usuarioId);
-        return { sucesso: true, data };
+        return data;
     }
 
-    @Post('cadastrar')
+    @Post()
     async create(@Body() data: any) {
         const response = await this.fazendasService.create(data);
-        return { message: 'Sucesso ao cadastrar!', response };
+        return response;
     }
 
-    @Patch('editar/:id')
+    @Patch(':id')
     async update(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
         const dataResponse = await this.fazendasService.update(id, data);
         return { sucesso: true, data: dataResponse };
     }
 
-    @Delete('deletar/:id')
+    @Delete(':id')
     async remove(@Param('id', ParseIntPipe) id: number) {
         const data = await this.fazendasService.remove(id);
-        return { sucesso: true, data };
+        return data;
     }
 }

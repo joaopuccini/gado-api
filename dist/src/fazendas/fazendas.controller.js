@@ -22,19 +22,19 @@ let FazendasController = class FazendasController {
     }
     async findAll() {
         const data = await this.fazendasService.findAll();
-        return { sucesso: true, data };
+        return data;
     }
     async findOne(id) {
         const data = await this.fazendasService.findOne(id);
-        return { sucesso: true, data };
+        return data;
     }
     async findByUserId(usuarioId) {
         const data = await this.fazendasService.findByUserId(usuarioId);
-        return { sucesso: true, data };
+        return data;
     }
     async create(data) {
         const response = await this.fazendasService.create(data);
-        return { message: 'Sucesso ao cadastrar!', response };
+        return response;
     }
     async update(id, data) {
         const dataResponse = await this.fazendasService.update(id, data);
@@ -42,18 +42,18 @@ let FazendasController = class FazendasController {
     }
     async remove(id) {
         const data = await this.fazendasService.remove(id);
-        return { sucesso: true, data };
+        return data;
     }
 };
 exports.FazendasController = FazendasController;
 __decorate([
-    (0, common_1.Get)('buscar'),
+    (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], FazendasController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.Get)('buscarum/:id'),
+    (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
@@ -67,14 +67,14 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], FazendasController.prototype, "findByUserId", null);
 __decorate([
-    (0, common_1.Post)('cadastrar'),
+    (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], FazendasController.prototype, "create", null);
 __decorate([
-    (0, common_1.Patch)('editar/:id'),
+    (0, common_1.Patch)(':id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -82,7 +82,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], FazendasController.prototype, "update", null);
 __decorate([
-    (0, common_1.Delete)('deletar/:id'),
+    (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),

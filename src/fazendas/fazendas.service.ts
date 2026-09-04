@@ -1,59 +1,67 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { TenantPrismaService } from '../tenant/tenant-prisma.service';
+import { RequestContext } from '../common/context';
 
 @Injectable()
 export class FazendasService {
-    constructor(private readonly prisma: PrismaService) { }
+    constructor(private readonly tenantPrisma: TenantPrismaService) { }
+
+    private getTenantClient() {
+        const schemaName = RequestContext.getSchemaName();
+        if (!schemaName) throw new Error('Schema do tenant não encontrado no contexto');
+        return this.tenantPrisma.getClientForSchema(schemaName);
+    }
 
     async findAll() {
-        return this.prisma.fazenda.findMany({
-            where: { excluido: false },
-            include: {
-                mensalidades: true
-            }
+        const tenant = this.getTenantClient();
+        return tenant.fazenda.findMany({
+            where: { ativo: true }
         });
     }
 
     async findOne(id: number) {
-        const fazenda = await this.prisma.fazenda.findUnique({
-            where: { id },
-            include: { mensalidades: true }
+        const tenant = this.getTenantClient();
+        const fazenda = await tenant.fazenda.findUnique({
+            where: { id }
         });
-        if (!fazenda || fazenda.excluido) throw new NotFoundException('Fazenda não encontrada');
+        if (!fazenda || !fazenda.ativo) throw new NotFoundException('Fazenda não encontrada');
         return fazenda;
     }
 
-    async findByUserId(usuarioId: number) {
-        return this.prisma.fazenda.findMany({
-            where: {
-                id_usuarios: { has: usuarioId },
-                excluido: false
-            }
+    async findByUserId(usuarioLocalId: number) {
+        const tenant = this.getTenantClient();
+        const userFazendas = await tenant.usuarioFazenda.findMany({
+            where: { usuarioId: usuarioLocalId, ativo: true },
+            include: { fazenda: true }
         });
+        return userFazendas.map(uf => uf.fazenda);
     }
 
     async create(data: any) {
-        return this.prisma.fazenda.create({
+        const tenant = this.getTenantClient();
+        return tenant.fazenda.create({
             data: {
                 ...data,
-                status: data.status || 'PENDENTE',
+                ativo: true,
             }
         });
     }
 
     async update(id: number, data: any) {
+        const tenant = this.getTenantClient();
         await this.findOne(id);
-        return this.prisma.fazenda.update({
+        return tenant.fazenda.update({
             where: { id },
             data
         });
     }
 
     async remove(id: number) {
+        const tenant = this.getTenantClient();
         await this.findOne(id);
-        return this.prisma.fazenda.update({
+        return tenant.fazenda.update({
             where: { id },
-            data: { excluido: true, excluido_data: new Date() }
+            data: { ativo: false }
         });
     }
 }

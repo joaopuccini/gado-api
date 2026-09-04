@@ -2,6 +2,9 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsString, IsInt, IsNumber, IsBoolean, IsDateString, IsArray } from 'class-validator';
 
 export class CreateAnimalDto {
+    @ApiPropertyOptional({ description: 'ID da fazenda (útil quando Matriz cria para Filha)', example: 2 })
+    @IsOptional() @IsInt() fazendaId?: number;
+
     @ApiPropertyOptional({ description: 'Nomes dos usuários responsáveis', example: ['João', 'Maria'] })
     @IsOptional() @IsArray() @IsString({ each: true }) id_usuario_nome?: string[];
 
@@ -81,3 +84,18 @@ export class UpdateAnimalDto {
     @ApiPropertyOptional() @IsOptional() @IsBoolean() castrado?: boolean;
     @ApiPropertyOptional() @IsOptional() @IsString() observacao?: string;
 }
+
+export class TransferirAnimalDto {
+    @ApiProperty({ description: 'ID da Fazenda de destino' })
+    @IsInt() @IsNotEmpty() fazendaDestinoId: number;
+
+    @ApiPropertyOptional({ description: 'ID do Pasto na fazenda destino' })
+    @IsOptional() @IsInt() pastoDestinoId?: number;
+
+    @ApiPropertyOptional({ description: 'ID do Lote na fazenda destino' })
+    @IsOptional() @IsInt() loteDestinoId?: number;
+
+    @ApiPropertyOptional({ description: 'Observações sobre a transferência' })
+    @IsOptional() @IsString() observacao?: string;
+}
+

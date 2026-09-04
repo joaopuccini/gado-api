@@ -12,17 +12,17 @@ var VacinacaoService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VacinacaoService = void 0;
 const common_1 = require("@nestjs/common");
-const prisma_service_1 = require("../prisma/prisma.service");
+const tenant_prisma_service_1 = require("../tenant/tenant-prisma.service");
 const services_1 = require("../common/services");
 let VacinacaoService = VacinacaoService_1 = class VacinacaoService extends services_1.BaseTenantService {
     logger = new common_1.Logger(VacinacaoService_1.name);
     modelName = 'Vacinação';
-    constructor(prisma) { super(prisma); }
-    getDelegate() { return this.prisma.vacinacao; }
+    constructor(tenantPrisma) { super(tenantPrisma); }
+    getDelegate(tenant) { return tenant.vacinacao; }
 };
 exports.VacinacaoService = VacinacaoService;
 exports.VacinacaoService = VacinacaoService = VacinacaoService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [tenant_prisma_service_1.TenantPrismaService])
 ], VacinacaoService);
 //# sourceMappingURL=vacinacao.service.js.map

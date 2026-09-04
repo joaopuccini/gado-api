@@ -4,27 +4,12 @@ import { PaginationDto } from '../common/dto';
 export declare class PastosController {
     private readonly service;
     constructor(service: PastosService);
-    create(dto: CreatePastoDto): Promise<{
-        message: string;
-        response: unknown;
-    }>;
+    create(dto: CreatePastoDto): Promise<any>;
     findAll(p: PaginationDto): Promise<{
-        sucesso: boolean;
-        data: {
-            data: any;
-            total: any;
-        };
-    }>;
-    findOne(id: number): Promise<{
-        sucesso: boolean;
         data: any;
+        total: any;
     }>;
-    update(id: number, dto: UpdatePastoDto): Promise<{
-        sucesso: boolean;
-        data: unknown;
-    }>;
-    remove(id: number): Promise<{
-        sucesso: boolean;
-        data: unknown;
-    }>;
+    findOne(id: number): Promise<any>;
+    update(id: number, dto: UpdatePastoDto): Promise<any>;
+    remove(id: number): Promise<any>;
 }

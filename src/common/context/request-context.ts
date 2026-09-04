@@ -3,9 +3,13 @@ import { v4 as uuidv4 } from 'uuid';
 
 export interface RequestContextData {
     requestId: string;
-    fazendaId?: number;
-    userId?: number;
+    globalUserId?: string;
+    userId?: number; // Tenant local user id
     userEmail?: string;
+    tenantId?: string;
+    schemaName?: string;
+    fazendaId?: number;
+    accessibleFazendaIds?: number[];
     path?: string;
     method?: string;
     startTime: number;
@@ -19,17 +23,21 @@ export interface RequestContextData {
 export class RequestContext {
     private static storage = new AsyncLocalStorage<RequestContextData>();
 
-    static run(data: Partial<RequestContextData>, fn: () => void): void {
+    static run<T>(data: Partial<RequestContextData>, fn: () => T): T {
         const context: RequestContextData = {
             requestId: data.requestId || uuidv4(),
-            fazendaId: data.fazendaId,
+            globalUserId: data.globalUserId,
             userId: data.userId,
             userEmail: data.userEmail,
+            tenantId: data.tenantId,
+            schemaName: data.schemaName,
+            fazendaId: data.fazendaId,
+            accessibleFazendaIds: data.accessibleFazendaIds,
             path: data.path,
             method: data.method,
             startTime: data.startTime || Date.now(),
         };
-        this.storage.run(context, fn);
+        return this.storage.run(context, fn);
     }
 
     static get(): RequestContextData | undefined {
@@ -44,8 +52,24 @@ export class RequestContext {
         return this.get()?.fazendaId;
     }
 
+    static getAccessibleFazendaIds(): number[] | undefined {
+        return this.get()?.accessibleFazendaIds;
+    }
+
     static getUserId(): number | undefined {
         return this.get()?.userId;
+    }
+
+    static getGlobalUserId(): string | undefined {
+        return this.get()?.globalUserId;
+    }
+
+    static getTenantId(): string | undefined {
+        return this.get()?.tenantId;
+    }
+
+    static getSchemaName(): string | undefined {
+        return this.get()?.schemaName;
     }
 
     static set(partial: Partial<RequestContextData>): void {

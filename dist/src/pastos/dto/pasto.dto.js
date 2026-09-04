@@ -14,6 +14,8 @@ const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 class CreatePastoDto {
     descricao;
+    geojson;
+    tamanhoHectares;
 }
 exports.CreatePastoDto = CreatePastoDto;
 __decorate([
@@ -22,8 +24,22 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreatePastoDto.prototype, "descricao", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsObject)(),
+    __metadata("design:type", Object)
+], CreatePastoDto.prototype, "geojson", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], CreatePastoDto.prototype, "tamanhoHectares", void 0);
 class UpdatePastoDto {
     descricao;
+    geojson;
+    tamanhoHectares;
 }
 exports.UpdatePastoDto = UpdatePastoDto;
 __decorate([
@@ -32,4 +48,16 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdatePastoDto.prototype, "descricao", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsObject)(),
+    __metadata("design:type", Object)
+], UpdatePastoDto.prototype, "geojson", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], UpdatePastoDto.prototype, "tamanhoHectares", void 0);
 //# sourceMappingURL=pasto.dto.js.map

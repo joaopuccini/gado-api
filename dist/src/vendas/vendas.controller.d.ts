@@ -5,34 +5,23 @@ export declare class VendasController {
     private readonly service;
     constructor(service: VendasService);
     create(dto: CreateVendaDto): Promise<{
-        message: string;
-        response: {
-            id_animais: number[];
-            qtd_animais: number;
-            valor_venda: number | null;
-            valor_custo: number | null;
-            data_venda: Date;
-            observacao: string | null;
-            excluido: boolean;
-            excluido_data: Date | null;
-            createdAt: Date;
-            id: number;
-            id_cliente: number;
-        };
+        id: number;
+        ativo: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        fazendaId: number;
+        registradoPorId: number | null;
+        valorTotal: import("@prisma/client-runtime-utils").Decimal | null;
+        observacao: string | null;
+        clienteId: number;
+        custoTotal: import("@prisma/client-runtime-utils").Decimal | null;
+        lucro: import("@prisma/client-runtime-utils").Decimal | null;
+        dataVenda: Date;
     }>;
     findAll(p: PaginationDto): Promise<{
-        sucesso: boolean;
-        data: {
-            data: any;
-            total: any;
-        };
-    }>;
-    findOne(id: number): Promise<{
-        sucesso: boolean;
         data: any;
+        total: any;
     }>;
-    remove(id: number): Promise<{
-        sucesso: boolean;
-        data: unknown;
-    }>;
+    findOne(id: number): Promise<any>;
+    remove(id: number): Promise<any>;
 }

@@ -12,17 +12,17 @@ var RacasService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RacasService = void 0;
 const common_1 = require("@nestjs/common");
-const prisma_service_1 = require("../prisma/prisma.service");
+const tenant_prisma_service_1 = require("../tenant/tenant-prisma.service");
 const services_1 = require("../common/services");
 let RacasService = RacasService_1 = class RacasService extends services_1.BaseTenantService {
     logger = new common_1.Logger(RacasService_1.name);
     modelName = 'Raça';
-    constructor(prisma) { super(prisma); }
-    getDelegate() { return this.prisma.raca; }
+    constructor(tenantPrisma) { super(tenantPrisma); }
+    getDelegate(tenant) { return tenant.raca; }
 };
 exports.RacasService = RacasService;
 exports.RacasService = RacasService = RacasService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [tenant_prisma_service_1.TenantPrismaService])
 ], RacasService);
 //# sourceMappingURL=racas.service.js.map

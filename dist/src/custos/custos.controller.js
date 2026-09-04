@@ -26,24 +26,24 @@ let CustosController = class CustosController {
     }
     async createCusto(dto) {
         const response = await this.custoService.create(dto);
-        return { message: 'Sucesso ao cadastrar!', response };
+        return response;
     }
     async findAll(p) {
         const data = await this.custoService.findAll({ skip: p.skip, take: p.limit, include: { custoTipo: true } });
-        return { sucesso: true, data };
+        return data;
     }
     async findOne(id) {
         const data = await this.custoService.findOne(id);
-        return { sucesso: true, data };
+        return data;
     }
     async removeCusto(id) {
         const data = await this.custoService.remove(id);
-        return { sucesso: true, data };
+        return data;
     }
 };
 exports.CustosController = CustosController;
 __decorate([
-    (0, common_1.Post)('cadastrar'),
+    (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Lançar custo (distribuído entre animais)' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -51,7 +51,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CustosController.prototype, "createCusto", null);
 __decorate([
-    (0, common_1.Get)('buscar'),
+    (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'Listar custos' }),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -59,7 +59,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CustosController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.Get)('buscarum/:id'),
+    (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Buscar um custo' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
@@ -67,7 +67,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CustosController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Delete)('deletar/:id'),
+    (0, common_1.Delete)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Excluir custo' }),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
@@ -88,16 +88,16 @@ let CustosTipoController = class CustosTipoController {
     }
     async createTipo(dto) {
         const response = await this.tipoService.create(dto);
-        return { message: 'Sucesso ao cadastrar!', response };
+        return response;
     }
     async findTipos(p) {
         const data = await this.tipoService.findAll({ skip: p.skip, take: p.limit });
-        return { sucesso: true, data };
+        return data;
     }
 };
 exports.CustosTipoController = CustosTipoController;
 __decorate([
-    (0, common_1.Post)('cadastrar'),
+    (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Criar tipo de custo' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -105,7 +105,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CustosTipoController.prototype, "createTipo", null);
 __decorate([
-    (0, common_1.Get)('buscar'),
+    (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'Listar tipos de custo' }),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),

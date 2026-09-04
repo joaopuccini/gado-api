@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { TenantPrismaService } from '../tenant/tenant-prisma.service';
 import { BaseTenantService } from '../common/services';
 import { CreateManejoDto, UpdateManejoDto } from './dto/manejo.dto';
 
@@ -7,6 +7,7 @@ import { CreateManejoDto, UpdateManejoDto } from './dto/manejo.dto';
 export class ManejoService extends BaseTenantService<CreateManejoDto, UpdateManejoDto> {
     protected readonly logger = new Logger(ManejoService.name);
     protected readonly modelName = 'Manejo';
-    constructor(prisma: PrismaService) { super(prisma); }
-    protected getDelegate() { return this.prisma.manejoReproducao; }
+    constructor(tenantPrisma: TenantPrismaService) { super(tenantPrisma); }
+    protected getDelegate(tenant: any) { return tenant.manejoReproducao; }
 }
+

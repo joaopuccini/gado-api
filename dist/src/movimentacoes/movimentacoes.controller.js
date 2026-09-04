@@ -26,16 +26,16 @@ let MovimentoPastoController = class MovimentoPastoController {
     }
     async create(dto) {
         const response = await this.service.create(dto);
-        return { message: 'Sucesso ao cadastrar!', response };
+        return response;
     }
     async findAll(p) {
         const data = await this.service.findAll({ skip: p.skip, take: p.limit, include: { animal: true, pastoOrigem: true, pastoDestino: true } });
-        return { sucesso: true, data };
+        return data;
     }
 };
 exports.MovimentoPastoController = MovimentoPastoController;
 __decorate([
-    (0, common_1.Post)('cadastrar'),
+    (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Mover animal de pasto' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -43,7 +43,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], MovimentoPastoController.prototype, "create", null);
 __decorate([
-    (0, common_1.Get)('buscar'),
+    (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'Listar movimentos de pasto' }),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
@@ -64,16 +64,16 @@ let MovimentoLoteController = class MovimentoLoteController {
     }
     async create(dto) {
         const response = await this.service.create(dto);
-        return { message: 'Sucesso ao cadastrar!', response };
+        return response;
     }
     async findAll(p) {
         const data = await this.service.findAll({ skip: p.skip, take: p.limit, include: { animal: true, loteOrigem: true, loteDestino: true } });
-        return { sucesso: true, data };
+        return data;
     }
 };
 exports.MovimentoLoteController = MovimentoLoteController;
 __decorate([
-    (0, common_1.Post)('cadastrar'),
+    (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Mover animal de lote' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -81,7 +81,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], MovimentoLoteController.prototype, "create", null);
 __decorate([
-    (0, common_1.Get)('buscar'),
+    (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'Listar movimentos de lote' }),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),

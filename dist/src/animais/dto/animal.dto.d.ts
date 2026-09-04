@@ -1,4 +1,5 @@
 export declare class CreateAnimalDto {
+    fazendaId?: number;
     id_usuario_nome?: string[];
     id_lote: number;
     id_raca: number;
@@ -38,5 +39,11 @@ export declare class UpdateAnimalDto {
     total?: number;
     valor_custo_final?: number;
     castrado?: boolean;
+    observacao?: string;
+}
+export declare class TransferirAnimalDto {
+    fazendaDestinoId: number;
+    pastoDestinoId?: number;
+    loteDestinoId?: number;
     observacao?: string;
 }

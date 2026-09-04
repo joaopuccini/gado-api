@@ -9,10 +9,15 @@ const config_1 = require("@nestjs/config");
 const swagger_1 = require("@nestjs/swagger");
 const helmet_1 = __importDefault(require("helmet"));
 const app_module_1 = require("./app.module");
+const custom_logger_service_1 = require("./common/logger/custom-logger.service");
+const transform_interceptor_1 = require("./common/interceptors/transform.interceptor");
+const global_exception_filter_1 = require("./common/filters/global-exception.filter");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule, {
         bufferLogs: true,
     });
+    const customLogger = new custom_logger_service_1.CustomLogger();
+    app.useLogger(customLogger);
     const configService = app.get(config_1.ConfigService);
     const port = configService.get('PORT', 8080);
     const prefix = configService.get('API_PREFIX', '');
@@ -32,6 +37,8 @@ async function bootstrap() {
         transform: true,
         transformOptions: { enableImplicitConversion: true },
     }));
+    app.useGlobalInterceptors(new transform_interceptor_1.TransformInterceptor());
+    app.useGlobalFilters(new global_exception_filter_1.GlobalExceptionFilter());
     if (configService.get('NODE_ENV') !== 'production') {
         const swaggerConfig = new swagger_1.DocumentBuilder()
             .setTitle('Gado API')

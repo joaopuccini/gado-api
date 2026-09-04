@@ -4,27 +4,12 @@ import { PaginationDto } from '../common/dto';
 export declare class LotesController {
     private readonly service;
     constructor(service: LotesService);
-    create(dto: CreateLoteDto): Promise<{
-        message: string;
-        response: unknown;
-    }>;
+    create(dto: CreateLoteDto): Promise<any>;
     findAll(pagination: PaginationDto): Promise<{
-        sucesso: boolean;
-        data: {
-            data: any;
-            total: any;
-        };
-    }>;
-    findOne(id: number): Promise<{
-        sucesso: boolean;
         data: any;
+        total: any;
     }>;
-    update(id: number, dto: UpdateLoteDto): Promise<{
-        sucesso: boolean;
-        data: unknown;
-    }>;
-    remove(id: number): Promise<{
-        sucesso: boolean;
-        data: unknown;
-    }>;
+    findOne(id: number): Promise<any>;
+    update(id: number, dto: UpdateLoteDto): Promise<any>;
+    remove(id: number): Promise<any>;
 }

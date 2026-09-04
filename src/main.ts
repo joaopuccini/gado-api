@@ -4,12 +4,16 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
-
+import { CustomLogger } from './common/logger/custom-logger.service';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
   });
 
+  const customLogger = new CustomLogger();
+  app.useLogger(customLogger);
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT', 8080);
   const prefix = configService.get<string>('API_PREFIX', '');
@@ -39,6 +43,10 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: true },
     }),
   );
+
+  // Global Interceptors and Filters
+  app.useGlobalInterceptors(new TransformInterceptor());
+  app.useGlobalFilters(new GlobalExceptionFilter());
 
   // Swagger (OpenAPI)
   if (configService.get('NODE_ENV') !== 'production') {

@@ -6,44 +6,44 @@ import { CreatePastoDto, UpdatePastoDto } from './dto/pasto.dto';
 import { PaginationDto } from '../common/dto';
 
 @ApiTags('Pastos')
-@ApiBearerAuth()
-@UseGuards(AuthGuard('jwt'))
+// @ApiBearerAuth()
+// @UseGuards(AuthGuard('jwt'))
 @Controller('pastos')
 export class PastosController {
     constructor(private readonly service: PastosService) { }
 
-    @Post('cadastrar')
+    @Post()
     @ApiOperation({ summary: 'Cadastrar pasto' })
     async create(@Body() dto: CreatePastoDto) {
         const response = await this.service.create(dto);
-        return { message: 'Sucesso ao cadastrar!', response };
+        return response;
     }
 
-    @Get('buscar')
+    @Get()
     @ApiOperation({ summary: 'Listar pastos' })
     async findAll(@Query() p: PaginationDto) {
         const data = await this.service.findAll({ skip: p.skip, take: p.limit });
-        return { sucesso: true, data };
+        return data;
     }
 
-    @Get('buscarum/:id')
+    @Get(':id')
     @ApiOperation({ summary: 'Buscar pasto' })
     async findOne(@Param('id', ParseIntPipe) id: number) {
         const data = await this.service.findOne(id);
-        return { sucesso: true, data };
+        return data;
     }
 
-    @Patch('editar/:id')
+    @Patch(':id')
     @ApiOperation({ summary: 'Editar pasto' })
     async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdatePastoDto) {
         const data = await this.service.update(id, dto);
-        return { sucesso: true, data };
+        return data;
     }
 
-    @Delete('deletar/:id')
+    @Delete(':id')
     @ApiOperation({ summary: 'Excluir pasto' })
     async remove(@Param('id', ParseIntPipe) id: number) {
         const data = await this.service.remove(id);
-        return { sucesso: true, data };
+        return data;
     }
 }

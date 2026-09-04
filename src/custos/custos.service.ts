@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { TenantPrismaService } from '../tenant/tenant-prisma.service';
 import { BaseTenantService } from '../common/services';
 import { CreateCustoDto, CreateCustoTipoDto } from './dto/custo.dto';
 
@@ -7,45 +7,46 @@ import { CreateCustoDto, CreateCustoTipoDto } from './dto/custo.dto';
 export class CustosService extends BaseTenantService<CreateCustoDto, any> {
     protected readonly logger = new Logger(CustosService.name);
     protected readonly modelName = 'Custo';
-    constructor(prisma: PrismaService) { super(prisma); }
-    protected getDelegate() { return this.prisma.custo; }
+    constructor(tenantPrisma: TenantPrismaService) { super(tenantPrisma); }
+    protected getDelegate(tenant: any) { return tenant.custo; }
 
     // Sobrescreve create para lidar com a transação nas duas tabelas
     override async create(dto: CreateCustoDto) {
-        return this.withTenant(async () => {
-            // 1. Criar o registro de Custo principal
-            const custo = await this.prisma.custo.create({
-                data: {
-                    id_animais: dto.id_animais,
-                    id_custo_tipos: dto.id_custo_tipos,
-                    qtd_animais: dto.id_animais.length,
-                    descricao: dto.descricao,
-                    valor_custo: dto.valor_custo,
-                    data_custo: dto.data_custo ? new Date(dto.data_custo) : new Date(),
-                },
-            });
+        const tenant = this.getTenantClient();
+        
+        // 1. Criar o registro de Custo principal
+        const custo = await tenant.custo.create({
+            data: {
+                categoriaCustoId: dto.id_custo_tipos, // mapeando do frontend legado
+                descricao: dto.descricao,
+                valorTotal: dto.valor_custo,
+                dataCusto: dto.data_custo ? new Date(dto.data_custo) : new Date(),
+                ativo: true,
+            } as any,
+        });
 
-            // 2. Criar os registros individuais por animal (custo_animais)
+        // 2. Criar os registros individuais por animal (custo_animais)
+        if (dto.id_animais && dto.id_animais.length > 0) {
             const valorPorCabeca = dto.valor_custo / dto.id_animais.length;
             const custoAnimaisData = dto.id_animais.map(animalId => ({
-                id_custo: custo.id,
-                id_animal: animalId,
-                valor_cabeca: valorPorCabeca,
+                custoId: custo.id,
+                animalId: animalId,
+                valorCabeca: valorPorCabeca,
             }));
 
-            await this.prisma.custoAnimal.createMany({
-                data: custoAnimaisData,
+            await tenant.custoAnimal.createMany({
+                data: custoAnimaisData as any,
             });
+        }
 
-            return custo;
-        });
+        return custo;
     }
 }
 
 @Injectable()
 export class CustoTiposService extends BaseTenantService<CreateCustoTipoDto, any> {
     protected readonly logger = new Logger(CustoTiposService.name);
-    protected readonly modelName = 'Custo Tipo';
-    constructor(prisma: PrismaService) { super(prisma); }
-    protected getDelegate() { return this.prisma.custoTipo; }
+    protected readonly modelName = 'CategoriaCusto';
+    constructor(tenantPrisma: TenantPrismaService) { super(tenantPrisma); }
+    protected getDelegate(tenant: any) { return tenant.categoriaCusto; }
 }

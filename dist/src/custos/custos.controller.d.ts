@@ -5,48 +5,31 @@ export declare class CustosController {
     private readonly custoService;
     constructor(custoService: CustosService);
     createCusto(dto: CreateCustoDto): Promise<{
-        message: string;
-        response: {
-            id: number;
-            id_animais: number[];
-            id_custo_tipos: number | null;
-            qtd_animais: number;
-            descricao: string | null;
-            valor_custo: number | null;
-            data_custo: Date;
-            excluido: boolean;
-            excluido_data: Date | null;
-            createdAt: Date;
-        };
+        id: number;
+        ativo: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        descricao: string | null;
+        fazendaId: number;
+        categoriaCustoId: number | null;
+        registradoPorId: number | null;
+        valorTotal: import("@prisma/client-runtime-utils").Decimal;
+        dataCusto: Date;
+        observacao: string | null;
     }>;
     findAll(p: PaginationDto): Promise<{
-        sucesso: boolean;
-        data: {
-            data: any;
-            total: any;
-        };
-    }>;
-    findOne(id: number): Promise<{
-        sucesso: boolean;
         data: any;
+        total: any;
     }>;
-    removeCusto(id: number): Promise<{
-        sucesso: boolean;
-        data: unknown;
-    }>;
+    findOne(id: number): Promise<any>;
+    removeCusto(id: number): Promise<any>;
 }
 export declare class CustosTipoController {
     private readonly tipoService;
     constructor(tipoService: CustoTiposService);
-    createTipo(dto: CreateCustoTipoDto): Promise<{
-        message: string;
-        response: unknown;
-    }>;
+    createTipo(dto: CreateCustoTipoDto): Promise<any>;
     findTipos(p: PaginationDto): Promise<{
-        sucesso: boolean;
-        data: {
-            data: any;
-            total: any;
-        };
+        data: any;
+        total: any;
     }>;
 }

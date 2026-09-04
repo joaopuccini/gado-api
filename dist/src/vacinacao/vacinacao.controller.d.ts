@@ -4,27 +4,12 @@ import { PaginationDto } from '../common/dto';
 export declare class VacinacaoController {
     private readonly service;
     constructor(service: VacinacaoService);
-    create(dto: CreateVacinacaoDto): Promise<{
-        message: string;
-        response: unknown;
-    }>;
+    create(dto: CreateVacinacaoDto): Promise<any>;
     findAll(p: PaginationDto): Promise<{
-        sucesso: boolean;
-        data: {
-            data: any;
-            total: any;
-        };
-    }>;
-    findOne(id: number): Promise<{
-        sucesso: boolean;
         data: any;
+        total: any;
     }>;
-    update(id: number, dto: UpdateVacinacaoDto): Promise<{
-        sucesso: boolean;
-        data: unknown;
-    }>;
-    remove(id: number): Promise<{
-        sucesso: boolean;
-        data: unknown;
-    }>;
+    findOne(id: number): Promise<any>;
+    update(id: number, dto: UpdateVacinacaoDto): Promise<any>;
+    remove(id: number): Promise<any>;
 }

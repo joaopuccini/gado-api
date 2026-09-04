@@ -25,19 +25,14 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
     }
     validate(payload) {
         context_1.RequestContext.set({
-            userId: payload.sub,
+            userId: payload.usuarioLocalId,
+            globalUserId: payload.sub,
+            tenantId: payload.tenantId,
+            schemaName: payload.schemaName,
             fazendaId: payload.fazendaId,
             userEmail: payload.email,
         });
-        return {
-            id: payload.sub,
-            email: payload.email,
-            nome: payload.nome,
-            admin: payload.admin,
-            suporte: payload.suporte,
-            fazendaId: payload.fazendaId,
-            permissoes: payload.permissoes,
-        };
+        return payload;
     }
 };
 exports.JwtStrategy = JwtStrategy;

@@ -1,28 +1,29 @@
 import { Logger } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { TenantPrismaService } from '../tenant/tenant-prisma.service';
 import { BaseTenantService } from '../common/services';
 import { CreateCustoDto, CreateCustoTipoDto } from './dto/custo.dto';
 export declare class CustosService extends BaseTenantService<CreateCustoDto, any> {
     protected readonly logger: Logger;
     protected readonly modelName = "Custo";
-    constructor(prisma: PrismaService);
-    protected getDelegate(): import("@prisma/client").Prisma.CustoDelegate<import("@prisma/client/runtime/client").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    constructor(tenantPrisma: TenantPrismaService);
+    protected getDelegate(tenant: any): any;
     create(dto: CreateCustoDto): Promise<{
         id: number;
-        excluido: boolean;
-        excluido_data: Date | null;
+        ativo: boolean;
         createdAt: Date;
+        updatedAt: Date;
         descricao: string | null;
-        id_animais: number[];
-        id_custo_tipos: number | null;
-        qtd_animais: number;
-        valor_custo: number | null;
-        data_custo: Date;
+        fazendaId: number;
+        categoriaCustoId: number | null;
+        registradoPorId: number | null;
+        valorTotal: import("@prisma/client-runtime-utils").Decimal;
+        dataCusto: Date;
+        observacao: string | null;
     }>;
 }
 export declare class CustoTiposService extends BaseTenantService<CreateCustoTipoDto, any> {
     protected readonly logger: Logger;
-    protected readonly modelName = "Custo Tipo";
-    constructor(prisma: PrismaService);
-    protected getDelegate(): import("@prisma/client").Prisma.CustoTipoDelegate<import("@prisma/client/runtime/client").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    protected readonly modelName = "CategoriaCusto";
+    constructor(tenantPrisma: TenantPrismaService);
+    protected getDelegate(tenant: any): any;
 }

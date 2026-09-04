@@ -1,192 +1,228 @@
-import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Logger, ForbiddenException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { PrismaService } from '../prisma/prisma.service';
-import { RequestContext } from '../common/context';
-import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
+import { AdminPrismaService } from '../admin/admin-prisma.service';
+import { TenantPrismaService } from '../tenant/tenant-prisma.service';
+import { SocialProvisioningService } from './services/social-provisioning.service';
+import { getPermissionsForRole, RolePermissions, PermissionString, FazendaRole } from '../common/rbac/rbac.config';
 
 @Injectable()
 export class AuthService {
     private readonly logger = new Logger(AuthService.name);
 
     constructor(
-        private readonly prisma: PrismaService,
+        private readonly adminPrisma: AdminPrismaService,
+        private readonly tenantPrisma: TenantPrismaService,
         private readonly jwtService: JwtService,
+        private readonly provisioningService: SocialProvisioningService,
     ) { }
 
+    /**
+     * Autenticação via Email/Senha (SaaS Admin ou Operational)
+     */
     async login(dto: any) {
         const email = dto.email.toLowerCase();
-        const user = await this.prisma.usuario.findUnique({
+        
+        // 1. Buscar UsuarioGlobal no banco Admin
+        const globalUser = await this.adminPrisma.usuarioGlobal.findUnique({
             where: { email },
+            include: {
+                acessos: {
+                    where: { status: 'ATIVO' },
+                    include: { organizacao: true }
+                }
+            }
         });
 
-        if (!user || user.excluido || user.inativo) {
-            throw new UnauthorizedException('Credenciais inválidas');
+        if (!globalUser || !globalUser.ativo) {
+            throw new UnauthorizedException('Credenciais inválidas ou usuário inativo');
         }
 
-        // Se a senha for enviada, valida ela (Login inicial)
-        if (dto.password) {
-            const passwordValid = await bcrypt.compare(dto.password, user.password);
+        if (dto.password && globalUser.senhaHash) {
+            const passwordValid = await bcrypt.compare(dto.password, globalUser.senhaHash);
             if (!passwordValid) {
                 throw new UnauthorizedException('Credenciais inválidas');
             }
+        } else if (dto.password && !globalUser.senhaHash) {
+            throw new UnauthorizedException('Este usuário deve autenticar via Google');
         }
 
-        // Buscar fazendas vinculadas
-        const allFazendas = await this.prisma.fazenda.findMany({
-            where: {
-                id_usuarios: { has: user.id },
-                excluido: false,
-                status: 'ATIVO',
-            },
+        return this.resolveUserAccess(globalUser, dto.id_fazenda || dto.fazendaId);
+    }
+
+    /**
+     * Autenticação via Google OAuth
+     */
+    async googleLogin(googleProfile: { email: string; nome: string; googleId: string; fotoUrl: string }) {
+        let globalUser: any = await this.adminPrisma.usuarioGlobal.findUnique({
+            where: { email: googleProfile.email },
+            include: {
+                acessos: {
+                    where: { status: 'ATIVO' },
+                    include: { organizacao: true }
+                }
+            }
         });
 
-        if (allFazendas.length === 0) {
-            throw new UnauthorizedException('Usuário não vinculado a nenhuma fazenda ativa');
+        if (!globalUser) {
+            // Criar novo UsuarioGlobal
+            globalUser = await this.adminPrisma.usuarioGlobal.create({
+                data: {
+                    nome: googleProfile.nome,
+                    email: googleProfile.email,
+                    googleId: googleProfile.googleId,
+                    fotoUrl: googleProfile.fotoUrl,
+                    authProvider: 'GOOGLE',
+                    ativo: true,
+                },
+                include: { acessos: true } // Vazio no momento da criação
+            });
+
+            this.logger.log(`Google OAuth: Novo UsuarioGlobal criado: ${globalUser.email}`);
+
+            // Auto-provisionar Trial
+            await this.provisioningService.provisionTrial({
+                email: globalUser.email,
+                nome: globalUser.nome,
+                globalUserId: globalUser.id,
+            });
+
+            // Recarregar os acessos após provisionamento
+            globalUser = await this.adminPrisma.usuarioGlobal.findUnique({
+                where: { id: globalUser.id },
+                include: {
+                    acessos: {
+                        where: { status: 'ATIVO' },
+                        include: { organizacao: true }
+                    }
+                }
+            });
+        } else if (!globalUser.googleId) {
+            // Ligar conta existente com Google
+            await this.adminPrisma.usuarioGlobal.update({
+                where: { id: globalUser.id },
+                data: { 
+                    googleId: googleProfile.googleId, 
+                    fotoUrl: googleProfile.fotoUrl || globalUser.fotoUrl,
+                    authProvider: 'GOOGLE'
+                }
+            });
         }
 
-        // Se um ID de fazenda específico foi solicitado
-        const requestedFazendaId = dto.id_fazenda || dto.fazendaId;
-        const selectedFazenda = requestedFazendaId 
-            ? allFazendas.find(f => f.id === Number(requestedFazendaId))
-            : allFazendas[0];
-
-        if (!selectedFazenda) {
-            throw new UnauthorizedException('Acesso negado ou fazenda não encontrada');
+        if (!globalUser.ativo) {
+            throw new UnauthorizedException('Conta desativada');
         }
 
-        // Se o front-end está esperando a lista de fazendas (fluxo de seleção)
-        // O legado espera { id_fazendas: number[], user: any } no /logar
-        if (!requestedFazendaId && allFazendas.length > 1 && dto.password) {
+        return this.resolveUserAccess(globalUser);
+    }
+
+    /**
+     * Resolve o acesso do usuário global:
+     * - Se não tem organizações: Erro
+     * - Se tem várias e não especificou fazenda: Retorna lista de fazendas/orgs
+     * - Se especificou ou só tem 1 fazenda: Retorna JWT JWT assinado
+     */
+    private async resolveUserAccess(globalUser: any, requestedFazendaId?: number) {
+        if (!globalUser.acessos || globalUser.acessos.length === 0) {
+            throw new UnauthorizedException('Usuário não vinculado a nenhuma organização ativa');
+        }
+
+        // Mapear todas as fazendas de todos os tenants que o usuário tem acesso
+        let todasFazendas = [];
+        
+        for (const acesso of globalUser.acessos) {
+            const org = acesso.organizacao;
+            if (!org.schemaName) continue;
+
+            const tenantClient = this.tenantPrisma.getClientForSchema(org.schemaName);
+            
+            // Buscar o usuario local
+            const userLocal = await tenantClient.usuario.findFirst({
+                where: { globalUserId: globalUser.id, ativo: true }
+            });
+
+            if (userLocal) {
+                const fazendasDoUsuario = await tenantClient.usuarioFazenda.findMany({
+                    where: { usuarioId: userLocal.id, ativo: true },
+                    include: { fazenda: true }
+                });
+
+                for (const uf of fazendasDoUsuario) {
+                    if (uf.fazenda.ativo) {
+                        todasFazendas.push({
+                            id: uf.fazenda.id,
+                            nome: uf.fazenda.nome,
+                            role: uf.role,
+                            schemaName: org.schemaName,
+                            tenantId: org.id,
+                            usuarioLocalId: userLocal.id,
+                        });
+                    }
+                }
+            }
+        }
+
+        if (todasFazendas.length === 0) {
+            throw new UnauthorizedException('Usuário não tem acesso a nenhuma fazenda operacional');
+        }
+
+        // Fluxo de Seleção (Multi-Tenant/Multi-Fazenda)
+        if (!requestedFazendaId && todasFazendas.length > 1) {
             return {
-                id_fazendas: allFazendas.map(f => f.id),
+                needSelection: true,
+                id_fazendas: todasFazendas.map(f => f.id),
+                fazendas: todasFazendas.map(f => ({ id: f.id, nome: f.nome })),
                 user: {
-                    id: user.id,
-                    nome: user.nome,
-                    email: user.email,
+                    id: globalUser.id,
+                    nome: globalUser.nome,
+                    email: globalUser.email,
                 }
             };
         }
 
-        const token = this.generateToken(user, selectedFazenda.id);
+        // Selecionar a fazenda alvo
+        const selectedFazenda = requestedFazendaId 
+            ? todasFazendas.find(f => f.id === Number(requestedFazendaId))
+            : todasFazendas[0];
+
+        if (!selectedFazenda) {
+            throw new ForbiddenException('Acesso negado à fazenda solicitada');
+        }
+
+        const permissoes = getPermissionsForRole(selectedFazenda.role as FazendaRole);
+
+        const token = this.generateToken(globalUser, selectedFazenda, permissoes);
 
         return {
             token,
             user: {
-                id: user.id,
-                nome: user.nome,
-                email: user.email,
-                admin: user.admin,
-                suporte: user.suporte,
-                acesso_geral: user.acesso_geral,
-                acesso_animais: user.acesso_animais,
-                acesso_dashboard: user.acesso_dashboard,
-                acesso_custos: user.acesso_custos,
-                acesso_caixa: user.acesso_caixa,
-                acesso_vendas: user.acesso_vendas,
-                acesso_saldo: user.acesso_saldo,
-                acesso_manejo: user.acesso_manejo,
-                acesso_racas: user.acesso_racas,
-                acesso_lotes: user.acesso_lotes,
-                acesso_pastos: user.acesso_pastos,
-                acesso_clientes: user.acesso_clientes,
+                id: globalUser.id,
+                nome: globalUser.nome,
+                email: globalUser.email,
+                fotoUrl: globalUser.fotoUrl,
+                tenantId: selectedFazenda.tenantId,
                 fazenda: {
                     id: selectedFazenda.id,
                     nome: selectedFazenda.nome,
+                    role: selectedFazenda.role,
                 },
+                permissoes,
             },
         };
     }
 
-    async register(dto: RegisterDto) {
-        const hashedPassword = await bcrypt.hash(dto.password, 10);
-
-        const user = await this.prisma.usuario.create({
-            data: {
-                ...dto,
-                password: hashedPassword,
-            },
-        });
-
-        this.logger.log(`Novo usuário registrado: ${user.email}`);
-
-        return {
-            id: user.id,
-            nome: user.nome,
-            email: user.email,
-        };
-    }
-
-    /**
-     * Handles Google OAuth callback.
-     * Creates user if not exists, links to fazenda, returns JWT.
-     */
-    async googleLogin(googleUser: { email: string; firstName: string; lastName: string }) {
-        let user = await this.prisma.usuario.findUnique({
-            where: { email: googleUser.email },
-        });
-
-        if (!user) {
-            // Auto-create user from Google profile
-            user = await this.prisma.usuario.create({
-                data: {
-                    nome: `${googleUser.firstName} ${googleUser.lastName}`,
-                    email: googleUser.email,
-                    password: '', // No password for OAuth users
-                    acesso_geral: true,
-                },
-            });
-            this.logger.log(`Google OAuth: novo usuário criado: ${user.email}`);
-        }
-
-        if (user.excluido || user.inativo) {
-            throw new UnauthorizedException('Conta desativada');
-        }
-
-        const fazenda = await this.prisma.fazenda.findFirst({
-            where: {
-                id_usuarios: { has: user.id },
-                excluido: false,
-            },
-        });
-
-        const token = this.generateToken(user, fazenda?.id);
-
-        return {
-            token,
-            user: {
-                id: user.id,
-                nome: user.nome,
-                email: user.email,
-                admin: user.admin,
-                fazenda: fazenda ? { id: fazenda.id, nome: fazenda.nome } : null,
-            },
-        };
-    }
-
-    private generateToken(user: any, fazendaId?: number): string {
+    private generateToken(globalUser: any, fazendaCtx: any, permissoes: PermissionString[]): string {
         const payload = {
-            sub: user.id,
-            email: user.email,
-            nome: user.nome,
-            admin: user.admin,
-            suporte: user.suporte,
-            fazendaId,
-            permissoes: {
-                acesso_geral: user.acesso_geral,
-                acesso_animais: user.acesso_animais,
-                acesso_dashboard: user.acesso_dashboard,
-                acesso_custos: user.acesso_custos,
-                acesso_caixa: user.acesso_caixa,
-                acesso_vendas: user.acesso_vendas,
-                acesso_saldo: user.acesso_saldo,
-                acesso_manejo: user.acesso_manejo,
-                acesso_racas: user.acesso_racas,
-                acesso_lotes: user.acesso_lotes,
-                acesso_pastos: user.acesso_pastos,
-                acesso_clientes: user.acesso_clientes,
-            },
+            sub: globalUser.id, // ID Global
+            email: globalUser.email,
+            nome: globalUser.nome,
+            // Contexto Tenant
+            tenantId: fazendaCtx.tenantId,
+            schemaName: fazendaCtx.schemaName,
+            usuarioLocalId: fazendaCtx.usuarioLocalId,
+            fazendaId: fazendaCtx.id,
+            role: fazendaCtx.role,
+            permissoes, // RBAC injetado no token
         };
 
         return this.jwtService.sign(payload);

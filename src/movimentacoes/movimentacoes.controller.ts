@@ -12,18 +12,18 @@ import { PaginationDto } from '../common/dto';
 export class MovimentoPastoController {
     constructor(private readonly service: MovimentoPastoService) { }
 
-    @Post('cadastrar')
+    @Post()
     @ApiOperation({ summary: 'Mover animal de pasto' })
     async create(@Body() dto: CreateMovPastoDto) {
         const response = await this.service.create(dto);
-        return { message: 'Sucesso ao cadastrar!', response };
+        return response;
     }
 
-    @Get('buscar')
+    @Get()
     @ApiOperation({ summary: 'Listar movimentos de pasto' })
     async findAll(@Query() p: PaginationDto) {
         const data = await this.service.findAll({ skip: p.skip, take: p.limit, include: { animal: true, pastoOrigem: true, pastoDestino: true } });
-        return { sucesso: true, data };
+        return data;
     }
 }
 
@@ -34,17 +34,17 @@ export class MovimentoPastoController {
 export class MovimentoLoteController {
     constructor(private readonly service: MovimentoLoteService) { }
 
-    @Post('cadastrar')
+    @Post()
     @ApiOperation({ summary: 'Mover animal de lote' })
     async create(@Body() dto: CreateMovLoteDto) {
         const response = await this.service.create(dto);
-        return { message: 'Sucesso ao cadastrar!', response };
+        return response;
     }
 
-    @Get('buscar')
+    @Get()
     @ApiOperation({ summary: 'Listar movimentos de lote' })
     async findAll(@Query() p: PaginationDto) {
         const data = await this.service.findAll({ skip: p.skip, take: p.limit, include: { animal: true, loteOrigem: true, loteDestino: true } });
-        return { sucesso: true, data };
+        return data;
     }
 }
