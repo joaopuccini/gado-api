@@ -1,6 +1,6 @@
 # Arquitetura da Migração Legado para Gado SaaS
 
-**Status:** aprovado conceitualmente em 2026-09-11
+**Status:** em revisão para aprovação final, atualizado em 2026-09-11
 
 **Escopo:** `gado`, `gado-painel-financeiro-back`, `gado-front-end`, `gado-painel-financeiro-front-end`, `gado-api` e `gado-web`
 
@@ -17,6 +17,11 @@
 3. Proprietários e demais usuários dos clientes não acessarão o `gado-admin`.
 4. O onboarding de um novo cliente provisionará automaticamente toda a infraestrutura necessária, inclusive schema, migrations, dados-base, proprietário e fazenda principal.
 5. Nenhuma funcionalidade será considerada migrada apenas porque existe uma tabela, pasta, controller ou tela. A migração exige regra funcional, isolamento, autorização, testes e interface utilizável.
+6. Toda request, job ou mensagem que acesse dados de cliente possuirá um contexto de execução baseado em `AsyncLocalStorage`; o tenant não será propagado manualmente entre camadas.
+7. Toda a cadeia usará logs estruturados e correlacionados de ponta a ponta, sem `console.*` em código de aplicação.
+8. Um `GlobalExceptionFilter` será a única fronteira de tradução de falhas para HTTP e adotará um domínio estável de erros.
+9. O contrato público de request, response, metadados e erros será único e estritamente `camelCase`.
+10. O banco será normalizado, versionado por migrations e modelado com isolamento multi-tenant como invariante, não como convenção opcional.
 
 ### 1.1 Alternativas consideradas
 
@@ -354,3 +359,95 @@ O primeiro fluxo vertical será autenticação + seleção de fazenda + animais 
 - fluxos financeiros reconciliados com o legado por tenant;
 - `gado-app` e `gado-admin` implantáveis independentemente;
 - legados desligados sem perda de dados nem regressão funcional aceita.
+
+## 15. Premissas técnicas inegociáveis
+
+A especificação normativa completa está em `.agent/rules/gado-saas-engineering.md`, na raiz do workspace. As integrações de Codex, Claude/Opus, Gemini e Antigravity devem apontar para essa única fonte, sem manter cópias divergentes.
+
+### 15.1 Contexto e isolamento de tenant
+
+Toda entrada HTTP será envelopada por um contexto único implementado com `AsyncLocalStorage` de `node:async_hooks`. O contexto será criado no primeiro middleware, antes de guards e interceptors, iniciando com os dados de correlação. Autenticação e resolução validada do tenant enriquecerão o mesmo contexto, que acompanhará automaticamente toda a cadeia assíncrona:
+
+```text
+request -> AsyncLocalStorage + correlação -> autenticação
+-> resolução validada do tenant + enriquecimento do contexto
+-> autorização -> controller -> caso de uso
+-> repository -> Prisma do schema corrente
+```
+
+O contexto carregará, conforme o tipo da operação, `requestId`, `traceId`, `contextType`, `tenantId`, `organizationId`, `schemaName`, identidades global e local, fazenda ativa, fazendas acessíveis, permissões e instante inicial. A autenticação e o vínculo persistido são a autoridade; body, query, path param ou header isolado nunca escolhem um tenant.
+
+Casos de uso, services e repositories não receberão `tenantId`, `organizationId` ou `schemaName` apenas para propagar contexto. O Prisma tenant-aware só poderá ser obtido do contexto atual e falhará de forma fechada quando ele estiver ausente ou inconsistente. Não haverá fallback para `public`, variável global mutável, singleton de tenant atual nem `process.env.FAZENDA`.
+
+Jobs e consumers criarão novo `AsyncLocalStorage` na própria fronteira. Como o contexto não atravessa processos, a mensagem transportará identificadores mínimos e confiáveis, que serão novamente validados antes da reidratação. Os atuais `TenantContext` e `RequestContext` deverão convergir para uma única abstração lógica.
+
+### 15.2 Observabilidade ponta a ponta
+
+Um logger estruturado único produzirá eventos JSON e enriquecerá automaticamente cada registro com o contexto disponível. Início, término, falha, transições importantes de domínio, chamadas externas, jobs, migrations e cada etapa do provisionamento serão rastreáveis por `requestId` e `traceId`.
+
+Os campos padronizados incluem `timestamp`, `level`, `service`, `environment`, `requestId`, `traceId`, `tenantId`, `organizationId`, `farmId`, `userId`, `module`, `operation`, `method`, `path`, `statusCode`, `durationMs`, `outcome` e `errorCode`. Código de aplicação não usará `console.*`. Tokens, cookies, senhas, secrets, payloads integrais e dados pessoais desnecessários serão removidos por redaction centralizada e testada.
+
+Uma falha será registrada uma vez na fronteira global que a encerra. O stack trace ficará restrito à telemetria interna autorizada e jamais integrará a resposta pública.
+
+### 15.3 Erros globais e domínio de falhas
+
+O domínio terá erros tipados com códigos estáveis em `camelCase`. Um `GlobalExceptionFilter`, registrado globalmente, será a única fronteira que traduz falhas em respostas HTTP. Adapters normalizarão validação, autenticação, autorização, Prisma, PostgreSQL e integrações externas antes da serialização.
+
+Controllers não montarão respostas de erro, e camadas internas não retornarão falhas como sucesso nem exporão `error.message`. Qualquer exceção desconhecida resultará em `500` com `code: "internalServerError"`, preservando detalhes técnicos apenas nos logs internos.
+
+### 15.4 Contrato único e estritamente camelCase
+
+Body, query, responses, metadados, detalhes de erro e eventos públicos usarão exclusivamente `camelCase`. `snake_case` ficará restrito ao banco físico e a adapters legados ou externos, com tradução explícita antes da entrada no domínio. DTO HTTP, comando, entidade de domínio e input Prisma serão tipos separados.
+
+Resposta de sucesso com conteúdo:
+
+```json
+{
+  "data": {},
+  "meta": {
+    "requestId": "uuid"
+  }
+}
+```
+
+Listas paginadas acrescentam `page`, `pageSize`, `totalItems` e `totalPages` em `meta`. Respostas `204 No Content` e streams binários não recebem envelope.
+
+Resposta de erro:
+
+```json
+{
+  "error": {
+    "code": "animalNotFound",
+    "message": "Animal não encontrado",
+    "details": [
+      {
+        "field": "earTagNumber",
+        "reason": "alreadyExists"
+      }
+    ]
+  },
+  "meta": {
+    "requestId": "uuid",
+    "timestamp": "2026-09-11T12:00:00.000Z",
+    "path": "/api/v1/animals/10"
+  }
+}
+```
+
+`error.code` será estável e próprio para automação; `message` será humano e localizável. OpenAPI, schemas compartilhados e o client central do frontend serão validados em conjunto. Mudança incompatível exigirá nova versão da API.
+
+### 15.5 Banco normalizado e versionado
+
+O modelo relacional ficará no mínimo em terceira forma normal. Relações N:N usarão tabelas associativas; arrays de IDs, strings delimitadas e JSON como substituto de relação serão proibidos. Toda tabela terá chave primária, tipos precisos, nulabilidade deliberada, foreign keys, constraints e índices coerentes com seu escopo.
+
+Dinheiro e medidas precisas usarão `Decimal` com escala definida; identificadores de negócio serão texto; datas civis e timestamps UTC de auditoria terão semânticas distintas. JSON será reservado a documentos genuinamente semiestruturados, como GeoJSON e snapshots imutáveis.
+
+Dados administrativos globais permanecerão no schema administrativo; dados da organização, no schema tenant; entidades operacionais possuirão `farmId`; catálogos compartilhados declararão explicitamente o escopo organizacional. Uniques e índices incorporarão o escopo necessário para impedir colisão global e duplicidade local.
+
+Toda mudança terá migration versionada e imutável após publicação. A mesma cadeia criará banco vazio, atualizará versão anterior e provisionará um tenant, cuja versão de schema ficará registrada. `db push`, cópia de tabelas de `public` e endpoints de reset não serão mecanismos de produção. Casos de uso com múltiplas escritas usarão transação; efeitos externos pós-commit usarão outbox; finanças usarão ledger imutável e estornos compensatórios.
+
+### 15.6 Gates de conformidade
+
+Nenhuma entrega poderá avançar se propagar tenant manualmente, acessar banco sem contexto, publicar campo fora de `camelCase`, criar outro envelope de resposta, alterar schema sem migration, registrar log não estruturado ou sensível, ocultar incompatibilidade com `any` ou realizar múltiplas escritas sem atomicidade.
+
+Além dos testes funcionais de cada módulo, serão obrigatórios testes de concorrência entre dois tenants e duas fazendas, contrato de erros, correlação de logs, criação e upgrade do banco e provisionamento de novo schema. O pipeline verificará lint, tipos, testes unitários, integração, contrato, isolamento, migrations e o build independente de `gado-app` e `gado-admin`.
