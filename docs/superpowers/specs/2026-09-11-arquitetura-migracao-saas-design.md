@@ -22,6 +22,9 @@
 8. Um `GlobalExceptionFilter` será a única fronteira de tradução de falhas para HTTP e adotará um domínio estável de erros.
 9. O contrato público de request, response, metadados e erros será único e estritamente `camelCase`.
 10. O banco será normalizado, versionado por migrations e modelado com isolamento multi-tenant como invariante, não como convenção opcional.
+11. Todo módulo seguirá arquitetura hexagonal com fluxo `Controller -> UseCase -> Repository/Gateway/Service`, dependências apontando para o domínio e adapters ligados por injeção de dependências.
+12. Todo input usará DTO concreto com `class-validator`, passará por `ValidationPipe` global e todo endpoint terá documentação Swagger/OpenAPI completa.
+13. Logging de entrada e saída será uma preocupação transversal implementada por interceptor global, sem poluir controllers, casos de uso ou domínio.
 
 ### 1.1 Alternativas consideradas
 
@@ -227,6 +230,43 @@ O sistema permanecerá um monólito modular. Controllers traduzem HTTP, casos de
 - `/api/v1/*`: operação da fazenda, protegida por tenant, assinatura, fazenda e RBAC.
 - Swagger separado por tags `Admin - ...`, `Conta - ...` e `Operacional - ...`.
 
+### 7.2 Fluxo hexagonal dos módulos
+
+```text
+HTTP
+  -> Controller
+  -> UseCase
+  -> Port
+     -> Repository -> PostgreSQL/Prisma
+     -> Gateway    -> APIs externas
+     -> Service    -> infraestrutura, SES, SNS, filas e storage
+```
+
+Entradas assíncronas substituem somente o Controller por um Consumer/Handler e preservam UseCase, portas e adapters.
+
+- Controller trata exclusivamente protocolo, DTO de entrada, chamada do caso de uso e DTO de saída.
+- UseCase representa uma ação de negócio, aplica autorização contextual, coordena domínio, transação e portas de saída.
+- Port é uma interface da camada interna; o adapter concreto é registrado pelo módulo por token de dependency injection.
+- Repository encapsula persistência e consultas, sem decidir regras ou orquestrar integrações.
+- Gateway encapsula APIs externas, inclusive autenticação, timeout, retry e tradução de erros.
+- Service de infraestrutura encapsula mensageria e providers como AWS SES/SNS, sem expor tipos de SDK ao caso de uso.
+- A transação é coordenada pelo UseCase por uma abstração de unit of work.
+
+Controller não acessa Prisma, repository, SDK, fila nem outro controller. UseCase não depende de tipos HTTP, decorators Nest, Prisma Client, SDK AWS ou implementação concreta. Um módulo só consome outro por UseCase/facade exportado, porta pública ou evento; acesso ao repository ou às tabelas internas de outro módulo é proibido.
+
+### 7.3 Organização interna de cada módulo
+
+```text
+modulo/
+├── presentation/       # controllers e DTOs HTTP
+├── application/        # use cases, ports e comandos/resultados
+├── domain/             # entidades, value objects, policies e erros
+├── infrastructure/     # Prisma repositories, gateways e services
+└── modulo.module.ts    # composition root local
+```
+
+Essa estrutura pode ser compactada em módulos pequenos, mas as dependências lógicas permanecem obrigatórias. Regras de domínio serão executáveis em testes unitários sem inicializar NestJS, HTTP, banco, rede, fila ou relógio real.
+
 ## 8. Modelo de dados e normalização
 
 As normalizações já iniciadas serão preservadas:
@@ -383,11 +423,13 @@ Jobs e consumers criarão novo `AsyncLocalStorage` na própria fronteira. Como o
 
 ### 15.2 Observabilidade ponta a ponta
 
-Um logger estruturado único produzirá eventos JSON e enriquecerá automaticamente cada registro com o contexto disponível. Início, término, falha, transições importantes de domínio, chamadas externas, jobs, migrations e cada etapa do provisionamento serão rastreáveis por `requestId` e `traceId`.
+Um logger estruturado único produzirá eventos JSON e enriquecerá automaticamente cada registro com o contexto disponível. Um interceptor global registrado por `APP_INTERCEPTOR` cobrirá 100% dos controllers e endpoints e registrará início, término, status, resultado e duração tanto no sucesso quanto no erro. Essa preocupação transversal não será implementada em Controller, UseCase ou domínio e não alterará o payload da operação.
+
+Falhas, transições importantes de domínio, chamadas externas, jobs, migrations e cada etapa do provisionamento serão rastreáveis por `requestId` e `traceId`.
 
 Os campos padronizados incluem `timestamp`, `level`, `service`, `environment`, `requestId`, `traceId`, `tenantId`, `organizationId`, `farmId`, `userId`, `module`, `operation`, `method`, `path`, `statusCode`, `durationMs`, `outcome` e `errorCode`. Código de aplicação não usará `console.*`. Tokens, cookies, senhas, secrets, payloads integrais e dados pessoais desnecessários serão removidos por redaction centralizada e testada.
 
-Uma falha será registrada uma vez na fronteira global que a encerra. O stack trace ficará restrito à telemetria interna autorizada e jamais integrará a resposta pública.
+Uma falha será registrada uma vez na fronteira global que a encerra: o interceptor registra resultado e duração, enquanto o `GlobalExceptionFilter` registra o erro normalizado e seu stack interno. O stack trace ficará restrito à telemetria interna autorizada e jamais integrará a resposta pública.
 
 ### 15.3 Erros globais e domínio de falhas
 
@@ -446,8 +488,22 @@ Dados administrativos globais permanecerão no schema administrativo; dados da o
 
 Toda mudança terá migration versionada e imutável após publicação. A mesma cadeia criará banco vazio, atualizará versão anterior e provisionará um tenant, cuja versão de schema ficará registrada. `db push`, cópia de tabelas de `public` e endpoints de reset não serão mecanismos de produção. Casos de uso com múltiplas escritas usarão transação; efeitos externos pós-commit usarão outbox; finanças usarão ledger imutável e estornos compensatórios.
 
-### 15.6 Gates de conformidade
+### 15.6 Arquitetura hexagonal e dependências
 
-Nenhuma entrega poderá avançar se propagar tenant manualmente, acessar banco sem contexto, publicar campo fora de `camelCase`, criar outro envelope de resposta, alterar schema sem migration, registrar log não estruturado ou sensível, ocultar incompatibilidade com `any` ou realizar múltiplas escritas sem atomicidade.
+Cada ação seguirá obrigatoriamente `Controller -> UseCase -> Port -> Adapter`. As portas de saída serão `Repository` para banco, `Gateway` para APIs externas e `Service` para infraestrutura e mensageria como AWS SES/SNS. Adapters concretos serão conectados por dependency injection na composition root do módulo.
 
-Além dos testes funcionais de cada módulo, serão obrigatórios testes de concorrência entre dois tenants e duas fazendas, contrato de erros, correlação de logs, criação e upgrade do banco e provisionamento de novo schema. O pipeline verificará lint, tipos, testes unitários, integração, contrato, isolamento, migrations e o build independente de `gado-app` e `gado-admin`.
+Controllers só traduzirão HTTP e DTOs. UseCases coordenarão regras, autorização contextual, domínio, transação e portas. O domínio permanecerá puro. Nenhuma camada interna conhecerá Prisma, AWS SDK, request/response HTTP ou implementação de adapter. Integração entre módulos ocorrerá por casos de uso/facades públicas ou eventos, nunca pelo repository ou tabela interna do módulo vizinho.
+
+### 15.7 Validação e documentação viva
+
+Body, query e params usarão classes DTO concretas, com `class-validator` em todas as propriedades recebidas e validação aninhada quando necessária. Um único `ValidationPipe` global cobrirá todos os endpoints com `transform: true`, `whitelist: true` e `forbidNonWhitelisted: true`. A falha será convertida pelo contrato global de erros.
+
+DTO valida formato e transporte; regras de autorização, existência, estado e invariantes continuam no UseCase/domínio. DTO, comando, entidade e input Prisma são contratos distintos e explícitos.
+
+Todos os endpoints terão Swagger/OpenAPI completo: `@ApiTags`, `@ApiOperation`, decorator de autenticação aplicável, `@ApiParam`, `@ApiQuery`/`@ApiBody` quando necessários e respostas tipadas de sucesso e erro. DTOs e modelos de resposta documentarão obrigatoriedade, enums, formatos e exemplos com `@ApiProperty`/`@ApiPropertyOptional` ou geração equivalente verificada. O OpenAPI gerado será validado no pipeline, e nenhuma operação poderá ficar sem `operationId`, resposta de sucesso ou erros comuns documentados.
+
+### 15.8 Gates de conformidade
+
+Nenhuma entrega poderá avançar se propagar tenant manualmente, acessar banco sem contexto, publicar campo fora de `camelCase`, criar outro envelope de resposta, alterar schema sem migration, registrar log não estruturado ou sensível, ocultar incompatibilidade com `any`, realizar múltiplas escritas sem atomicidade, pular UseCase, inverter dependências hexagonais, expor endpoint sem DTO validado/documentado ou excluir endpoint do interceptor global.
+
+Além dos testes funcionais de cada módulo, serão obrigatórios testes de concorrência entre dois tenants e duas fazendas, fronteiras arquiteturais, contrato de erros/OpenAPI, correlação de logs, providers globais, criação e upgrade do banco e provisionamento de novo schema. O pipeline verificará lint, tipos, testes unitários, arquitetura, integração, contrato, isolamento, migrations e o build independente de `gado-app` e `gado-admin`.
