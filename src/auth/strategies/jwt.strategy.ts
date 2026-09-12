@@ -1,47 +1,71 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
+import type { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { RequestContext } from '../../common/context';
+import { ResolveTenantContextUseCase } from '../../identity-access/application/use-cases/resolve-tenant-context.use-case';
 
 export interface JwtPayload {
-    sub: string; // ID Global
-    email: string;
-    nome: string;
-    tenantId: string;
-    schemaName: string;
-    usuarioLocalId: number;
-    fazendaId: number;
-    role: string;
-    permissoes: string[];
+  sub: string;
+  email: string;
+  nome: string;
+  tenantId: string;
+  schemaName?: string;
+  usuarioLocalId?: number;
+  fazendaId: number;
+  role: string;
+  permissoes?: string[];
 }
 
-/**
- * JWT Strategy — validates and verifies JWT tokens.
- * Enriches the RequestContext with user/tenant data
- * for AsyncLocalStorage-based tracing and schema resolution.
- */
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-    constructor(configService: ConfigService) {
-        super({
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-            ignoreExpiration: false,
-            secretOrKey: configService.getOrThrow<string>('JWT_SECRET'),
-        });
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly resolveTenantContext: ResolveTenantContextUseCase,
+  ) {
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
+      secretOrKey: configService.getOrThrow<string>('JWT_SECRET'),
+      passReqToCallback: true,
+    });
+  }
+
+  async validate(request: Request, payload: JwtPayload) {
+    const context = await this.resolveTenantContext.execute({
+      verifiedSubject: payload.sub,
+      tenantId: payload.tenantId,
+      requestedFarmId: Number(payload.fazendaId),
+      requestedSchemaName: payload.schemaName,
+      hostTenant: this.transportTenantHint(request),
+    });
+
+    return {
+      sub: context.globalUserId,
+      email: payload.email,
+      nome: payload.nome,
+      tenantId: context.tenantId,
+      organizationId: context.organizationId,
+      usuarioLocalId: context.localUserId,
+      fazendaId: context.farmId,
+      role: payload.role,
+      permissoes: [...context.permissions],
+    };
+  }
+
+  private transportTenantHint(request: Request): string | undefined {
+    const header = request.headers['x-tenant'];
+    if (typeof header === 'string' && header.trim()) {
+      return header.trim().toLowerCase();
     }
 
-    validate(payload: JwtPayload) {
-        // Enrich AsyncLocalStorage context with tenant data
-        RequestContext.set({
-            userId: payload.usuarioLocalId, // Prefer local user id for tenant operations
-            globalUserId: payload.sub,
-            tenantId: payload.tenantId,
-            schemaName: payload.schemaName,
-            fazendaId: payload.fazendaId,
-            userEmail: payload.email,
-        });
+    const hostname = request.hostname.toLowerCase();
+    const baseDomain = this.configService
+      .get<string>('TENANT_BASE_DOMAIN', 'gado.com.br')
+      .toLowerCase();
+    if (!hostname.endsWith(`.${baseDomain}`)) return undefined;
 
-        return payload; // Retorna o payload completo para o req.user
-    }
+    const subdomain = hostname.slice(0, -(baseDomain.length + 1));
+    return subdomain && !subdomain.includes('.') ? subdomain : undefined;
+  }
 }

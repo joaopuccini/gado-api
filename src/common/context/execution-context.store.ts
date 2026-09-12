@@ -54,18 +54,20 @@ const freezeContext = (
     permissions: Object.freeze([...context.permissions]),
   });
 
+interface ExecutionContextHolder {
+  context: Readonly<ExecutionContextData>;
+}
+
 @Injectable()
 export class ExecutionContextStore {
-  private readonly storage = new AsyncLocalStorage<
-    Readonly<ExecutionContextData>
-  >();
+  private readonly storage = new AsyncLocalStorage<ExecutionContextHolder>();
 
   run<T>(context: ExecutionContextData, callback: () => T): T {
-    return this.storage.run(freezeContext(context), callback);
+    return this.storage.run({ context: freezeContext(context) }, callback);
   }
 
   current(): Readonly<ExecutionContextData> | undefined {
-    return this.storage.getStore();
+    return this.storage.getStore()?.context;
   }
 
   require(): Readonly<ExecutionContextData> {
@@ -81,9 +83,18 @@ export class ExecutionContextStore {
 
   enrichTenant(verified: VerifiedTenantContext): void {
     const current = this.require();
-    this.storage.enterWith(
-      freezeContext({ ...current, ...verified, contextType: 'tenant' }),
-    );
+    const holder = this.storage.getStore();
+    if (!holder) {
+      throw new DomainError(
+        'executionContextMissing',
+        'Contexto de execução ausente',
+      );
+    }
+    holder.context = freezeContext({
+      ...current,
+      ...verified,
+      contextType: 'tenant',
+    });
   }
 
   requireTenant(): Readonly<RequiredTenantContext> {

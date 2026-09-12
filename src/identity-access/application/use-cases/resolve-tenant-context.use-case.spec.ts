@@ -1,4 +1,7 @@
-import { ExecutionContextStore, type ExecutionContextData } from '../../../common/context';
+import {
+  ExecutionContextStore,
+  type ExecutionContextData,
+} from '../../../common/context';
 import type {
   TenantMembershipRecord,
   TenantRegistryRecord,
@@ -88,7 +91,7 @@ describe('ResolveTenantContextUseCase', () => {
       await expect(executeInRequest()).rejects.toMatchObject({
         code: 'tenantUnavailable',
       });
-      expect(registry.findMembership).not.toHaveBeenCalled();
+      expect(registry.findMembership.mock.calls).toHaveLength(0);
     },
   );
 
