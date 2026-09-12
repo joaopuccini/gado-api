@@ -25,10 +25,7 @@ import {
   LoggingInterceptor,
   TransformInterceptor,
 } from '../../src/common/interceptors';
-import {
-  STRUCTURED_LOG_SINK,
-  StructuredLogger,
-} from '../../src/common/logger';
+import { STRUCTURED_LOG_SINK, StructuredLogger } from '../../src/common/logger';
 import { GlobalValidationPipe } from '../../src/common/pipes/global-validation.pipe';
 
 class ProbeInputDto {

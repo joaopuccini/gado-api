@@ -1,5 +1,5 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 
@@ -10,10 +10,12 @@ import { ContextModule, ExecutionContextMiddleware } from './common/context';
 import { GlobalExceptionFilter } from './common/filters';
 import {
   LoggingInterceptor,
+  TransformInterceptor,
   HierarchyInterceptor,
 } from './common/interceptors';
 import { SubscriptionGuard } from './common/guards/subscription.guard';
 import { StructuredLogger } from './common/logger/structured-logger.service';
+import { GlobalValidationPipe } from './common/pipes/global-validation.pipe';
 
 // Feature modules
 import { AuthModule } from './auth/auth.module';
@@ -91,8 +93,10 @@ import { ManutencoesModule } from './frota/manutencoes/manutencoes.module';
   ],
   providers: [
     StructuredLogger,
+    { provide: APP_PIPE, useClass: GlobalValidationPipe },
     { provide: APP_FILTER, useClass: GlobalExceptionFilter },
     { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },
     { provide: APP_INTERCEPTOR, useClass: HierarchyInterceptor },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: SubscriptionGuard },

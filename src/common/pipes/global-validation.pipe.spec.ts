@@ -30,7 +30,7 @@ const validationError = async (
 
 describe('GlobalValidationPipe', () => {
   it('transforms valid input into the declared DTO', async () => {
-    const result = await new GlobalValidationPipe().transform(
+    const result: unknown = await new GlobalValidationPipe().transform(
       { earTagNumber: 'brinco-100' },
       bodyMetadata,
     );

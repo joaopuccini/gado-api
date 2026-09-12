@@ -1,45 +1,35 @@
 import {
-    CallHandler,
-    ExecutionContext,
-    Injectable,
-    NestInterceptor,
+  CallHandler,
+  ExecutionContext,
+  Injectable,
+  NestInterceptor,
 } from '@nestjs/common';
-import { Observable, map } from 'rxjs';
-import { RequestContext } from '../context';
+import type { Response } from 'express';
+import { map, Observable } from 'rxjs';
+import type { ApiSuccessResponse } from '../contracts/api-envelope';
+import { ExecutionContextStore } from '../context';
 
-export interface ApiResponse<T> {
-    success: boolean;
-    data: T;
-    meta: {
-        requestId: string;
-        timestamp: string;
-        path: string;
-    };
-}
-
-/**
- * Transforma todas as respostas em um envelope padrão:
- * { success: true, data: {...}, meta: { requestId, timestamp, path } }
- *
- * Mantém consistência com o formato original do Express:
- * { sucesso: true, data: response }
- */
 @Injectable()
-export class TransformInterceptor<T> implements NestInterceptor<T, ApiResponse<T>> {
-    intercept(context: ExecutionContext, next: CallHandler): Observable<ApiResponse<T>> {
-        const req = context.switchToHttp().getRequest();
-        const ctx = RequestContext.get();
+export class TransformInterceptor<T> implements NestInterceptor<
+  T,
+  ApiSuccessResponse<T> | undefined
+> {
+  constructor(private readonly contextStore: ExecutionContextStore) {}
 
-        return next.handle().pipe(
-            map((data) => ({
-                success: true,
-                data,
-                meta: {
-                    requestId: ctx?.requestId || 'unknown',
-                    timestamp: new Date().toISOString(),
-                    path: req.originalUrl,
-                },
-            })),
-        );
-    }
+  intercept(
+    context: ExecutionContext,
+    next: CallHandler<T>,
+  ): Observable<ApiSuccessResponse<T> | undefined> {
+    const response = context.switchToHttp().getResponse<Response>();
+
+    return next.handle().pipe(
+      map((data) => {
+        if (response.statusCode === 204) return undefined;
+        return {
+          data,
+          meta: { requestId: this.contextStore.require().requestId },
+        };
+      }),
+    );
+  }
 }
