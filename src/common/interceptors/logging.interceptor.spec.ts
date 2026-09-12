@@ -29,6 +29,8 @@ class ProbeController {
   listAnimals(): void {}
 }
 
+function listAnimals(): void {}
+
 const requestContext: ExecutionContextData = {
   requestId: 'request-a',
   traceId: 'trace-a',
@@ -56,7 +58,7 @@ const httpExecutionContext = (statusCode: number): ExecutionContext => {
       },
     }),
     getClass: () => ProbeController,
-    getHandler: () => ProbeController.prototype.listAnimals,
+    getHandler: () => listAnimals,
   } as unknown as ExecutionContext;
 };
 
@@ -73,19 +75,18 @@ describe('LoggingInterceptor', () => {
     );
 
     expect(sink.records()).toHaveLength(2);
-    expect(sink.records()).toEqual([
-      expect.objectContaining({
-        event: 'httpRequestStarted',
-        module: 'ProbeController',
-        operation: 'listAnimals',
-      }),
-      expect.objectContaining({
-        event: 'httpRequestCompleted',
-        statusCode: 200,
-        durationMs: expect.any(Number),
-        outcome: 'success',
-      }),
-    ]);
+    const [started, completed] = sink.records();
+    expect(started).toMatchObject({
+      event: 'httpRequestStarted',
+      module: 'ProbeController',
+      operation: 'listAnimals',
+    });
+    expect(completed).toMatchObject({
+      event: 'httpRequestCompleted',
+      statusCode: 200,
+      outcome: 'success',
+    });
+    expect(typeof completed.durationMs).toBe('number');
     expect(sink.lines.join('\n')).not.toContain('response body');
   });
 
