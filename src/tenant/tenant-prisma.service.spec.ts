@@ -1,5 +1,8 @@
 import type { PrismaClient } from '@prisma/client';
-import { ExecutionContextStore, type ExecutionContextData } from '../common/context';
+import {
+  ExecutionContextStore,
+  type ExecutionContextData,
+} from '../common/context';
 import type { TenantPrismaClientFactoryPort } from './infrastructure/tenant-prisma-client.factory';
 import { TenantSchemaName } from './infrastructure/schema-name';
 import { TenantPrismaService } from './tenant-prisma.service';
@@ -40,17 +43,23 @@ describe('TenantPrismaService', () => {
   });
 
   it('refuses database access outside a verified tenant context', () => {
-    expect(() => service.getClient()).toThrow(
-      expect.objectContaining({ code: 'executionContextMissing' }),
-    );
+    let thrown: unknown;
+
+    try {
+      service.getClient();
+    } catch (error: unknown) {
+      thrown = error;
+    }
+
+    expect(thrown).toMatchObject({ code: 'executionContextMissing' });
     expect(factory.create.mock.calls).toHaveLength(0);
   });
 
-  it('selects the client exclusively from current AsyncLocalStorage context', async () => {
-    await store.run(contextFor(schemaA), async () => {
+  it('selects the client exclusively from current AsyncLocalStorage context', () => {
+    store.run(contextFor(schemaA), () => {
       expect(service.getClient()).toBe(clientA);
     });
-    await store.run(contextFor(schemaB), async () => {
+    store.run(contextFor(schemaB), () => {
       expect(service.getClient()).toBe(clientB);
     });
 

@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { TenantPrismaService } from '../tenant/tenant-prisma.service';
-import { RequestContext } from '../common/context';
 
 @Injectable()
 export class DashboardService {
@@ -9,14 +8,12 @@ export class DashboardService {
     constructor(private readonly tenantPrisma: TenantPrismaService) { }
 
     private getTenantClient() {
-        const schemaName = RequestContext.getSchemaName();
-        if (!schemaName) throw new Error('Schema do tenant não encontrado no contexto');
-        return this.tenantPrisma.getClientForSchema(schemaName);
+        return this.tenantPrisma.getClient();
     }
 
     async getStats() {
         const tenant = this.getTenantClient();
-        const fazendaId = RequestContext.getFazendaId();
+        const { farmId: fazendaId } = this.tenantPrisma.getContext();
 
         const baseWhere = { ativo: true, fazendaId };
 
@@ -57,7 +54,7 @@ export class DashboardService {
 
     async getTotalMachoFemea() {
         const tenant = this.getTenantClient();
-        const fazendaId = RequestContext.getFazendaId();
+        const { farmId: fazendaId } = this.tenantPrisma.getContext();
 
         const femeas = await tenant.animal.count({ where: { sexo: 'FEMEA', ativo: true, status: 'ATIVO', fazendaId } });
         const machos = await tenant.animal.count({ where: { sexo: 'MACHO', ativo: true, status: 'ATIVO', fazendaId } });
@@ -69,7 +66,7 @@ export class DashboardService {
 
     async getTotalCustoAnimaisComCusto() {
         const tenant = this.getTenantClient();
-        const fazendaId = RequestContext.getFazendaId();
+        const { farmId: fazendaId } = this.tenantPrisma.getContext();
 
         const animaisAtivos = await tenant.animal.findMany({
             where: { ativo: true, status: 'ATIVO', fazendaId },
@@ -94,7 +91,7 @@ export class DashboardService {
 
     async getTotalLotesPastosRacasClientesAtivos(query: any) {
         const tenant = this.getTenantClient();
-        const fazendaId = RequestContext.getFazendaId();
+        const { farmId: fazendaId } = this.tenantPrisma.getContext();
         const response: any = { Lotes: {}, Pastos: {}, Racas: {}, Clientes: {} };
 
         if (query.lotes === 'true') {

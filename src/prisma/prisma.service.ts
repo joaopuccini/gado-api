@@ -24,22 +24,6 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
         this.logger.log('📦 Database disconnected');
     }
 
-    /**
-     * Multi-tenancy: executa operação no schema da fazenda via SET search_path
-     */
-    async executeInTenantSchema<T>(
-        fazendaId: number,
-        operation: (prisma: PrismaClient) => Promise<T>,
-    ): Promise<T> {
-        const schema = `fazenda_${fazendaId}`;
-        await this.$executeRawUnsafe(`SET search_path TO "${schema}", public`);
-        try {
-            return await operation(this);
-        } finally {
-            await this.$executeRawUnsafe(`SET search_path TO "gado_fazendas", public`);
-        }
-    }
-
     excludeDeleted() {
         return { excluido: false };
     }

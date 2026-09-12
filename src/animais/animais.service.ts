@@ -2,7 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { TenantPrismaService } from '../tenant/tenant-prisma.service';
 import { BaseTenantService } from '../common/services';
 import { CreateAnimalDto, UpdateAnimalDto, TransferirAnimalDto } from './dto/animal.dto';
-import { RequestContext } from '../common/context/request-context';
 
 @Injectable()
 export class AnimaisService extends BaseTenantService<CreateAnimalDto, UpdateAnimalDto> {
@@ -117,8 +116,8 @@ export class AnimaisService extends BaseTenantService<CreateAnimalDto, UpdateAni
 
     async transferir(id: number, dto: TransferirAnimalDto) {
         const tenant = this.getTenantClient();
-        const currentFazendaId = RequestContext.getFazendaId();
-        const accessibleFazendaIds = RequestContext.getAccessibleFazendaIds() || (currentFazendaId ? [currentFazendaId] : []);
+        const { accessibleFarmIds: accessibleFazendaIds } =
+            this.tenantPrisma.getContext();
         
         // Verifica se tem acesso à fazenda de destino
         if (!accessibleFazendaIds.includes(dto.fazendaDestinoId)) {

@@ -1,6 +1,5 @@
 import { NotFoundException, Logger } from '@nestjs/common';
 import { TenantPrismaService } from '../../tenant/tenant-prisma.service';
-import { RequestContext } from '../context';
 
 export abstract class BaseTenantService<CreateDto, UpdateDto> {
     protected abstract readonly logger: Logger;

@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { randomBytes } from 'node:crypto';
 import { AdminPrismaService } from '../admin-prisma.service';
 import { CreateOrganizacaoDto } from './dto/create-organizacao.dto';
 import { UpdateOrganizacaoDto } from './dto/update-organizacao.dto';
-import { PrismaClient as TenantPrismaClient } from '@prisma/client';
 
 @Injectable()
 export class OrganizacoesService {
@@ -23,7 +23,7 @@ export class OrganizacoesService {
       throw new ConflictException('Organização já existe com este subdomínio ou CNPJ');
     }
 
-    const schemaName = `tenant_${createOrganizacaoDto.subdomain}`;
+    const schemaName = `tenant_${randomBytes(16).toString('hex')}`;
 
     // 2. Cria a organizacao e o TenantRegistry numa transaction
     return await this.prisma.$transaction(async (tx) => {
@@ -49,26 +49,7 @@ export class OrganizacoesService {
         },
       });
 
-      // Aqui poderíamos emitir um evento ou agendar um job para:
-      // a. CREATE SCHEMA tenant_x
-      // b. Rodar migrations
-      // c. Executar seed default
-      
-      // Simulando a criação imediata (síncrona) para testes locais:
-      try {
-         const tenantDb = new TenantPrismaClient();
-         await tenantDb.$executeRawUnsafe(`CREATE SCHEMA IF NOT EXISTS "${schemaName}";`);
-         await tenantDb.$disconnect();
-         
-         await tx.tenantRegistry.update({
-           where: { id: registry.id },
-           data: { status: 'ATIVO', provisionedAt: new Date() }
-         });
-      } catch (e) {
-         console.error('Erro ao provisionar schema', e);
-      }
-
-      return org;
+      return { ...org, tenantRegistryId: registry.id };
     });
   }
 

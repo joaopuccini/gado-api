@@ -2,7 +2,8 @@ import { Injectable, UnauthorizedException, Logger, ForbiddenException } from '@
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { AdminPrismaService } from '../admin/admin-prisma.service';
-import { TenantPrismaService } from '../tenant/tenant-prisma.service';
+import { TenantPrismaClientFactory } from '../tenant/infrastructure/tenant-prisma-client.factory';
+import { TenantSchemaName } from '../tenant/infrastructure/schema-name';
 import { SocialProvisioningService } from './services/social-provisioning.service';
 import { getPermissionsForRole, RolePermissions, PermissionString, FazendaRole } from '../common/rbac/rbac.config';
 
@@ -12,7 +13,7 @@ export class AuthService {
 
     constructor(
         private readonly adminPrisma: AdminPrismaService,
-        private readonly tenantPrisma: TenantPrismaService,
+        private readonly tenantClientFactory: TenantPrismaClientFactory,
         private readonly jwtService: JwtService,
         private readonly provisioningService: SocialProvisioningService,
     ) { }
@@ -134,7 +135,9 @@ export class AuthService {
             const org = acesso.organizacao;
             if (!org.schemaName) continue;
 
-            const tenantClient = this.tenantPrisma.getClientForSchema(org.schemaName);
+            const tenantClient = this.tenantClientFactory.create(
+                TenantSchemaName.parse(org.schemaName),
+            );
             
             // Buscar o usuario local
             const userLocal = await tenantClient.usuario.findFirst({

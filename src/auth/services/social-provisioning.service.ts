@@ -1,7 +1,9 @@
 import { Injectable, Logger, ConflictException } from '@nestjs/common';
+import { randomBytes } from 'node:crypto';
 import { ConfigService } from '@nestjs/config';
 import { AdminPrismaService } from '../../admin/admin-prisma.service';
-import { TenantPrismaService } from '../../tenant/tenant-prisma.service';
+import { TenantPrismaClientFactory } from '../../tenant/infrastructure/tenant-prisma-client.factory';
+import { TenantSchemaName } from '../../tenant/infrastructure/schema-name';
 import { FazendaRole } from '../../common/rbac/rbac.config';
 import * as bcrypt from 'bcrypt';
 
@@ -21,7 +23,7 @@ export class SocialProvisioningService {
 
   constructor(
     private readonly adminPrisma: AdminPrismaService,
-    private readonly tenantPrisma: TenantPrismaService,
+    private readonly tenantClientFactory: TenantPrismaClientFactory,
     private readonly configService: ConfigService,
   ) {}
 
@@ -35,7 +37,7 @@ export class SocialProvisioningService {
     globalUserId: string;
   }): Promise<ProvisionResult> {
     const slug = await this.generateUniqueSlug(profile.email);
-    const schemaName = `fazenda_${slug}`;
+    const schemaName = `tenant_${randomBytes(16).toString('hex')}`;
     const subdomain = slug;
 
     this.logger.log(`Provisionando TRIAL para ${profile.email}: schema=${schemaName}`);
@@ -91,10 +93,11 @@ export class SocialProvisioningService {
     });
 
     // 5. Criar Schema no PostgreSQL
-    await this.createTenantSchema(schemaName);
+    const tenantSchema = TenantSchemaName.parse(schemaName);
+    await this.createTenantSchema(tenantSchema);
 
     // 6. Criar dados iniciais no tenant (UsuarioLocal + Fazenda + Perfil)
-    const tenantClient = this.tenantPrisma.getClientForSchema(schemaName);
+    const tenantClient = this.tenantClientFactory.create(tenantSchema);
 
     // Seed permissões e perfis padrão
     await this.seedDefaultPermissions(tenantClient);
@@ -184,10 +187,10 @@ export class SocialProvisioningService {
     return plan;
   }
 
-  private async createTenantSchema(schemaName: string): Promise<void> {
+  private async createTenantSchema(schema: TenantSchemaName): Promise<void> {
     // Usar $executeRawUnsafe via AdminPrisma para criar o schema
     await this.adminPrisma.$executeRawUnsafe(
-      `CREATE SCHEMA IF NOT EXISTS "${schemaName}"`,
+      `CREATE SCHEMA IF NOT EXISTS "${schema.value}"`,
     );
 
     // Copiar tabelas do schema template
@@ -202,11 +205,11 @@ export class SocialProvisioningService {
 
     for (const { tablename } of tables) {
       await this.adminPrisma.$executeRawUnsafe(
-        `CREATE TABLE IF NOT EXISTS "${schemaName}"."${tablename}" (LIKE "${templateSchema}"."${tablename}" INCLUDING ALL)`,
+        `CREATE TABLE IF NOT EXISTS "${schema.value}"."${tablename}" (LIKE "${templateSchema}"."${tablename}" INCLUDING ALL)`,
       );
     }
 
-    this.logger.log(`Schema ${schemaName} criado com ${tables.length} tabelas`);
+    this.logger.log(`Schema ${schema.value} criado com ${tables.length} tabelas`);
   }
 
   private async seedDefaultPermissions(tenantClient: any): Promise<void> {

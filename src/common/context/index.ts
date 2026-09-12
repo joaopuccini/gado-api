@@ -1,5 +1,3 @@
-export { RequestContext } from './request-context';
-export type { RequestContextData } from './request-context';
 export { ContextModule } from './context.module';
 export { ExecutionContextMiddleware } from './execution-context.middleware';
 export {

@@ -1,15 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { TenantPrismaService } from '../tenant/tenant-prisma.service';
-import { RequestContext } from '../common/context';
 
 @Injectable()
 export class FazendasService {
     constructor(private readonly tenantPrisma: TenantPrismaService) { }
 
     private getTenantClient() {
-        const schemaName = RequestContext.getSchemaName();
-        if (!schemaName) throw new Error('Schema do tenant não encontrado no contexto');
-        return this.tenantPrisma.getClientForSchema(schemaName);
+        return this.tenantPrisma.getClient();
     }
 
     async findAll() {

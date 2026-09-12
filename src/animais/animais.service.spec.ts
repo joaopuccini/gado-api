@@ -47,7 +47,6 @@ describe('AnimaisService', () => {
           provide: TenantPrismaService,
           useValue: {
             getClient: jest.fn().mockReturnValue(mockPrismaClient),
-            getClientForSchema: jest.fn().mockReturnValue(mockPrismaClient),
           },
         },
       ],

@@ -4,7 +4,8 @@ import {
   getPermissionsForRole,
   type FazendaRole,
 } from '../../common/rbac/rbac.config';
-import { TenantPrismaService } from '../../tenant/tenant-prisma.service';
+import { TenantPrismaClientFactory } from '../../tenant/infrastructure/tenant-prisma-client.factory';
+import { TenantSchemaName } from '../../tenant/infrastructure/schema-name';
 import type {
   TenantMembershipRecord,
   TenantRegistryRecord,
@@ -35,7 +36,7 @@ const normalizedStatus = (
 export class PrismaTenantRegistryRepository implements TenantRegistryRepository {
   constructor(
     private readonly adminPrisma: AdminPrismaService,
-    private readonly tenantPrisma: TenantPrismaService,
+    private readonly tenantClientFactory: TenantPrismaClientFactory,
   ) {}
 
   async findById(tenantId: string): Promise<TenantRegistryRecord | null> {
@@ -71,7 +72,9 @@ export class PrismaTenantRegistryRepository implements TenantRegistryRepository 
       });
     if (organizationAccess?.status !== 'ATIVO') return null;
 
-    const client = this.tenantPrisma.getClientForSchema(tenant.schemaName);
+    const client = this.tenantClientFactory.create(
+      TenantSchemaName.parse(tenant.schemaName),
+    );
     const localUser = await client.usuario.findFirst({
       where: { globalUserId, ativo: true },
       include: {

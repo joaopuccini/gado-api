@@ -11,7 +11,6 @@ import { GlobalExceptionFilter } from './common/filters';
 import {
   LoggingInterceptor,
   TransformInterceptor,
-  HierarchyInterceptor,
 } from './common/interceptors';
 import { SubscriptionGuard } from './common/guards/subscription.guard';
 import { StructuredLogger } from './common/logger/structured-logger.service';
@@ -97,7 +96,6 @@ import { ManutencoesModule } from './frota/manutencoes/manutencoes.module';
     { provide: APP_FILTER, useClass: GlobalExceptionFilter },
     { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
     { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },
-    { provide: APP_INTERCEPTOR, useClass: HierarchyInterceptor },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: SubscriptionGuard },
   ],

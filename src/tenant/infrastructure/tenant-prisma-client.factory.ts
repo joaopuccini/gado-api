@@ -10,7 +10,7 @@ export type QueryObservablePrismaClient = PrismaClient<
 >;
 
 export interface TenantPrismaClientFactoryPort {
-  create(schemaName: TenantSchemaName): Promise<QueryObservablePrismaClient>;
+  create(schemaName: TenantSchemaName): QueryObservablePrismaClient;
   dispose(schemaName: TenantSchemaName): Promise<void>;
 }
 
@@ -22,9 +22,7 @@ export class TenantPrismaClientFactory
 
   constructor(private readonly configService: ConfigService) {}
 
-  async create(
-    schemaName: TenantSchemaName,
-  ): Promise<QueryObservablePrismaClient> {
+  create(schemaName: TenantSchemaName): QueryObservablePrismaClient {
     const cached = this.clients.get(schemaName.value);
     if (cached) return cached;
 
@@ -41,7 +39,6 @@ export class TenantPrismaClientFactory
       adapter,
       log: [{ emit: 'event', level: 'query' }],
     }) as QueryObservablePrismaClient;
-    await client.$connect();
     this.clients.set(schemaName.value, client);
     return client;
   }
