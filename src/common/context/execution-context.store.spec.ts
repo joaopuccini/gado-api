@@ -1,4 +1,20 @@
-import { ExecutionContextStore, type ExecutionContextData } from './execution-context.store';
+import {
+  ExecutionContextStore,
+  type ExecutionContextData,
+} from './execution-context.store';
+import { DomainError } from '../errors/domain-error';
+
+const capturedErrorCode = (action: () => unknown): string => {
+  try {
+    action();
+    throw new Error('Expected action to throw');
+  } catch (error: unknown) {
+    if (error instanceof DomainError) {
+      return error.code;
+    }
+    throw error;
+  }
+};
 
 const contextFor = (tenantId: string): ExecutionContextData => ({
   requestId: `request-${tenantId}`,
@@ -23,8 +39,8 @@ describe('ExecutionContextStore', () => {
   });
 
   it('fails closed when an execution context is required but absent', () => {
-    expect(() => store.require()).toThrow(
-      expect.objectContaining({ code: 'executionContextMissing' }),
+    expect(capturedErrorCode(() => store.require())).toBe(
+      'executionContextMissing',
     );
   });
 
@@ -42,9 +58,11 @@ describe('ExecutionContextStore', () => {
       permissions: [],
     };
 
-    expect(() =>
-      store.run(publicContext, () => store.requireTenant()),
-    ).toThrow(expect.objectContaining({ code: 'tenantContextMissing' }));
+    expect(
+      capturedErrorCode(() =>
+        store.run(publicContext, () => store.requireTenant()),
+      ),
+    ).toBe('tenantContextMissing');
   });
 
   it('keeps two concurrent tenant contexts isolated', async () => {

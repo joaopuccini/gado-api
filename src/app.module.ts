@@ -6,9 +6,12 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 // Infrastructure
 import { PrismaModule } from './prisma/prisma.module';
 import { TenantModule } from './tenant/tenant.module';
-import { RequestContextMiddleware } from './common/context/request-context.middleware';
+import { ContextModule, ExecutionContextMiddleware } from './common/context';
 import { AllExceptionsFilter } from './common/filters';
-import { LoggingInterceptor, TransformInterceptor, HierarchyInterceptor } from './common/interceptors';
+import {
+  LoggingInterceptor,
+  HierarchyInterceptor,
+} from './common/interceptors';
 import { SubscriptionGuard } from './common/guards/subscription.guard';
 
 // Feature modules
@@ -44,12 +47,15 @@ import { ManutencoesModule } from './frota/manutencoes/manutencoes.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
-    ThrottlerModule.forRoot([{
-      ttl: parseInt(process.env.THROTTLE_TTL || '60000', 10),
-      limit: parseInt(process.env.THROTTLE_LIMIT || '100', 10),
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: parseInt(process.env.THROTTLE_TTL || '60000', 10),
+        limit: parseInt(process.env.THROTTLE_LIMIT || '100', 10),
+      },
+    ]),
 
     PrismaModule,
+    ContextModule,
     TenantModule,
     AuthModule,
 
@@ -92,6 +98,6 @@ import { ManutencoesModule } from './frota/manutencoes/manutencoes.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(RequestContextMiddleware).forRoutes('*');
+    consumer.apply(ExecutionContextMiddleware).forRoutes('*');
   }
 }
