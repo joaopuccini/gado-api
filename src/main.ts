@@ -6,7 +6,6 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { CustomLogger } from './common/logger/custom-logger.service';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
-import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
@@ -29,7 +28,8 @@ async function bootstrap() {
 
   // CORS restritivo
   app.enableCors({
-    origin: corsOrigins === '*' ? '*' : corsOrigins.split(',').map((o) => o.trim()),
+    origin:
+      corsOrigins === '*' ? '*' : corsOrigins.split(',').map((o) => o.trim()),
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
   });
@@ -46,7 +46,6 @@ async function bootstrap() {
 
   // Global Interceptors and Filters
   app.useGlobalInterceptors(new TransformInterceptor());
-  app.useGlobalFilters(new GlobalExceptionFilter());
 
   // Swagger (OpenAPI)
   if (configService.get('NODE_ENV') !== 'production') {
@@ -66,4 +65,4 @@ async function bootstrap() {
   Logger.log(`📄 Swagger: http://localhost:${port}/api-docs`, 'Bootstrap');
 }
 
-bootstrap();
+void bootstrap();

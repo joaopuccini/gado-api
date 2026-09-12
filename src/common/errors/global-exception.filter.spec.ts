@@ -1,8 +1,8 @@
-import {
-  BadRequestException,
-  type ArgumentsHost,
-  type HttpArgumentsHost,
-} from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
+import type {
+  ArgumentsHost,
+  HttpArgumentsHost,
+} from '@nestjs/common/interfaces';
 import type { Request, Response } from 'express';
 import { ExecutionContextStore, type ExecutionContextData } from '../context';
 import { GlobalExceptionFilter } from '../filters/global-exception.filter';
@@ -32,19 +32,21 @@ const createHost = (captured: CapturedResponse): ArgumentsHost => {
     url: '/probe/unexpected',
   } as Request;
   const response = {
-    status(statusCode: number) {
+    status(statusCode: number): Response {
       captured.statusCode = statusCode;
-      return this;
+      return response;
     },
-    json(body: Record<string, unknown>) {
+    json(body: Record<string, unknown>): Response {
       captured.body = body;
-      return this;
+      return response;
     },
   } as unknown as Response;
   const httpHost: HttpArgumentsHost = {
     getRequest: <T = Request>() => request as T,
     getResponse: <T = Response>() => response as T,
-    getNext: <T = unknown>() => undefined as T,
+    getNext: <T = unknown>(): T => {
+      throw new Error('getNext is not used by this test');
+    },
   };
 
   return {
@@ -53,7 +55,8 @@ const createHost = (captured: CapturedResponse): ArgumentsHost => {
     switchToWs: jest.fn(),
     getArgs: jest.fn(),
     getArgByIndex: jest.fn(),
-    getType: () => 'http',
+    getType: <TContext extends string = 'http'>(): TContext =>
+      'http' as TContext,
   };
 };
 

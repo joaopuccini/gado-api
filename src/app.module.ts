@@ -7,7 +7,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { PrismaModule } from './prisma/prisma.module';
 import { TenantModule } from './tenant/tenant.module';
 import { ContextModule, ExecutionContextMiddleware } from './common/context';
-import { AllExceptionsFilter } from './common/filters';
+import { GlobalExceptionFilter } from './common/filters';
 import {
   LoggingInterceptor,
   HierarchyInterceptor,
@@ -89,7 +89,7 @@ import { ManutencoesModule } from './frota/manutencoes/manutencoes.module';
     ManutencoesModule,
   ],
   providers: [
-    { provide: APP_FILTER, useClass: AllExceptionsFilter },
+    { provide: APP_FILTER, useClass: GlobalExceptionFilter },
     { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
     { provide: APP_INTERCEPTOR, useClass: HierarchyInterceptor },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
