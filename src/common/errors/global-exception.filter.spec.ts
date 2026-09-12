@@ -6,6 +6,7 @@ import type {
 import type { Request, Response } from 'express';
 import { ExecutionContextStore, type ExecutionContextData } from '../context';
 import { GlobalExceptionFilter } from '../filters/global-exception.filter';
+import { StructuredLogger } from '../logger/structured-logger.service';
 import { DomainError } from './domain-error';
 import { mapDomainErrorToHttp } from './error-http.mapper';
 
@@ -24,6 +25,9 @@ interface CapturedResponse {
   statusCode?: number;
   body?: Record<string, unknown>;
 }
+
+const filterFor = (store: ExecutionContextStore): GlobalExceptionFilter =>
+  new GlobalExceptionFilter(store, new StructuredLogger(store, { write() {} }));
 
 const createHost = (captured: CapturedResponse): ArgumentsHost => {
   const request = {
@@ -74,7 +78,7 @@ describe('Global error contract', () => {
 
   it('normalizes class-validator failures into camelCase details', () => {
     const store = new ExecutionContextStore();
-    const filter = new GlobalExceptionFilter(store);
+    const filter = filterFor(store);
     const captured: CapturedResponse = {};
 
     store.run(executionContext, () =>
@@ -106,7 +110,7 @@ describe('Global error contract', () => {
 
   it('hides unknown exception internals and legacy response fields', () => {
     const store = new ExecutionContextStore();
-    const filter = new GlobalExceptionFilter(store);
+    const filter = filterFor(store);
     const captured: CapturedResponse = {};
     const internalError = Object.assign(new Error('SQL password leaked'), {
       sql: 'select secret from credentials',

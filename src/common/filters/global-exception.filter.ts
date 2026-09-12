@@ -4,13 +4,13 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
-  Logger,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { ExecutionContextStore } from '../context';
 import { DomainError } from '../errors/domain-error';
 import { mapDomainErrorToHttp } from '../errors/error-http.mapper';
 import type { ErrorCode, ErrorDetail } from '../errors/error-catalog';
+import { StructuredLogger } from '../logger/structured-logger.service';
 
 interface ApiErrorResponse {
   error: {
@@ -81,9 +81,10 @@ const prismaCode = (exception: unknown): string | undefined => {
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
-  private readonly logger = new Logger(GlobalExceptionFilter.name);
-
-  constructor(private readonly contextStore: ExecutionContextStore) {}
+  constructor(
+    private readonly contextStore: ExecutionContextStore,
+    private readonly logger: StructuredLogger,
+  ) {}
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
@@ -94,10 +95,14 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const path = request.originalUrl || request.url;
 
     if (normalized.statusCode >= 500) {
-      this.logger.error(
-        `${request.method} ${path} failed [requestId=${requestId}]`,
-        exception instanceof Error ? exception.stack : undefined,
-      );
+      this.logger.error('exceptionCaught', {
+        method: request.method,
+        path,
+        statusCode: normalized.statusCode,
+        errorCode: normalized.code,
+        errorName: exception instanceof Error ? exception.name : 'UnknownError',
+        errorStack: exception instanceof Error ? exception.stack : undefined,
+      });
     }
 
     const body: ApiErrorResponse = {

@@ -1,18 +1,18 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe, Logger } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
-import { CustomLogger } from './common/logger/custom-logger.service';
+import { StructuredLogger } from './common/logger/structured-logger.service';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
   });
 
-  const customLogger = new CustomLogger();
-  app.useLogger(customLogger);
+  const structuredLogger = app.get(StructuredLogger);
+  app.useLogger(structuredLogger);
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT', 8080);
   const prefix = configService.get<string>('API_PREFIX', '');
@@ -61,8 +61,8 @@ async function bootstrap() {
   }
 
   await app.listen(port);
-  Logger.log(`🐂 Gado API running on port ${port}`, 'Bootstrap');
-  Logger.log(`📄 Swagger: http://localhost:${port}/api-docs`, 'Bootstrap');
+  structuredLogger.info('applicationStarted', { port });
+  structuredLogger.info('swaggerAvailable', { path: '/api-docs' });
 }
 
 void bootstrap();

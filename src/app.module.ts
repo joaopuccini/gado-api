@@ -13,6 +13,7 @@ import {
   HierarchyInterceptor,
 } from './common/interceptors';
 import { SubscriptionGuard } from './common/guards/subscription.guard';
+import { StructuredLogger } from './common/logger/structured-logger.service';
 
 // Feature modules
 import { AuthModule } from './auth/auth.module';
@@ -89,6 +90,7 @@ import { ManutencoesModule } from './frota/manutencoes/manutencoes.module';
     ManutencoesModule,
   ],
   providers: [
+    StructuredLogger,
     { provide: APP_FILTER, useClass: GlobalExceptionFilter },
     { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
     { provide: APP_INTERCEPTOR, useClass: HierarchyInterceptor },
