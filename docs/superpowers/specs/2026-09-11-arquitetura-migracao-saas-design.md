@@ -1,6 +1,6 @@
 # Arquitetura da Migração Legado para Gado SaaS
 
-**Status:** em revisão para aprovação final, atualizado em 2026-09-11
+**Status:** aprovado para planejamento executável em 2026-09-12
 
 **Escopo:** `gado`, `gado-painel-financeiro-back`, `gado-front-end`, `gado-painel-financeiro-front-end`, `gado-api` e `gado-web`
 
