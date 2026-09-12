@@ -1,9 +1,10 @@
 import { randomBytes } from 'node:crypto';
 import { ConfigService } from '@nestjs/config';
-import type { PrismaClient } from '@prisma/client';
 import { Pool } from 'pg';
 import { TenantPrismaClientFactory } from './tenant-prisma-client.factory';
 import { TenantSchemaName } from './schema-name';
+
+jest.setTimeout(30_000);
 
 const disposableSchema = (): TenantSchemaName =>
   TenantSchemaName.parse(`tenant_${randomBytes(16).toString('hex')}`);
@@ -24,7 +25,6 @@ describe('TenantPrismaClientFactory PostgreSQL isolation', () => {
   const factory = new TenantPrismaClientFactory(
     new ConfigService({ DATABASE_URL: databaseUrl }),
   );
-  const clients: PrismaClient[] = [];
 
   beforeAll(async () => {
     for (const schema of [schemaA, schemaB]) {
@@ -50,13 +50,11 @@ describe('TenantPrismaClientFactory PostgreSQL isolation', () => {
   });
 
   afterAll(async () => {
-    await Promise.all(
-      clients.map(async (client) => {
-        await client.$disconnect();
-      }),
-    );
+    await factory.disposeAll();
     for (const schema of [schemaA, schemaB]) {
-      await adminPool.query(`DROP SCHEMA ${quotedSchema(schema)} CASCADE`);
+      await adminPool.query(
+        `DROP SCHEMA IF EXISTS ${quotedSchema(schema)} CASCADE`,
+      );
     }
     await adminPool.end();
   });
@@ -64,7 +62,6 @@ describe('TenantPrismaClientFactory PostgreSQL isolation', () => {
   it('binds each client to exactly one schema without SQL rewriting', async () => {
     const clientA = await factory.create(schemaA);
     const clientB = await factory.create(schemaB);
-    clients.push(clientA, clientB);
     const queries: string[] = [];
     clientA.$on('query', ({ query }) => queries.push(query));
     clientB.$on('query', ({ query }) => queries.push(query));
@@ -72,12 +69,8 @@ describe('TenantPrismaClientFactory PostgreSQL isolation', () => {
     const rowsA = await clientA.raca.findMany();
     const rowsB = await clientB.raca.findMany();
 
-    expect(rowsA).toEqual([
-      expect.objectContaining({ descricao: 'tenantA' }),
-    ]);
-    expect(rowsB).toEqual([
-      expect.objectContaining({ descricao: 'tenantB' }),
-    ]);
+    expect(rowsA).toEqual([expect.objectContaining({ descricao: 'tenantA' })]);
+    expect(rowsB).toEqual([expect.objectContaining({ descricao: 'tenantB' })]);
     expect(rowsA).not.toContainEqual(
       expect.objectContaining({ descricao: 'tenantB' }),
     );

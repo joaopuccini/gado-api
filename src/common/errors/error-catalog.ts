@@ -9,7 +9,8 @@ export type ErrorCode =
   | 'tenantContextMissing'
   | 'tenantUnavailable'
   | 'animalNotFound'
-  | 'internalServerError';
+  | 'internalServerError'
+  | 'invalidTenantSchemaName';
 
 export interface ErrorDetail {
   field?: string;
