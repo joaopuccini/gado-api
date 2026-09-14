@@ -22,9 +22,13 @@ describe('backend continuous integration workflow', () => {
       'npm run test:no-skipped',
     ];
 
-    const positions = orderedCommands.map((command) => workflow.indexOf(command));
+    const positions = orderedCommands.map((command) =>
+      workflow.indexOf(command),
+    );
     expect(positions.every((position) => position >= 0)).toBe(true);
-    expect(positions).toEqual([...positions].sort((left, right) => left - right));
+    expect(positions).toEqual(
+      [...positions].sort((left, right) => left - right),
+    );
     expect(workflow).not.toContain('prisma db push');
     expect(workflow).not.toContain('migrate reset');
   });

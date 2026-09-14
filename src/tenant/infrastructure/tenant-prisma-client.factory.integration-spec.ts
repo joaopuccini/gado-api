@@ -60,8 +60,8 @@ describe('TenantPrismaClientFactory PostgreSQL isolation', () => {
   });
 
   it('binds each client to exactly one schema without SQL rewriting', async () => {
-    const clientA = await factory.create(schemaA);
-    const clientB = await factory.create(schemaB);
+    const clientA = factory.create(schemaA);
+    const clientB = factory.create(schemaB);
     const queries: string[] = [];
     clientA.$on('query', ({ query }) => queries.push(query));
     clientB.$on('query', ({ query }) => queries.push(query));

@@ -3,6 +3,7 @@ node_modules
 .env
 
 /generated/prisma
+/coverage/
 
 # Isolated implementation worktrees
 .worktrees/

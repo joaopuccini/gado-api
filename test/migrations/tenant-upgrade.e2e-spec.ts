@@ -21,7 +21,8 @@ describe('tenant schema upgrade and retry', () => {
   const schema = TenantSchemaName.parse(schemaName);
   const pool = new Pool({ connectionString: databaseUrl, max: 2 });
   const context = new ExecutionContextStore();
-  const repository = new PostgresTenantMigrationRepository(pool);
+  const logger = { info: jest.fn(), error: jest.fn() };
+  const repository = new PostgresTenantMigrationRepository(pool, logger);
   const loader = new TenantMigrationLoader();
   const useCase = new MigrateTenantSchemaUseCase(context, repository, loader);
 
@@ -58,6 +59,7 @@ describe('tenant schema upgrade and retry', () => {
       TENANT_CURRENT_VERSION,
     ]);
     await repository.apply(schema, migrations[0]);
+    await repository.apply(schema, migrations[0]);
 
     await expect(runMigration()).resolves.toEqual({
       fromVersion: TENANT_INITIAL_VERSION,
@@ -84,5 +86,37 @@ describe('tenant schema upgrade and retry', () => {
 
     expect(retry.rows).toEqual(firstApplication.rows);
     expect(retry.rows).toHaveLength(2);
+    expect(logger.info.mock.calls).toHaveLength(2);
+
+    await expect(
+      repository.apply(schema, {
+        ...migrations[1],
+        checksum: 'c'.repeat(64),
+      }),
+    ).rejects.toMatchObject({ code: 'migrationChecksumMismatch' });
+
+    await expect(
+      repository.apply(schema, {
+        version: '202609140003_invalid_sql',
+        checksum: 'd'.repeat(64),
+        sql: 'SET LOCAL search_path = "__tenant__"; SELECT * FROM missing_table',
+      }),
+    ).rejects.toMatchObject({ code: 'tenantMigrationFailed' });
+
+    await expect(
+      repository.apply(schema, {
+        version: '202609140004_missing_marker',
+        checksum: 'e'.repeat(64),
+        sql: 'SELECT 1',
+      }),
+    ).rejects.toMatchObject({ code: 'migrationChainInvalid' });
+    expect(logger.error.mock.calls).toHaveLength(2);
+
+    const ownedRepository = new PostgresTenantMigrationRepository(databaseUrl);
+    await expect(ownedRepository.appliedVersions(schema)).resolves.toEqual(
+      expect.any(Map),
+    );
+    await ownedRepository.onModuleDestroy();
+    await repository.onModuleDestroy();
   });
 });

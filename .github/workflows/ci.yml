@@ -1,0 +1,50 @@
+name: Backend foundation CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  quality-gates:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: gado_wave00_test_000000000001
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d gado_wave00_test_000000000001"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/gado_wave00_test_000000000001
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/gado_wave00_test_000000000001
+      JWT_SECRET: wave-00-ci-only-secret
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Generate prisma/admin/schema.prisma and prisma/tenant/schema.prisma clients
+        run: npm run prisma:generate
+      - run: npm run lint:check
+      - run: npm run build
+      - run: npm run test:unit -- --runInBand
+      - run: npm run test:architecture -- --runInBand
+      - run: npm run test:contract -- --runInBand
+      - run: npm run test:integration -- --runInBand
+      - run: npm run test:migrations -- --runInBand
+      - run: npm run test:isolation -- --runInBand
+      - run: npm run test:cov -- --runInBand
+      - run: npm run test:no-skipped

@@ -9,12 +9,12 @@ RUN apk add --no-cache openssl
 COPY package*.json ./
 COPY prisma ./prisma/
 
-RUN npm install
+RUN npm ci
 
 COPY . .
 
 # Gerar o Prisma Client e Build do NestJS
-RUN npx prisma generate
+RUN npm run prisma:generate
 RUN npm run build
 
 # STAGE 2: Run
@@ -34,5 +34,5 @@ COPY --from=builder /app/.env.example ./.env
 
 EXPOSE 8080
 
-# Script de entrada para rodar migrations e depois a app
-CMD ["sh", "-c", "npx prisma db push && npm run start:prod"]
+# O catálogo administrativo usa somente migrations versionadas em produção.
+CMD ["sh", "-c", "npx prisma migrate deploy --config prisma.config.ts && npm run start:prod"]

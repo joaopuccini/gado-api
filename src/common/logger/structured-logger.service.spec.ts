@@ -70,4 +70,65 @@ describe('StructuredLogger', () => {
     expect(sink.lines[0]).not.toContain('"password"');
     expect(sink.lines[0]).not.toContain('"authorization"');
   });
+
+  it('implements every Nest logger level with stable fallback event names', () => {
+    const sink = new MemoryLogSink();
+    const logger = new StructuredLogger(new ExecutionContextStore(), sink);
+
+    logger.log(123, 7);
+    logger.error('', true);
+    logger.warn('warningEvent', 10n);
+    logger.debug('debugEvent', Symbol('debug-symbol'));
+    logger.verbose('verboseEvent', function namedDetail() {});
+    logger.warn(undefined);
+
+    expect(
+      sink.lines.map((line) => {
+        const record = JSON.parse(line) as StructuredLogRecord;
+        return {
+          level: record.level,
+          event: record.event,
+          message: record.message,
+        };
+      }),
+    ).toEqual([
+      { level: 'info', event: 'applicationLog', message: 123 },
+      { level: 'error', event: 'applicationError', message: 'true' },
+      { level: 'warn', event: 'warningEvent', message: '10' },
+      {
+        level: 'debug',
+        event: 'debugEvent',
+        message: 'debug-symbol',
+      },
+      { level: 'debug', event: 'verboseEvent', message: 'namedDetail' },
+      {
+        level: 'warn',
+        event: 'applicationWarning',
+        message: undefined,
+      },
+    ]);
+  });
+
+  it('uses the process output sink and development environment by default', () => {
+    const previousEnvironment = process.env.NODE_ENV;
+    delete process.env.NODE_ENV;
+    const output = jest
+      .spyOn(process.stdout, 'write')
+      .mockImplementation(() => true);
+
+    try {
+      new StructuredLogger(new ExecutionContextStore()).info('healthChecked');
+
+      const line = output.mock.calls[0]?.[0];
+      expect(typeof line).toBe('string');
+      expect(JSON.parse(String(line))).toMatchObject({
+        event: 'healthChecked',
+        environment: 'development',
+      });
+    } finally {
+      output.mockRestore();
+      if (previousEnvironment === undefined) delete process.env.NODE_ENV;
+      else process.env.NODE_ENV = previousEnvironment;
+    }
+  });
 });
