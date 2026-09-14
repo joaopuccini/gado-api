@@ -1,11 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { AdminPrismaService } from '../../admin/admin-prisma.service';
 import {
   getPermissionsForRole,
   type FazendaRole,
 } from '../../common/rbac/rbac.config';
-import { TenantPrismaClientFactory } from '../../tenant/infrastructure/tenant-prisma-client.factory';
-import { TenantSchemaName } from '../../tenant/infrastructure/schema-name';
+import {
+  TENANT_PRISMA_CLIENT_FACTORY,
+  type TenantPrismaClientFactoryPort,
+} from '../../tenant/application/ports/tenant-prisma-client-factory.port';
+import { TenantSchemaName } from '../../tenant/domain/tenant-schema-name';
 import type {
   TenantMembershipRecord,
   TenantRegistryRecord,
@@ -36,7 +39,8 @@ const normalizedStatus = (
 export class PrismaTenantRegistryRepository implements TenantRegistryRepository {
   constructor(
     private readonly adminPrisma: AdminPrismaService,
-    private readonly tenantClientFactory: TenantPrismaClientFactory,
+    @Inject(TENANT_PRISMA_CLIENT_FACTORY)
+    private readonly tenantClientFactory: TenantPrismaClientFactoryPort,
   ) {}
 
   async findById(tenantId: string): Promise<TenantRegistryRecord | null> {

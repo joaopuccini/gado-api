@@ -1,9 +1,9 @@
-import { Injectable, UnauthorizedException, Logger, ForbiddenException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException, Logger, ForbiddenException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { AdminPrismaService } from '../admin/admin-prisma.service';
-import { TenantPrismaClientFactory } from '../tenant/infrastructure/tenant-prisma-client.factory';
-import { TenantSchemaName } from '../tenant/infrastructure/schema-name';
+import { TENANT_PRISMA_CLIENT_FACTORY, type TenantPrismaClientFactoryPort } from '../tenant/application/ports/tenant-prisma-client-factory.port';
+import { TenantSchemaName } from '../tenant/domain/tenant-schema-name';
 import { SocialProvisioningService } from './services/social-provisioning.service';
 import { getPermissionsForRole, RolePermissions, PermissionString, FazendaRole } from '../common/rbac/rbac.config';
 
@@ -13,7 +13,8 @@ export class AuthService {
 
     constructor(
         private readonly adminPrisma: AdminPrismaService,
-        private readonly tenantClientFactory: TenantPrismaClientFactory,
+        @Inject(TENANT_PRISMA_CLIENT_FACTORY)
+        private readonly tenantClientFactory: TenantPrismaClientFactoryPort,
         private readonly jwtService: JwtService,
         private readonly provisioningService: SocialProvisioningService,
     ) { }

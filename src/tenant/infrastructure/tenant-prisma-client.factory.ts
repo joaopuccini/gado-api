@@ -1,18 +1,12 @@
 import { Injectable, type OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { Prisma, PrismaClient } from '@prisma/client';
-import { TenantSchemaName } from './schema-name';
-
-export type QueryObservablePrismaClient = PrismaClient<
-  Prisma.PrismaClientOptions,
-  'query'
->;
-
-export interface TenantPrismaClientFactoryPort {
-  create(schemaName: TenantSchemaName): QueryObservablePrismaClient;
-  dispose(schemaName: TenantSchemaName): Promise<void>;
-}
+import { PrismaClient } from '@prisma/client';
+import type {
+  QueryObservablePrismaClient,
+  TenantPrismaClientFactoryPort,
+} from '../application/ports/tenant-prisma-client-factory.port';
+import { TenantSchemaName } from '../domain/tenant-schema-name';
 
 @Injectable()
 export class TenantPrismaClientFactory

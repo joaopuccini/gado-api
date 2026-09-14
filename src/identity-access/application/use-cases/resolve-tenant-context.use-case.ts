@@ -1,13 +1,9 @@
-import { Inject, Injectable } from '@nestjs/common';
 import {
   ExecutionContextStore,
   type RequiredTenantContext,
 } from '../../../common/context';
 import { DomainError } from '../../../common/errors/domain-error';
-import {
-  TENANT_REGISTRY_REPOSITORY,
-  type TenantRegistryRepository,
-} from '../ports/tenant-registry.repository';
+import type { TenantRegistryRepository } from '../ports/tenant-registry.repository';
 
 export interface ResolveTenantContextInput {
   verifiedSubject: string;
@@ -17,10 +13,8 @@ export interface ResolveTenantContextInput {
   requestedSchemaName?: string;
 }
 
-@Injectable()
 export class ResolveTenantContextUseCase {
   constructor(
-    @Inject(TENANT_REGISTRY_REPOSITORY)
     private readonly registry: TenantRegistryRepository,
     private readonly contextStore: ExecutionContextStore,
   ) {}

@@ -1,6 +1,6 @@
 import { ExecutionContextStore } from '../../../common/context';
 import { DomainError } from '../../../common/errors/domain-error';
-import { TenantSchemaName } from '../../../tenant/infrastructure/schema-name';
+import { TenantSchemaName } from '../../../tenant/domain/tenant-schema-name';
 import type {
   TenantMigration,
   TenantMigrationRepository,

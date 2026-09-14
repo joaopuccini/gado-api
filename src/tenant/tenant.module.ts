@@ -1,28 +1,18 @@
-import { forwardRef, Global, Module } from '@nestjs/common';
-import { AdminModule } from '../admin/admin.module';
-import { TENANT_REGISTRY_REPOSITORY } from '../identity-access/application/ports/tenant-registry.repository';
-import { ResolveTenantContextUseCase } from '../identity-access/application/use-cases/resolve-tenant-context.use-case';
-import { PrismaTenantRegistryRepository } from '../identity-access/infrastructure/prisma-tenant-registry.repository';
+import { Global, Module } from '@nestjs/common';
+import { TENANT_PRISMA_CLIENT_FACTORY } from './application/ports/tenant-prisma-client-factory.port';
 import { TenantPrismaService } from './tenant-prisma.service';
 import { TenantPrismaClientFactory } from './infrastructure/tenant-prisma-client.factory';
 
 @Global()
 @Module({
-  imports: [forwardRef(() => AdminModule)],
   providers: [
     TenantPrismaClientFactory,
-    TenantPrismaService,
-    PrismaTenantRegistryRepository,
     {
-      provide: TENANT_REGISTRY_REPOSITORY,
-      useExisting: PrismaTenantRegistryRepository,
+      provide: TENANT_PRISMA_CLIENT_FACTORY,
+      useExisting: TenantPrismaClientFactory,
     },
-    ResolveTenantContextUseCase,
-  ],
-  exports: [
-    TenantPrismaClientFactory,
     TenantPrismaService,
-    ResolveTenantContextUseCase,
   ],
+  exports: [TENANT_PRISMA_CLIENT_FACTORY, TenantPrismaService],
 })
 export class TenantModule {}

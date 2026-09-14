@@ -5,16 +5,16 @@ import {
   type RequiredTenantContext,
 } from '../common/context';
 import {
-  TenantPrismaClientFactory,
+  TENANT_PRISMA_CLIENT_FACTORY,
   type TenantPrismaClientFactoryPort,
-} from './infrastructure/tenant-prisma-client.factory';
-import { TenantSchemaName } from './infrastructure/schema-name';
+} from './application/ports/tenant-prisma-client-factory.port';
+import { TenantSchemaName } from './domain/tenant-schema-name';
 
 @Injectable()
 export class TenantPrismaService {
   constructor(
     private readonly contextStore: ExecutionContextStore,
-    @Inject(TenantPrismaClientFactory)
+    @Inject(TENANT_PRISMA_CLIENT_FACTORY)
     private readonly clientFactory: TenantPrismaClientFactoryPort,
   ) {}
 

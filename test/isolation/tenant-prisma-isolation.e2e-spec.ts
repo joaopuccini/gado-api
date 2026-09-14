@@ -6,7 +6,7 @@ import {
   type ExecutionContextData,
 } from '../../src/common/context';
 import { TenantPrismaClientFactory } from '../../src/tenant/infrastructure/tenant-prisma-client.factory';
-import { TenantSchemaName } from '../../src/tenant/infrastructure/schema-name';
+import { TenantSchemaName } from '../../src/tenant/domain/tenant-schema-name';
 import { TenantPrismaService } from '../../src/tenant/tenant-prisma.service';
 
 jest.setTimeout(30_000);

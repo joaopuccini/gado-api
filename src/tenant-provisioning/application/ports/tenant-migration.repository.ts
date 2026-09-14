@@ -1,4 +1,4 @@
-import type { TenantSchemaName } from '../../../tenant/infrastructure/schema-name';
+import type { TenantSchemaName } from '../../../tenant/domain/tenant-schema-name';
 
 export interface TenantMigration {
   readonly version: string;

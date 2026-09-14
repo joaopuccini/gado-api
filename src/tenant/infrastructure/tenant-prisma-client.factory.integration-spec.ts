@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto';
 import { ConfigService } from '@nestjs/config';
 import { Pool } from 'pg';
 import { TenantPrismaClientFactory } from './tenant-prisma-client.factory';
-import { TenantSchemaName } from './schema-name';
+import { TenantSchemaName } from '../domain/tenant-schema-name';
 
 jest.setTimeout(30_000);
 

@@ -2,7 +2,7 @@ import type { OnModuleDestroy } from '@nestjs/common';
 import { Pool, type PoolClient } from 'pg';
 import { DomainError } from '../../common/errors/domain-error';
 import type { StructuredLogger } from '../../common/logger/structured-logger.service';
-import type { TenantSchemaName } from '../../tenant/infrastructure/schema-name';
+import type { TenantSchemaName } from '../../tenant/domain/tenant-schema-name';
 import type {
   TenantMigration,
   TenantMigrationRepository,

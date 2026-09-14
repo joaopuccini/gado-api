@@ -1,112 +1,192 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { dirname, relative, resolve } from 'node:path';
 
-describe('Hexagonal Boundaries', () => {
-  const srcDir = path.resolve(__dirname, '../../src');
-  const quarantinePath = path.resolve(__dirname, '../fixtures/legacy-route-quarantine.json');
-  
-  function getFiles(dir: string, fileList: string[] = []): string[] {
-    const files = fs.readdirSync(dir);
-    for (const file of files) {
-      const filePath = path.join(dir, file);
-      if (fs.statSync(filePath).isDirectory()) {
-        getFiles(filePath, fileList);
-      } else if (filePath.endsWith('.ts') && !filePath.endsWith('.spec.ts')) {
-        fileList.push(filePath);
-      }
-    }
-    return fileList;
+interface LegacyRouteQuarantineEntry {
+  readonly controller: string;
+  readonly removalWave: string;
+  readonly reason: string;
+}
+
+const srcDirectory = resolve(process.cwd(), 'src');
+const quarantinePath = resolve(
+  process.cwd(),
+  'test/fixtures/legacy-route-quarantine.json',
+);
+
+const sourceFiles = (directory: string): string[] =>
+  readdirSync(directory).flatMap((entry) => {
+    const entryPath = resolve(directory, entry);
+    if (statSync(entryPath).isDirectory()) return sourceFiles(entryPath);
+    return entryPath.endsWith('.ts') && !entryPath.endsWith('.spec.ts')
+      ? [entryPath]
+      : [];
+  });
+
+const importsOf = (source: string): string[] => {
+  const imports: string[] = [];
+  const importPattern =
+    /(?:import|export)\s+(?:type\s+)?[\s\S]*?\sfrom\s+['"]([^'"]+)['"]/g;
+  for (const match of source.matchAll(importPattern)) {
+    if (match[1]) imports.push(match[1]);
   }
-  
-  const allFiles = getFiles(srcDir);
-  
-  const forbidden = {
-    controller: ['@prisma/client', '@prisma/client-admin', 'aws-sdk', '/infrastructure/'],
-    useCase: ['@nestjs/common', '@nestjs/swagger', '@prisma/client', '@prisma/client-admin', 'express'],
-    domain: ['@nestjs/', '@prisma/', 'express', 'pg'],
-  };
+  return imports;
+};
 
-  const getImports = (content: string): string[] => {
-    const importRegex = /import\s+.*?\s+from\s+['"](.*?)['"]/g;
-    const imports: string[] = [];
-    let match;
-    while ((match = importRegex.exec(content)) !== null) {
-      imports.push(match[1]);
-    }
-    return imports;
-  };
+const controllerNamesOf = (source: string): string[] =>
+  [...source.matchAll(/export\s+class\s+(\w+Controller)\b/g)].flatMap(
+    (match) => (match[1] ? [match[1]] : []),
+  );
 
-  const legacyQuarantine = JSON.parse(fs.readFileSync(quarantinePath, 'utf8')) as any[];
-  const legacyControllers = legacyQuarantine.map(q => q.controller);
+const normalizedRelativePath = (file: string): string =>
+  relative(srcDirectory, file).replaceAll('\\', '/');
 
-  it('should not allow forbidden imports in controllers', () => {
-    const controllers = allFiles.filter(f => f.includes('.controller.ts'));
-    for (const file of controllers) {
-      const content = fs.readFileSync(file, 'utf8');
-      const imports = getImports(content);
-      for (const imp of imports) {
-        for (const rule of forbidden.controller) {
-          expect(`${file} imports ${imp}`).not.toContain(rule);
-        }
-      }
-    }
+const moduleOf = (file: string): string =>
+  normalizedRelativePath(file).split('/')[0] ?? '';
+
+const matchesForbiddenImport = (
+  moduleName: string,
+  forbiddenImport: string,
+): boolean => {
+  if (forbiddenImport.endsWith('/')) {
+    return moduleName.startsWith(forbiddenImport);
+  }
+  return (
+    moduleName === forbiddenImport ||
+    moduleName.startsWith(`${forbiddenImport}/`)
+  );
+};
+
+const parsedQuarantine = JSON.parse(
+  readFileSync(quarantinePath, 'utf8'),
+) as unknown;
+if (!Array.isArray(parsedQuarantine)) {
+  throw new Error('legacyRouteQuarantineMustBeAnArray');
+}
+const quarantine = parsedQuarantine as LegacyRouteQuarantineEntry[];
+const quarantinedControllers = new Set(
+  quarantine.map(({ controller }) => controller),
+);
+const files = sourceFiles(srcDirectory);
+
+describe('hexagonal architecture boundaries', () => {
+  it('keeps the legacy controller quarantine explicit, complete and unique', () => {
+    const discoveredControllers = new Set(
+      files.flatMap((file) => controllerNamesOf(readFileSync(file, 'utf8'))),
+    );
+    const invalidEntries = quarantine.filter(
+      ({ controller, removalWave, reason }) =>
+        !controller.endsWith('Controller') ||
+        !/^\d{2}$/.test(removalWave) ||
+        reason.trim().length === 0 ||
+        !discoveredControllers.has(controller),
+    );
+
+    expect(invalidEntries).toEqual([]);
+    expect(quarantinedControllers.size).toBe(quarantine.length);
   });
 
-  it('should not allow forbidden imports in use cases', () => {
-    const useCases = allFiles.filter(f => f.includes('.use-case.ts'));
-    for (const file of useCases) {
-      const content = fs.readFileSync(file, 'utf8');
-      const imports = getImports(content);
-      for (const imp of imports) {
-        for (const rule of forbidden.useCase) {
-          expect(`${file} imports ${imp}`).not.toContain(rule);
-        }
-      }
-    }
+  it('forbids persistence, external SDKs and infrastructure in controllers', () => {
+    const forbidden = [
+      '@prisma/client',
+      '@prisma/client-admin',
+      'aws-sdk',
+      '@aws-sdk/',
+      '/infrastructure/',
+    ];
+    const violations = files
+      .filter((file) => file.endsWith('.controller.ts'))
+      .flatMap((file) =>
+        importsOf(readFileSync(file, 'utf8')).flatMap((moduleName) =>
+          forbidden.some((rule) => moduleName.includes(rule))
+            ? [`${normalizedRelativePath(file)} -> ${moduleName}`]
+            : [],
+        ),
+      );
+
+    expect(violations).toEqual([]);
   });
 
-  it('should not allow forbidden imports in domain', () => {
-    const domainFiles = allFiles.filter(f => f.includes('/domain/'));
-    for (const file of domainFiles) {
-      const content = fs.readFileSync(file, 'utf8');
-      const imports = getImports(content);
-      for (const imp of imports) {
-        for (const rule of forbidden.domain) {
-          expect(`${file} imports ${imp}`).not.toContain(rule);
-        }
-      }
-    }
+  it('keeps use cases independent from Nest, transport and persistence frameworks', () => {
+    const forbidden = [
+      '@nestjs/',
+      '@prisma/',
+      'express',
+      'pg',
+      '@aws-sdk/',
+      'aws-sdk',
+    ];
+    const violations = files
+      .filter((file) =>
+        normalizedRelativePath(file).includes('/application/use-cases/'),
+      )
+      .flatMap((file) =>
+        importsOf(readFileSync(file, 'utf8')).flatMap((moduleName) =>
+          forbidden.some((rule) => matchesForbiddenImport(moduleName, rule))
+            ? [`${normalizedRelativePath(file)} -> ${moduleName}`]
+            : [],
+        ),
+      );
+
+    expect(violations).toEqual([]);
   });
 
-  it('should fail if new controller does not import a use case', () => {
-    const controllers = allFiles.filter(f => f.includes('.controller.ts'));
-    for (const file of controllers) {
-      const content = fs.readFileSync(file, 'utf8');
-      const controllerNameMatch = content.match(/class\s+(\w+Controller)/);
-      const controllerName = controllerNameMatch ? controllerNameMatch[1] : '';
+  it('keeps domain code free from frameworks and infrastructure', () => {
+    const forbidden = ['@nestjs/', '@prisma/', 'express', 'pg'];
+    const violations = files
+      .filter((file) => normalizedRelativePath(file).includes('/domain/'))
+      .flatMap((file) =>
+        importsOf(readFileSync(file, 'utf8')).flatMap((moduleName) =>
+          forbidden.some((rule) => matchesForbiddenImport(moduleName, rule))
+            ? [`${normalizedRelativePath(file)} -> ${moduleName}`]
+            : [],
+        ),
+      );
 
-      if (!legacyControllers.includes(controllerName)) {
-        const imports = getImports(content);
-        const hasUseCase = imports.some(imp => imp.includes('.use-case'));
-        expect(hasUseCase).toBe(true);
-      }
-    }
+    expect(violations).toEqual([]);
   });
 
-  it('should fail if a module accesses /infrastructure/ of another module', () => {
-    for (const file of allFiles) {
-      const content = fs.readFileSync(file, 'utf8');
-      const imports = getImports(content);
-      
-      const fileModuleMatch = file.match(/src[\\/](.*?)[\\/]/);
-      const fileModule = fileModuleMatch ? fileModuleMatch[1] : '';
+  it('requires every non-quarantined controller to depend on a use case', () => {
+    const violations = files
+      .filter((file) => file.endsWith('.controller.ts'))
+      .flatMap((file) => {
+        const source = readFileSync(file, 'utf8');
+        const newControllers = controllerNamesOf(source).filter(
+          (controller) => !quarantinedControllers.has(controller),
+        );
+        if (newControllers.length === 0) return [];
 
-      for (const imp of imports) {
-        if (imp.includes('/infrastructure/')) {
-          const isSameModule = imp.includes(`../${fileModule}/`) || imp.includes(`./infrastructure/`) || imp.includes(`../../${fileModule}/`);
-          expect(isSameModule).toBe(true);
+        const importsUseCase = importsOf(source).some(
+          (moduleName) =>
+            moduleName.includes('/application/use-cases/') &&
+            moduleName.endsWith('.use-case'),
+        );
+        return importsUseCase
+          ? []
+          : newControllers.map(
+              (controller) => `${normalizedRelativePath(file)}:${controller}`,
+            );
+      });
+
+    expect(violations).toEqual([]);
+  });
+
+  it('forbids direct access to another module infrastructure layer', () => {
+    const violations = files.flatMap((file) => {
+      const sourceModule = moduleOf(file);
+      return importsOf(readFileSync(file, 'utf8')).flatMap((moduleName) => {
+        if (
+          !moduleName.startsWith('.') ||
+          !moduleName.includes('/infrastructure/')
+        ) {
+          return [];
         }
-      }
-    }
+        const target = resolve(dirname(file), moduleName);
+        return moduleOf(target) === sourceModule
+          ? []
+          : [`${normalizedRelativePath(file)} -> ${moduleName}`];
+      });
+    });
+
+    expect(violations).toEqual([]);
   });
 });

@@ -10,6 +10,7 @@ import { SocialProvisioningService } from './services/social-provisioning.servic
 import { AdminModule } from '../admin/admin.module';
 import { TenantModule } from '../tenant/tenant.module';
 import { TenantProvisioningModule } from '../tenant-provisioning/tenant-provisioning.module';
+import { IdentityAccessModule } from '../identity-access/identity-access.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { TenantProvisioningModule } from '../tenant-provisioning/tenant-provisio
     }),
     forwardRef(() => AdminModule),
     forwardRef(() => TenantModule),
+    forwardRef(() => IdentityAccessModule),
     TenantProvisioningModule,
   ],
   controllers: [AuthController],

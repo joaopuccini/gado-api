@@ -1,4 +1,4 @@
-import { TenantSchemaName } from './schema-name';
+import { TenantSchemaName } from './tenant-schema-name';
 import { DomainError } from '../../common/errors/domain-error';
 
 const errorCodeFrom = (value: string): string => {

@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 import { ExecutionContextStore } from '../../src/common/context';
-import { TenantSchemaName } from '../../src/tenant/infrastructure/schema-name';
+import { TenantSchemaName } from '../../src/tenant/domain/tenant-schema-name';
 import { MigrateTenantSchemaUseCase } from '../../src/tenant-provisioning/application/use-cases/migrate-tenant-schema.use-case';
 import { PostgresTenantMigrationRepository } from '../../src/tenant-provisioning/infrastructure/postgres-tenant-migration.repository';
 import { TenantMigrationLoader } from '../../src/tenant-provisioning/infrastructure/tenant-migration.loader';
