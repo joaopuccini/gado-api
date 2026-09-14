@@ -18,9 +18,7 @@ const contextFor = (schemaName: string): ExecutionContextData => ({
   organizationId: 'organization-id',
   schemaName,
   globalUserId: 'migration-worker',
-  localUserId: 1,
-  farmId: 1,
-  accessibleFarmIds: [1],
+  accessibleFarmIds: [],
   permissions: ['tenant.migrate'],
 });
 
