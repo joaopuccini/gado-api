@@ -1,11 +1,15 @@
-import { Injectable, Logger, ConflictException } from '@nestjs/common';
-import { randomBytes } from 'node:crypto';
+import { Injectable } from '@nestjs/common';
+import { randomBytes, randomUUID } from 'node:crypto';
+import type { Prisma } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import { AdminPrismaService } from '../../admin/admin-prisma.service';
 import { TenantPrismaClientFactory } from '../../tenant/infrastructure/tenant-prisma-client.factory';
 import { TenantSchemaName } from '../../tenant/infrastructure/schema-name';
 import { FazendaRole } from '../../common/rbac/rbac.config';
-import * as bcrypt from 'bcrypt';
+import { ExecutionContextStore } from '../../common/context';
+import { StructuredLogger } from '../../common/logger/structured-logger.service';
+import { MigrateTenantSchemaUseCase } from '../../tenant-provisioning/application/use-cases/migrate-tenant-schema.use-case';
+import { DomainError } from '../../common/errors/domain-error';
 
 export interface ProvisionResult {
   organizacaoId: string;
@@ -19,12 +23,13 @@ export interface ProvisionResult {
 
 @Injectable()
 export class SocialProvisioningService {
-  private readonly logger = new Logger(SocialProvisioningService.name);
-
   constructor(
     private readonly adminPrisma: AdminPrismaService,
     private readonly tenantClientFactory: TenantPrismaClientFactory,
     private readonly configService: ConfigService,
+    private readonly context: ExecutionContextStore,
+    private readonly migrateTenantSchema: MigrateTenantSchemaUseCase,
+    private readonly logger: StructuredLogger,
   ) {}
 
   /**
@@ -39,8 +44,6 @@ export class SocialProvisioningService {
     const slug = await this.generateUniqueSlug(profile.email);
     const schemaName = `tenant_${randomBytes(16).toString('hex')}`;
     const subdomain = slug;
-
-    this.logger.log(`Provisionando TRIAL para ${profile.email}: schema=${schemaName}`);
 
     // 1. Criar Organização
     const org = await this.adminPrisma.organizacao.create({
@@ -60,8 +63,7 @@ export class SocialProvisioningService {
         organizacaoId: org.id,
         subdomain,
         schemaName,
-        status: 'ATIVO',
-        provisionedAt: new Date(),
+        status: 'PROVISIONANDO',
       },
     });
 
@@ -92,49 +94,78 @@ export class SocialProvisioningService {
       },
     });
 
-    // 5. Criar Schema no PostgreSQL
+    // 5. Criar e atualizar o schema exclusivamente por migrations versionadas.
     const tenantSchema = TenantSchemaName.parse(schemaName);
-    await this.createTenantSchema(tenantSchema);
+    const migrationRequestId = randomUUID();
+    await this.context.run(
+      {
+        requestId: migrationRequestId,
+        traceId: migrationRequestId,
+        contextType: 'job',
+        startedAt: Date.now(),
+        tenantId: tenant.id,
+        organizationId: org.id,
+        schemaName,
+        globalUserId: profile.globalUserId,
+        accessibleFarmIds: [],
+        permissions: ['tenant.migrate'],
+      },
+      () => this.migrateTenantSchema.execute(),
+    );
 
     // 6. Criar dados iniciais no tenant (UsuarioLocal + Fazenda + Perfil)
     const tenantClient = this.tenantClientFactory.create(tenantSchema);
-
-    // Seed permissões e perfis padrão
-    await this.seedDefaultPermissions(tenantClient);
-    const adminPerfil = await this.seedDefaultProfiles(tenantClient);
-
-    // Criar UsuarioLocal
-    const usuarioLocal = await tenantClient.usuario.create({
-      data: {
-        globalUserId: profile.globalUserId,
-        nome: profile.nome,
-        email: profile.email,
-        senhaHash: '', // OAuth user, sem senha
-        perfilId: adminPerfil.id,
-      },
+    const adminPerfil = await tenantClient.perfil.findUnique({
+      where: { nome: 'Administrador' },
     });
+    if (!adminPerfil) {
+      throw new DomainError(
+        'tenantMigrationFailed',
+        'Seed de autorização do tenant ausente',
+      );
+    }
 
-    // Criar Fazenda padrão
-    const fazenda = await tenantClient.fazenda.create({
-      data: {
-        nome: 'Fazenda Principal',
-        nomeProprietario: profile.nome,
+    const { usuarioLocal, fazenda } = await tenantClient.$transaction(
+      async (transaction) => {
+        const createdUser = await transaction.usuario.create({
+          data: {
+            globalUserId: profile.globalUserId,
+            nome: profile.nome,
+            email: profile.email,
+            senhaHash: '',
+            perfilId: adminPerfil.id,
+          },
+        });
+        const createdFarm = await transaction.fazenda.create({
+          data: {
+            nome: 'Fazenda Principal',
+            nomeProprietario: profile.nome,
+          },
+        });
+        await transaction.usuarioFazenda.create({
+          data: {
+            usuarioId: createdUser.id,
+            fazendaId: createdFarm.id,
+            role: FazendaRole.DONO,
+          },
+        });
+        await this.seedDefaultFarmData(transaction, createdFarm.id);
+        return { usuarioLocal: createdUser, fazenda: createdFarm };
       },
+    );
+
+    await tenantClient.fazenda.findUniqueOrThrow({ where: { id: fazenda.id } });
+    await this.adminPrisma.tenantRegistry.update({
+      where: { id: tenant.id },
+      data: { status: 'ATIVO', provisionedAt: new Date() },
     });
-
-    // Vincular UsuarioFazenda como DONO
-    await tenantClient.usuarioFazenda.create({
-      data: {
-        usuarioId: usuarioLocal.id,
-        fazendaId: fazenda.id,
-        role: FazendaRole.DONO,
-      },
+    this.logger.info('tenantTrialProvisioned', {
+      module: 'tenantProvisioning',
+      operation: 'provisionTrial',
+      tenantId: tenant.id,
+      organizationId: org.id,
+      schemaName,
     });
-
-    // Criar dados base (Raça, Lote, Pasto padrão)
-    await this.seedDefaultFarmData(tenantClient, fazenda.id);
-
-    this.logger.log(`✅ TRIAL provisionado: org=${org.id}, schema=${schemaName}`);
 
     return {
       organizacaoId: org.id,
@@ -148,7 +179,8 @@ export class SocialProvisioningService {
   }
 
   private async generateUniqueSlug(email: string): Promise<string> {
-    let base = email.split('@')[0]
+    let base = email
+      .split('@')[0]
       .toLowerCase()
       .replace(/[^a-z0-9]/g, '')
       .substring(0, 30);
@@ -187,85 +219,10 @@ export class SocialProvisioningService {
     return plan;
   }
 
-  private async createTenantSchema(schema: TenantSchemaName): Promise<void> {
-    // Usar $executeRawUnsafe via AdminPrisma para criar o schema
-    await this.adminPrisma.$executeRawUnsafe(
-      `CREATE SCHEMA IF NOT EXISTS "${schema.value}"`,
-    );
-
-    // Copiar tabelas do schema template
-    // Em produção usaria prisma migrate deploy; aqui cria via DDL
-    const templateSchema = 'public'; // mudado de gado_fazendas para public se for esse o default
-
-    // Buscar todas as tabelas do schema template e recriar no novo schema
-    const tables = await this.adminPrisma.$queryRawUnsafe<Array<{ tablename: string }>>(
-      `SELECT tablename FROM pg_tables WHERE schemaname = $1`,
-      templateSchema,
-    );
-
-    for (const { tablename } of tables) {
-      await this.adminPrisma.$executeRawUnsafe(
-        `CREATE TABLE IF NOT EXISTS "${schema.value}"."${tablename}" (LIKE "${templateSchema}"."${tablename}" INCLUDING ALL)`,
-      );
-    }
-
-    this.logger.log(`Schema ${schema.value} criado com ${tables.length} tabelas`);
-  }
-
-  private async seedDefaultPermissions(tenantClient: any): Promise<void> {
-    const permissoes = [
-      { codigo: 'animais:ler', nome: 'Ler Animais', modulo: 'Animais' },
-      { codigo: 'animais:criar', nome: 'Criar Animais', modulo: 'Animais' },
-      { codigo: 'animais:editar', nome: 'Editar Animais', modulo: 'Animais' },
-      { codigo: 'animais:excluir', nome: 'Excluir Animais', modulo: 'Animais' },
-      { codigo: 'financeiro:ler', nome: 'Ver Financeiro', modulo: 'Financeiro' },
-      { codigo: 'financeiro:criar', nome: 'Lançar Financeiro', modulo: 'Financeiro' },
-      { codigo: 'financeiro:editar', nome: 'Editar Financeiro', modulo: 'Financeiro' },
-      { codigo: 'financeiro:excluir', nome: 'Excluir Financeiro', modulo: 'Financeiro' },
-      { codigo: 'configuracoes:gerenciar', nome: 'Gerenciar Configurações', modulo: 'Configurações' },
-      { codigo: 'sanidade:ler', nome: 'Ver Sanidade', modulo: 'Sanidade' },
-      { codigo: 'sanidade:criar', nome: 'Registrar Sanidade', modulo: 'Sanidade' },
-      { codigo: 'sanidade:gerenciar', nome: 'Gerenciar Sanidade', modulo: 'Sanidade' },
-      { codigo: 'manejo:ler', nome: 'Ver Manejo', modulo: 'Manejo' },
-      { codigo: 'manejo:criar', nome: 'Registrar Manejo', modulo: 'Manejo' },
-      { codigo: 'manejo:gerenciar', nome: 'Gerenciar Manejo', modulo: 'Manejo' },
-      { codigo: 'pesagens:ler', nome: 'Ver Pesagens', modulo: 'Pesagens' },
-      { codigo: 'pesagens:criar', nome: 'Registrar Pesagens', modulo: 'Pesagens' },
-    ];
-
-    for (const p of permissoes) {
-      await tenantClient.permissao.upsert({
-        where: { codigo: p.codigo },
-        update: {},
-        create: p,
-      });
-    }
-  }
-
-  private async seedDefaultProfiles(tenantClient: any) {
-    const adminPerfil = await tenantClient.perfil.upsert({
-      where: { nome: 'Administrador' },
-      update: {},
-      create: {
-        nome: 'Administrador',
-        descricao: 'Acesso total ao sistema da fazenda',
-      },
-    });
-
-    // Vincular todas as permissões ao perfil Admin
-    const allPerms = await tenantClient.permissao.findMany();
-    for (const perm of allPerms) {
-      await tenantClient.perfilPermissao.upsert({
-        where: { perfilId_permissaoId: { perfilId: adminPerfil.id, permissaoId: perm.id } },
-        update: {},
-        create: { perfilId: adminPerfil.id, permissaoId: perm.id },
-      });
-    }
-
-    return adminPerfil;
-  }
-
-  private async seedDefaultFarmData(tenantClient: any, fazendaId: number): Promise<void> {
+  private async seedDefaultFarmData(
+    tenantClient: Prisma.TransactionClient,
+    fazendaId: number,
+  ): Promise<void> {
     await tenantClient.raca.upsert({
       where: { id: 1 },
       update: {},

@@ -36,7 +36,10 @@ export const resetAdminDatabase = async (pool: Pool): Promise<void> => {
 };
 
 export const deployAdminMigrations = (databaseUrl: string): void => {
-  const prismaCli = resolve(process.cwd(), 'node_modules/prisma/build/index.js');
+  const prismaCli = resolve(
+    process.cwd(),
+    'node_modules/prisma/build/index.js',
+  );
   const result = spawnSync(
     process.execPath,
     [prismaCli, 'migrate', 'deploy', '--config', 'prisma.config.ts'],
@@ -50,7 +53,11 @@ export const deployAdminMigrations = (databaseUrl: string): void => {
     },
   );
   if (result.status !== 0) {
-    throw new Error('adminMigrationDeployFailed');
+    const detail = [result.error?.message, result.stderr, result.stdout]
+      .filter(Boolean)
+      .join('\n')
+      .replaceAll(databaseUrl, '[redactedDatabaseUrl]');
+    throw new Error(`adminMigrationDeployFailed: ${detail}`);
   }
 };
 

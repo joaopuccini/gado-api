@@ -55,12 +55,15 @@ describe('tenant migrations on an empty schema', () => {
       toVersion: TENANT_CURRENT_VERSION,
     });
 
-    const tables = await pool.query<{ tableName: string }>(`
+    const tables = await pool.query<{ tableName: string }>(
+      `
       SELECT table_name AS "tableName"
       FROM information_schema.tables
       WHERE table_schema = $1
       ORDER BY table_name
-    `, [schemaName]);
+    `,
+      [schemaName],
+    );
     expect(tables.rows.map(({ tableName }) => tableName)).toEqual(
       expect.arrayContaining([
         '_gado_tenant_migrations',
@@ -72,17 +75,23 @@ describe('tenant migrations on an empty schema', () => {
       ]),
     );
 
-    const foreignKeys = await pool.query<{ total: number }>(`
+    const foreignKeys = await pool.query<{ total: number }>(
+      `
       SELECT count(*)::int AS total
       FROM pg_constraint constraint_record
       JOIN pg_namespace namespace_record
         ON namespace_record.oid = constraint_record.connamespace
       WHERE namespace_record.nspname = $1
         AND constraint_record.contype = 'f'
-    `, [schemaName]);
+    `,
+      [schemaName],
+    );
     expect(foreignKeys.rows[0]?.total).toBeGreaterThan(20);
 
-    const seedCounts = await pool.query<{ permissions: number; profiles: number }>(`
+    const seedCounts = await pool.query<{
+      permissions: number;
+      profiles: number;
+    }>(`
       SELECT
         (SELECT count(*)::int FROM "${schemaName}"."permissoes") AS permissions,
         (SELECT count(*)::int FROM "${schemaName}"."perfis") AS profiles

@@ -48,7 +48,7 @@ describe('MigrateTenantSchemaUseCase', () => {
     await expect(useCase.execute()).rejects.toMatchObject({
       code: 'executionContextMissing',
     });
-    expect(repository.appliedVersions).not.toHaveBeenCalled();
+    expect(repository.appliedVersions.mock.calls).toHaveLength(0);
   });
 
   it('applies pending migrations in order and reports the version range', async () => {
@@ -73,6 +73,6 @@ describe('MigrateTenantSchemaUseCase', () => {
     await expect(
       context.run(contextFor(schemaName), () => useCase.execute()),
     ).rejects.toMatchObject({ code: 'migrationChecksumMismatch' });
-    expect(repository.apply).not.toHaveBeenCalled();
+    expect(repository.apply.mock.calls).toHaveLength(0);
   });
 });

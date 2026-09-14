@@ -10,7 +10,10 @@ export type ErrorCode =
   | 'tenantUnavailable'
   | 'animalNotFound'
   | 'internalServerError'
-  | 'invalidTenantSchemaName';
+  | 'invalidTenantSchemaName'
+  | 'migrationChecksumMismatch'
+  | 'migrationChainInvalid'
+  | 'tenantMigrationFailed';
 
 export interface ErrorDetail {
   field?: string;

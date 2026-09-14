@@ -22,6 +22,9 @@ const statusByCode: Readonly<Record<ErrorCode, number>> = {
   animalNotFound: HttpStatus.NOT_FOUND,
   internalServerError: HttpStatus.INTERNAL_SERVER_ERROR,
   invalidTenantSchemaName: HttpStatus.INTERNAL_SERVER_ERROR,
+  migrationChecksumMismatch: HttpStatus.INTERNAL_SERVER_ERROR,
+  migrationChainInvalid: HttpStatus.INTERNAL_SERVER_ERROR,
+  tenantMigrationFailed: HttpStatus.INTERNAL_SERVER_ERROR,
 };
 
 export const mapDomainErrorToHttp = (

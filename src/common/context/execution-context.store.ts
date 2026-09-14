@@ -45,6 +45,14 @@ export type RequiredTenantContext = ExecutionContextData &
     >
   >;
 
+export type RequiredTenantIdentityContext = ExecutionContextData &
+  Required<
+    Pick<
+      ExecutionContextData,
+      'tenantId' | 'organizationId' | 'schemaName' | 'globalUserId'
+    >
+  >;
+
 const freezeContext = (
   context: ExecutionContextData,
 ): Readonly<ExecutionContextData> =>
@@ -98,19 +106,11 @@ export class ExecutionContextStore {
   }
 
   requireTenant(): Readonly<RequiredTenantContext> {
-    const context = this.require();
-    const hasRequiredIdentity =
-      context.tenantId !== undefined &&
-      context.organizationId !== undefined &&
-      context.schemaName !== undefined &&
-      context.globalUserId !== undefined &&
-      context.localUserId !== undefined &&
-      context.farmId !== undefined;
+    const context = this.requireTenantIdentity();
+    const hasRequiredOperationalScope =
+      context.localUserId !== undefined && context.farmId !== undefined;
 
-    if (
-      !['tenant', 'job'].includes(context.contextType) ||
-      !hasRequiredIdentity
-    ) {
+    if (!hasRequiredOperationalScope) {
       throw new DomainError(
         'tenantContextMissing',
         'Contexto de tenant ausente',
@@ -118,5 +118,26 @@ export class ExecutionContextStore {
     }
 
     return context as Readonly<RequiredTenantContext>;
+  }
+
+  requireTenantIdentity(): Readonly<RequiredTenantIdentityContext> {
+    const context = this.require();
+    const hasRequiredIdentity =
+      context.tenantId !== undefined &&
+      context.organizationId !== undefined &&
+      context.schemaName !== undefined &&
+      context.globalUserId !== undefined;
+
+    if (
+      !['tenant', 'job'].includes(context.contextType) ||
+      !hasRequiredIdentity
+    ) {
+      throw new DomainError(
+        'tenantContextMissing',
+        'Identidade de tenant ausente',
+      );
+    }
+
+    return context as Readonly<RequiredTenantIdentityContext>;
   }
 }
