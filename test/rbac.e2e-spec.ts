@@ -6,7 +6,10 @@ import { PassportModule } from '@nestjs/passport';
 import { APP_GUARD } from '@nestjs/core';
 import { PermissionsGuard } from '../src/auth/guards/permissions.guard';
 import { RequirePermissions } from '../src/auth/decorators/permissions.decorator';
-import { FazendaRole, getPermissionsForRole } from '../src/common/rbac/rbac.config';
+import {
+  FazendaRole,
+  getPermissionsForRole,
+} from '../src/common/rbac/rbac.config';
 import { JwtAuthGuard } from '../src/auth/guards/jwt-auth.guard';
 import { JwtStrategy } from '../src/auth/strategies/jwt.strategy';
 import { ConfigModule } from '@nestjs/config';
@@ -40,7 +43,10 @@ describe('RBAC Permissions (e2e)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
-        ConfigModule.forRoot({ isGlobal: true, load: [() => ({ JWT_SECRET: 'test-secret' })] }),
+        ConfigModule.forRoot({
+          isGlobal: true,
+          load: [() => ({ JWT_SECRET: 'test-secret' })],
+        }),
         PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule.register({
           secret: 'test-secret',

@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { AssinaturasService } from './assinaturas.service';
 import { CreateAssinaturaDto } from './dto/create-assinatura.dto';
 import { UpdateAssinaturaDto } from './dto/update-assinatura.dto';
@@ -23,7 +31,10 @@ export class AssinaturasController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAssinaturaDto: UpdateAssinaturaDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateAssinaturaDto: UpdateAssinaturaDto,
+  ) {
     return this.assinaturasService.update(id, updateAssinaturaDto);
   }
 
@@ -33,7 +44,10 @@ export class AssinaturasController {
   }
 
   @Post('pagamentos/:pagamentoId/baixar')
-  registrarBaixa(@Param('pagamentoId') pagamentoId: string, @Body('valorPago') valorPago: number) {
+  registrarBaixa(
+    @Param('pagamentoId') pagamentoId: string,
+    @Body('valorPago') valorPago: number,
+  ) {
     return this.assinaturasService.registrarPagamento(pagamentoId, valorPago);
   }
 }

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { randomBytes } from 'node:crypto';
 import { AdminPrismaService } from '../admin-prisma.service';
 import { CreateOrganizacaoDto } from './dto/create-organizacao.dto';
@@ -14,13 +18,17 @@ export class OrganizacoesService {
       where: {
         OR: [
           { subdomain: createOrganizacaoDto.subdomain },
-          ...(createOrganizacaoDto.cnpj ? [{ cnpj: createOrganizacaoDto.cnpj }] : []),
+          ...(createOrganizacaoDto.cnpj
+            ? [{ cnpj: createOrganizacaoDto.cnpj }]
+            : []),
         ],
       },
     });
 
     if (existingOrg) {
-      throw new ConflictException('Organização já existe com este subdomínio ou CNPJ');
+      throw new ConflictException(
+        'Organização já existe com este subdomínio ou CNPJ',
+      );
     }
 
     const schemaName = `tenant_${randomBytes(16).toString('hex')}`;

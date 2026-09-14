@@ -14,9 +14,9 @@ export class TenantRegistryService {
       connectionString: databaseUrl,
     });
     const adapter = new PrismaPg(pool) as any;
-    
+
     this.adminClient = new AdminPrismaClient({
-      adapter
+      adapter,
     });
   }
 

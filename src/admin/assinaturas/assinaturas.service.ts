@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { AdminPrismaService } from '../admin-prisma.service';
 import { CreateAssinaturaDto } from './dto/create-assinatura.dto';
 import { UpdateAssinaturaDto } from './dto/update-assinatura.dto';
@@ -37,13 +41,13 @@ export class AssinaturasService {
 
       // Se passou o número de meses, gera os boletos futuros (mensalidades)
       const meses = createAssinaturaDto.mesesGerarPagamento || 1;
-      
+
       for (let i = 0; i < meses; i++) {
         const d = new Date(dataInicio);
         d.setMonth(d.getMonth() + i);
         const compAno = d.getFullYear();
         const compMes = String(d.getMonth() + 1).padStart(2, '0');
-        
+
         await tx.pagamento.create({
           data: {
             assinaturaId: assinatura.id,
@@ -73,7 +77,8 @@ export class AssinaturasService {
       where: { id },
       include: { organizacao: true, plano: true, pagamentos: true },
     });
-    if (!assinatura) throw new NotFoundException(`Assinatura #${id} não encontrada`);
+    if (!assinatura)
+      throw new NotFoundException(`Assinatura #${id} não encontrada`);
     return assinatura;
   }
 
@@ -103,11 +108,12 @@ export class AssinaturasService {
   async registrarPagamento(pagamentoId: string, valorPago: number) {
     const pagamento = await this.prisma.pagamento.findUnique({
       where: { id: pagamentoId },
-      include: { assinatura: true }
+      include: { assinatura: true },
     });
 
     if (!pagamento) throw new NotFoundException('Pagamento não encontrado');
-    if (pagamento.status === 'PAGO') throw new ConflictException('Este pagamento já foi baixado');
+    if (pagamento.status === 'PAGO')
+      throw new ConflictException('Este pagamento já foi baixado');
 
     return await this.prisma.$transaction(async (tx) => {
       const pag = await tx.pagamento.update({
@@ -116,7 +122,7 @@ export class AssinaturasService {
           status: 'PAGO',
           dataPagamento: new Date(),
           observacao: `Valor pago: ${valorPago}`,
-        }
+        },
       });
 
       // Atualiza o vencimento da assinatura empurrando mais 30 dias (lógica do financeiro antigo)
@@ -128,13 +134,13 @@ export class AssinaturasService {
         data: {
           dataVencimento: novaDataVenc,
           status: 'ATIVA',
-        }
+        },
       });
 
       // Aumenta o tempo da Organização para ATIVO também se tava suspensa (migração do SyncEditarFazenda)
       await tx.organizacao.update({
         where: { id: pagamento.assinatura.organizacaoId },
-        data: { status: 'ATIVO' }
+        data: { status: 'ATIVO' },
       });
 
       return pag;

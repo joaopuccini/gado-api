@@ -1,4 +1,10 @@
-import { IsString, IsNotEmpty, IsEmail, IsOptional, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsEmail,
+  IsOptional,
+  IsEnum,
+} from 'class-validator';
 import { OrganizacaoStatus } from '@prisma/client-admin';
 
 export class CreateOrganizacaoDto {

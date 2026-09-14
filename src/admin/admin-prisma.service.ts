@@ -4,7 +4,10 @@ import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 @Injectable()
-export class AdminPrismaService extends AdminPrismaClient implements OnModuleInit, OnModuleDestroy {
+export class AdminPrismaService
+  extends AdminPrismaClient
+  implements OnModuleInit, OnModuleDestroy
+{
   constructor() {
     const databaseUrl = process.env.DATABASE_URL || '';
     const pool = new Pool({

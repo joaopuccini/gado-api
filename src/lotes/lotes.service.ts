@@ -4,16 +4,18 @@ import { BaseTenantService } from '../common/services';
 import { CreateLoteDto, UpdateLoteDto } from './dto/lote.dto';
 
 @Injectable()
-export class LotesService extends BaseTenantService<CreateLoteDto, UpdateLoteDto> {
-    protected readonly logger = new Logger(LotesService.name);
-    protected readonly modelName = 'Lote';
+export class LotesService extends BaseTenantService<
+  CreateLoteDto,
+  UpdateLoteDto
+> {
+  protected readonly logger = new Logger(LotesService.name);
+  protected readonly modelName = 'Lote';
 
-    constructor(tenantPrisma: TenantPrismaService) {
-        super(tenantPrisma);
-    }
+  constructor(tenantPrisma: TenantPrismaService) {
+    super(tenantPrisma);
+  }
 
-    protected getDelegate() {
-        return this.getTenantClient().lote;
-    }
+  protected getDelegate() {
+    return this.getTenantClient().lote;
+  }
 }
-

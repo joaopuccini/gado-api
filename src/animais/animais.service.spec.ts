@@ -116,13 +116,13 @@ describe('AnimaisService', () => {
     it('should create required relations if they do not exist and seed 25 animals', async () => {
       mockPrismaClient.fazenda.findFirst.mockResolvedValue(null);
       mockPrismaClient.fazenda.create.mockResolvedValue({ id: 10 });
-      
+
       mockPrismaClient.raca.findFirst.mockResolvedValue(null);
       mockPrismaClient.raca.create.mockResolvedValue({ id: 20 });
-      
+
       mockPrismaClient.lote.findFirst.mockResolvedValue(null);
       mockPrismaClient.lote.create.mockResolvedValue({ id: 30 });
-      
+
       mockPrismaClient.pasto.findFirst.mockResolvedValue(null);
       mockPrismaClient.pasto.create.mockResolvedValue({ id: 40 });
 
@@ -137,13 +137,14 @@ describe('AnimaisService', () => {
       expect(mockPrismaClient.raca.create).toHaveBeenCalled();
       expect(mockPrismaClient.lote.create).toHaveBeenCalled();
       expect(mockPrismaClient.pasto.create).toHaveBeenCalled();
-      
+
       expect(mockPrismaClient.animal.createMany).toHaveBeenCalled();
-      const createManyCallArgs = mockPrismaClient.animal.createMany.mock.calls[0][0];
+      const createManyCallArgs =
+        mockPrismaClient.animal.createMany.mock.calls[0][0];
       expect(createManyCallArgs.data).toHaveLength(25);
-      
+
       expect(mockPrismaClient.pesagem.createMany).toHaveBeenCalled();
-      
+
       expect(result).toEqual({ message: '25 animais gerados com sucesso' });
     });
   });

@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AdminPrismaService } from '../../admin/admin-prisma.service';
 import { SKIP_SUBSCRIPTION_CHECK } from './skip-subscription.decorator';
@@ -11,10 +16,10 @@ export class SubscriptionGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const skipCheck = this.reflector.getAllAndOverride<boolean>(SKIP_SUBSCRIPTION_CHECK, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const skipCheck = this.reflector.getAllAndOverride<boolean>(
+      SKIP_SUBSCRIPTION_CHECK,
+      [context.getHandler(), context.getClass()],
+    );
 
     if (skipCheck) {
       return true;
@@ -43,11 +48,15 @@ export class SubscriptionGuard implements CanActivate {
     );
 
     if (!assinatura) {
-      throw new ForbiddenException('Nenhuma assinatura ativa encontrada para esta organização');
+      throw new ForbiddenException(
+        'Nenhuma assinatura ativa encontrada para esta organização',
+      );
     }
 
     if (assinatura.dataVencimento < new Date()) {
-      throw new ForbiddenException('A assinatura expirou. Renove para continuar utilizando a plataforma.');
+      throw new ForbiddenException(
+        'A assinatura expirou. Renove para continuar utilizando a plataforma.',
+      );
     }
 
     return true;

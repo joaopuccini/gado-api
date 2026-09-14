@@ -11,29 +11,29 @@ import { AdminModule } from '../admin/admin.module';
 import { TenantModule } from '../tenant/tenant.module';
 
 @Module({
-    imports: [
-        PassportModule.register({ defaultStrategy: 'jwt' }),
-        JwtModule.registerAsync({
-            imports: [ConfigModule],
-            inject: [ConfigService],
-            useFactory: (configService: ConfigService) => ({
-                secret: configService.getOrThrow<string>('JWT_SECRET'),
-                signOptions: {
-                    expiresIn: configService.get('JWT_EXPIRES_IN', '1h') as any,
-                },
-            }),
-        }),
-        forwardRef(() => AdminModule),
-        forwardRef(() => TenantModule),
-    ],
-    controllers: [AuthController],
-    providers: [
-        AuthService,
-        SocialProvisioningService,
-        JwtStrategy,
-        // Google OAuth é opcional — só registra quando as credenciais estão configuradas
-        ...(process.env.GOOGLE_CLIENT_ID ? [GoogleStrategy] : []),
-    ],
-    exports: [JwtModule, PassportModule],
+  imports: [
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.getOrThrow<string>('JWT_SECRET'),
+        signOptions: {
+          expiresIn: configService.get('JWT_EXPIRES_IN', '1h'),
+        },
+      }),
+    }),
+    forwardRef(() => AdminModule),
+    forwardRef(() => TenantModule),
+  ],
+  controllers: [AuthController],
+  providers: [
+    AuthService,
+    SocialProvisioningService,
+    JwtStrategy,
+    // Google OAuth é opcional — só registra quando as credenciais estão configuradas
+    ...(process.env.GOOGLE_CLIENT_ID ? [GoogleStrategy] : []),
+  ],
+  exports: [JwtModule, PassportModule],
 })
-export class AuthModule { }
+export class AuthModule {}

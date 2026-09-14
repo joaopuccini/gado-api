@@ -4,6 +4,6 @@ import { MovimentoEstoqueService } from './movimento-estoque.service';
 
 @Module({
   controllers: [MovimentoEstoqueController],
-  providers: [MovimentoEstoqueService]
+  providers: [MovimentoEstoqueService],
 })
 export class MovimentoEstoqueModule {}

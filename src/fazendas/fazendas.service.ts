@@ -3,62 +3,63 @@ import { TenantPrismaService } from '../tenant/tenant-prisma.service';
 
 @Injectable()
 export class FazendasService {
-    constructor(private readonly tenantPrisma: TenantPrismaService) { }
+  constructor(private readonly tenantPrisma: TenantPrismaService) {}
 
-    private getTenantClient() {
-        return this.tenantPrisma.getClient();
-    }
+  private getTenantClient() {
+    return this.tenantPrisma.getClient();
+  }
 
-    async findAll() {
-        const tenant = this.getTenantClient();
-        return tenant.fazenda.findMany({
-            where: { ativo: true }
-        });
-    }
+  async findAll() {
+    const tenant = this.getTenantClient();
+    return tenant.fazenda.findMany({
+      where: { ativo: true },
+    });
+  }
 
-    async findOne(id: number) {
-        const tenant = this.getTenantClient();
-        const fazenda = await tenant.fazenda.findUnique({
-            where: { id }
-        });
-        if (!fazenda || !fazenda.ativo) throw new NotFoundException('Fazenda não encontrada');
-        return fazenda;
-    }
+  async findOne(id: number) {
+    const tenant = this.getTenantClient();
+    const fazenda = await tenant.fazenda.findUnique({
+      where: { id },
+    });
+    if (!fazenda || !fazenda.ativo)
+      throw new NotFoundException('Fazenda não encontrada');
+    return fazenda;
+  }
 
-    async findByUserId(usuarioLocalId: number) {
-        const tenant = this.getTenantClient();
-        const userFazendas = await tenant.usuarioFazenda.findMany({
-            where: { usuarioId: usuarioLocalId, ativo: true },
-            include: { fazenda: true }
-        });
-        return userFazendas.map(uf => uf.fazenda);
-    }
+  async findByUserId(usuarioLocalId: number) {
+    const tenant = this.getTenantClient();
+    const userFazendas = await tenant.usuarioFazenda.findMany({
+      where: { usuarioId: usuarioLocalId, ativo: true },
+      include: { fazenda: true },
+    });
+    return userFazendas.map((uf) => uf.fazenda);
+  }
 
-    async create(data: any) {
-        const tenant = this.getTenantClient();
-        return tenant.fazenda.create({
-            data: {
-                ...data,
-                ativo: true,
-            }
-        });
-    }
+  async create(data: any) {
+    const tenant = this.getTenantClient();
+    return tenant.fazenda.create({
+      data: {
+        ...data,
+        ativo: true,
+      },
+    });
+  }
 
-    async update(id: number, data: any) {
-        const tenant = this.getTenantClient();
-        await this.findOne(id);
-        return tenant.fazenda.update({
-            where: { id },
-            data
-        });
-    }
+  async update(id: number, data: any) {
+    const tenant = this.getTenantClient();
+    await this.findOne(id);
+    return tenant.fazenda.update({
+      where: { id },
+      data,
+    });
+  }
 
-    async remove(id: number) {
-        const tenant = this.getTenantClient();
-        await this.findOne(id);
-        return tenant.fazenda.update({
-            where: { id },
-            data: { ativo: false }
-        });
-    }
+  async remove(id: number) {
+    const tenant = this.getTenantClient();
+    await this.findOne(id);
+    return tenant.fazenda.update({
+      where: { id },
+      data: { ativo: false },
+    });
+  }
 }

@@ -8,8 +8,8 @@ import { createParamDecorator, ExecutionContext } from '@nestjs/common';
  * isolado por request via JWT payload.
  */
 export const CurrentFazenda = createParamDecorator(
-    (_data: unknown, ctx: ExecutionContext): number => {
-        const request = ctx.switchToHttp().getRequest();
-        return request.user?.fazendaId;
-    },
+  (_data: unknown, ctx: ExecutionContext): number => {
+    const request = ctx.switchToHttp().getRequest();
+    return request.user?.fazendaId;
+  },
 );

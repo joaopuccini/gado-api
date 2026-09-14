@@ -8,50 +8,51 @@ import { DashboardService } from './dashboard.service';
 // @UseGuards(AuthGuard('jwt'))
 @Controller('dashboard')
 export class DashboardController {
-    constructor(private readonly service: DashboardService) { }
+  constructor(private readonly service: DashboardService) {}
 
-    @Get('stats')
-    @ApiOperation({ summary: 'Estatísticas básicas' })
-    async getStats() {
-        return this.service.getStats();
-    }
+  @Get('stats')
+  @ApiOperation({ summary: 'Estatísticas básicas' })
+  async getStats() {
+    return this.service.getStats();
+  }
 
-    @Get('total_machos_femeas')
-    @ApiOperation({ summary: 'Total de machos e fêmeas ativos' })
-    async getTotalMachoFemea() {
-        return this.service.getTotalMachoFemea();
-    }
+  @Get('total_machos_femeas')
+  @ApiOperation({ summary: 'Total de machos e fêmeas ativos' })
+  async getTotalMachoFemea() {
+    return this.service.getTotalMachoFemea();
+  }
 
-    @Get('total')
-    @ApiOperation({ summary: 'Total de custo acumulado' })
-    async getTotalCusto() {
-        const data = await this.service.getTotalCustoAnimaisComCusto();
-        return data;
-    }
+  @Get('total')
+  @ApiOperation({ summary: 'Total de custo acumulado' })
+  async getTotalCusto() {
+    const data = await this.service.getTotalCustoAnimaisComCusto();
+    return data;
+  }
 
-    @Get('total_lprc_ativos')
-    @ApiOperation({ summary: 'Total de lotes, pastos, raças e clientes ativos' })
-    async getTotalLPRC(@Query() query: any) {
-        const data = await this.service.getTotalLotesPastosRacasClientesAtivos(query);
-        return data;
-    }
+  @Get('total_lprc_ativos')
+  @ApiOperation({ summary: 'Total de lotes, pastos, raças e clientes ativos' })
+  async getTotalLPRC(@Query() query: any) {
+    const data =
+      await this.service.getTotalLotesPastosRacasClientesAtivos(query);
+    return data;
+  }
 
-    @Get('total_tipo_custo')
-    @ApiOperation({ summary: 'Total por tipo de custo' })
-    async getTotalTipoCusto() {
-        return this.service.getTotalPorTipoCusto();
-    }
+  @Get('total_tipo_custo')
+  @ApiOperation({ summary: 'Total por tipo de custo' })
+  async getTotalTipoCusto() {
+    return this.service.getTotalPorTipoCusto();
+  }
 
-    @Get('total_12_meses')
-    @ApiOperation({ summary: 'Total de custo nos últimos 12 meses' })
-    async getTotal12Meses() {
-        const data = await this.service.getTotalCusto12Meses();
-        return data;
-    }
+  @Get('total_12_meses')
+  @ApiOperation({ summary: 'Total de custo nos últimos 12 meses' })
+  async getTotal12Meses() {
+    const data = await this.service.getTotalCusto12Meses();
+    return data;
+  }
 
-    @Get('evolucao_peso')
-    @ApiOperation({ summary: 'Evolução de peso médio dos animais' })
-    async getEvolucaoPeso() {
-        return this.service.getEvolucaoPeso();
-    }
+  @Get('evolucao_peso')
+  @ApiOperation({ summary: 'Evolução de peso médio dos animais' })
+  async getEvolucaoPeso() {
+    return this.service.getEvolucaoPeso();
+  }
 }

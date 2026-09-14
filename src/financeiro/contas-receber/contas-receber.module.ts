@@ -4,6 +4,6 @@ import { ContasReceberService } from './contas-receber.service';
 
 @Module({
   controllers: [ContasReceberController],
-  providers: [ContasReceberService]
+  providers: [ContasReceberService],
 })
 export class ContasReceberModule {}

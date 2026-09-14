@@ -4,6 +4,6 @@ import { SafrasService } from './safras.service';
 
 @Module({
   controllers: [SafrasController],
-  providers: [SafrasService]
+  providers: [SafrasService],
 })
 export class SafrasModule {}

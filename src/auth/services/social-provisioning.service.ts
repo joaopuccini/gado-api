@@ -1,9 +1,12 @@
-import { Injectable, Logger, ConflictException } from '@nestjs/common';
+import { Injectable, Inject, Logger, ConflictException } from '@nestjs/common';
 import { randomBytes } from 'node:crypto';
 import { ConfigService } from '@nestjs/config';
 import { AdminPrismaService } from '../../admin/admin-prisma.service';
-import { TenantPrismaClientFactory } from '../../tenant/infrastructure/tenant-prisma-client.factory';
-import { TenantSchemaName } from '../../tenant/infrastructure/schema-name';
+import {
+  TENANT_PRISMA_CLIENT_FACTORY,
+  type TenantPrismaClientFactoryPort,
+} from '../../tenant/application/ports/tenant-prisma-client.factory.port';
+import { TenantSchemaName } from '../../tenant/domain/schema-name';
 import { FazendaRole } from '../../common/rbac/rbac.config';
 import * as bcrypt from 'bcrypt';
 
@@ -23,7 +26,8 @@ export class SocialProvisioningService {
 
   constructor(
     private readonly adminPrisma: AdminPrismaService,
-    private readonly tenantClientFactory: TenantPrismaClientFactory,
+    @Inject(TENANT_PRISMA_CLIENT_FACTORY)
+    private readonly tenantClientFactory: TenantPrismaClientFactoryPort,
     private readonly configService: ConfigService,
   ) {}
 
@@ -40,7 +44,9 @@ export class SocialProvisioningService {
     const schemaName = `tenant_${randomBytes(16).toString('hex')}`;
     const subdomain = slug;
 
-    this.logger.log(`Provisionando TRIAL para ${profile.email}: schema=${schemaName}`);
+    this.logger.log(
+      `Provisionando TRIAL para ${profile.email}: schema=${schemaName}`,
+    );
 
     // 1. Criar Organização
     const org = await this.adminPrisma.organizacao.create({
@@ -134,7 +140,9 @@ export class SocialProvisioningService {
     // Criar dados base (Raça, Lote, Pasto padrão)
     await this.seedDefaultFarmData(tenantClient, fazenda.id);
 
-    this.logger.log(`✅ TRIAL provisionado: org=${org.id}, schema=${schemaName}`);
+    this.logger.log(
+      `✅ TRIAL provisionado: org=${org.id}, schema=${schemaName}`,
+    );
 
     return {
       organizacaoId: org.id,
@@ -148,7 +156,8 @@ export class SocialProvisioningService {
   }
 
   private async generateUniqueSlug(email: string): Promise<string> {
-    let base = email.split('@')[0]
+    let base = email
+      .split('@')[0]
       .toLowerCase()
       .replace(/[^a-z0-9]/g, '')
       .substring(0, 30);
@@ -198,10 +207,9 @@ export class SocialProvisioningService {
     const templateSchema = 'public'; // mudado de gado_fazendas para public se for esse o default
 
     // Buscar todas as tabelas do schema template e recriar no novo schema
-    const tables = await this.adminPrisma.$queryRawUnsafe<Array<{ tablename: string }>>(
-      `SELECT tablename FROM pg_tables WHERE schemaname = $1`,
-      templateSchema,
-    );
+    const tables = await this.adminPrisma.$queryRawUnsafe<
+      Array<{ tablename: string }>
+    >(`SELECT tablename FROM pg_tables WHERE schemaname = $1`, templateSchema);
 
     for (const { tablename } of tables) {
       await this.adminPrisma.$executeRawUnsafe(
@@ -209,7 +217,9 @@ export class SocialProvisioningService {
       );
     }
 
-    this.logger.log(`Schema ${schema.value} criado com ${tables.length} tabelas`);
+    this.logger.log(
+      `Schema ${schema.value} criado com ${tables.length} tabelas`,
+    );
   }
 
   private async seedDefaultPermissions(tenantClient: any): Promise<void> {
@@ -218,19 +228,55 @@ export class SocialProvisioningService {
       { codigo: 'animais:criar', nome: 'Criar Animais', modulo: 'Animais' },
       { codigo: 'animais:editar', nome: 'Editar Animais', modulo: 'Animais' },
       { codigo: 'animais:excluir', nome: 'Excluir Animais', modulo: 'Animais' },
-      { codigo: 'financeiro:ler', nome: 'Ver Financeiro', modulo: 'Financeiro' },
-      { codigo: 'financeiro:criar', nome: 'Lançar Financeiro', modulo: 'Financeiro' },
-      { codigo: 'financeiro:editar', nome: 'Editar Financeiro', modulo: 'Financeiro' },
-      { codigo: 'financeiro:excluir', nome: 'Excluir Financeiro', modulo: 'Financeiro' },
-      { codigo: 'configuracoes:gerenciar', nome: 'Gerenciar Configurações', modulo: 'Configurações' },
+      {
+        codigo: 'financeiro:ler',
+        nome: 'Ver Financeiro',
+        modulo: 'Financeiro',
+      },
+      {
+        codigo: 'financeiro:criar',
+        nome: 'Lançar Financeiro',
+        modulo: 'Financeiro',
+      },
+      {
+        codigo: 'financeiro:editar',
+        nome: 'Editar Financeiro',
+        modulo: 'Financeiro',
+      },
+      {
+        codigo: 'financeiro:excluir',
+        nome: 'Excluir Financeiro',
+        modulo: 'Financeiro',
+      },
+      {
+        codigo: 'configuracoes:gerenciar',
+        nome: 'Gerenciar Configurações',
+        modulo: 'Configurações',
+      },
       { codigo: 'sanidade:ler', nome: 'Ver Sanidade', modulo: 'Sanidade' },
-      { codigo: 'sanidade:criar', nome: 'Registrar Sanidade', modulo: 'Sanidade' },
-      { codigo: 'sanidade:gerenciar', nome: 'Gerenciar Sanidade', modulo: 'Sanidade' },
+      {
+        codigo: 'sanidade:criar',
+        nome: 'Registrar Sanidade',
+        modulo: 'Sanidade',
+      },
+      {
+        codigo: 'sanidade:gerenciar',
+        nome: 'Gerenciar Sanidade',
+        modulo: 'Sanidade',
+      },
       { codigo: 'manejo:ler', nome: 'Ver Manejo', modulo: 'Manejo' },
       { codigo: 'manejo:criar', nome: 'Registrar Manejo', modulo: 'Manejo' },
-      { codigo: 'manejo:gerenciar', nome: 'Gerenciar Manejo', modulo: 'Manejo' },
+      {
+        codigo: 'manejo:gerenciar',
+        nome: 'Gerenciar Manejo',
+        modulo: 'Manejo',
+      },
       { codigo: 'pesagens:ler', nome: 'Ver Pesagens', modulo: 'Pesagens' },
-      { codigo: 'pesagens:criar', nome: 'Registrar Pesagens', modulo: 'Pesagens' },
+      {
+        codigo: 'pesagens:criar',
+        nome: 'Registrar Pesagens',
+        modulo: 'Pesagens',
+      },
     ];
 
     for (const p of permissoes) {
@@ -256,7 +302,12 @@ export class SocialProvisioningService {
     const allPerms = await tenantClient.permissao.findMany();
     for (const perm of allPerms) {
       await tenantClient.perfilPermissao.upsert({
-        where: { perfilId_permissaoId: { perfilId: adminPerfil.id, permissaoId: perm.id } },
+        where: {
+          perfilId_permissaoId: {
+            perfilId: adminPerfil.id,
+            permissaoId: perm.id,
+          },
+        },
         update: {},
         create: { perfilId: adminPerfil.id, permissaoId: perm.id },
       });
@@ -265,7 +316,10 @@ export class SocialProvisioningService {
     return adminPerfil;
   }
 
-  private async seedDefaultFarmData(tenantClient: any, fazendaId: number): Promise<void> {
+  private async seedDefaultFarmData(
+    tenantClient: any,
+    fazendaId: number,
+  ): Promise<void> {
     await tenantClient.raca.upsert({
       where: { id: 1 },
       update: {},

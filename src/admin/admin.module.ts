@@ -28,4 +28,3 @@ import { AuthModule } from '../auth/auth.module';
   exports: [AdminPrismaService],
 })
 export class AdminModule {}
-

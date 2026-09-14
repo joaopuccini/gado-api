@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PERMISSIONS_KEY } from '../decorators/permissions.decorator';
 
@@ -26,7 +31,7 @@ export class PermissionsGuard implements CanActivate {
 
     const hasPermission = requiredPermissions.every((permission) => {
       if (userPermissions.includes(permission)) return true;
-      
+
       // Fallback: Check if user has 'gerenciar' permission for the module
       const [module] = permission.split(':');
       const manageAllPermission = `${module}:gerenciar`;

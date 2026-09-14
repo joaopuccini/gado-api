@@ -1,10 +1,14 @@
 import type { PrismaClient } from '@prisma/client';
+import { Test } from '@nestjs/testing';
 import {
   ExecutionContextStore,
   type ExecutionContextData,
 } from '../common/context';
-import type { TenantPrismaClientFactoryPort } from './infrastructure/tenant-prisma-client.factory';
-import { TenantSchemaName } from './infrastructure/schema-name';
+import {
+  TENANT_PRISMA_CLIENT_FACTORY,
+  type TenantPrismaClientFactoryPort,
+} from './application/ports/tenant-prisma-client.factory.port';
+import { TenantSchemaName } from './domain/schema-name';
 import { TenantPrismaService } from './tenant-prisma.service';
 
 const contextFor = (schemaName: string): ExecutionContextData => ({

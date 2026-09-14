@@ -4,9 +4,9 @@ import { AnimaisService } from './animais.service';
 import { TenantModule } from '../tenant/tenant.module';
 
 @Module({
-    imports: [TenantModule],
-    controllers: [AnimaisController],
-    providers: [AnimaisService],
-    exports: [AnimaisService],
+  imports: [TenantModule],
+  controllers: [AnimaisController],
+  providers: [AnimaisService],
+  exports: [AnimaisService],
 })
-export class AnimaisModule { }
+export class AnimaisModule {}

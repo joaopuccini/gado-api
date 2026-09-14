@@ -17,16 +17,19 @@ describe('OpenAPI Completeness', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    
-    const config = new DocumentBuilder()
-      .setTitle('Gado API')
-      .build();
-    
+
+    const config = new DocumentBuilder().setTitle('Gado API').build();
+
     document = SwaggerModule.createDocument(app, config);
 
-    const quarantinePath = path.resolve(__dirname, '../fixtures/legacy-route-quarantine.json');
-    const legacyQuarantine = JSON.parse(fs.readFileSync(quarantinePath, 'utf8')) as any[];
-    legacyControllers = legacyQuarantine.map(q => q.controller);
+    const quarantinePath = path.resolve(
+      __dirname,
+      '../fixtures/legacy-route-quarantine.json',
+    );
+    const legacyQuarantine = JSON.parse(
+      fs.readFileSync(quarantinePath, 'utf8'),
+    ) as any[];
+    legacyControllers = legacyQuarantine.map((q) => q.controller);
   });
 
   afterAll(async () => {
@@ -35,16 +38,16 @@ describe('OpenAPI Completeness', () => {
 
   it('should have unique and non-empty operationIds', () => {
     const operationIds = new Set<string>();
-    
+
     for (const path of Object.keys(document.paths)) {
       const pathItem = document.paths[path] as any;
       for (const method of Object.keys(pathItem)) {
         const operation = pathItem[method];
         // TODO: Skip legacy controllers if we can identify them (NestJS doesn't put controller names in the doc easily unless tagged, we might check tags)
-        
+
         expect(operation.operationId).toBeDefined();
         expect(operation.operationId).not.toBe('');
-        
+
         expect(operationIds.has(operation.operationId)).toBe(false);
         operationIds.add(operation.operationId);
       }
@@ -58,7 +61,7 @@ describe('OpenAPI Completeness', () => {
         const operation = pathItem[method];
         expect(operation.tags).toBeDefined();
         expect(operation.tags.length).toBeGreaterThan(0);
-        
+
         if (p.startsWith('/admin')) {
           expect(operation.tags).toContain('Admin');
         } else if (p.startsWith('/account')) {
@@ -73,7 +76,10 @@ describe('OpenAPI Completeness', () => {
       const pathItem = document.paths[path] as any;
       for (const method of Object.keys(pathItem)) {
         const operation = pathItem[method];
-        if (['post', 'put', 'patch'].includes(method.toLowerCase()) && operation.requestBody) {
+        if (
+          ['post', 'put', 'patch'].includes(method.toLowerCase()) &&
+          operation.requestBody
+        ) {
           const content = operation.requestBody.content;
           if (content && content['application/json']) {
             expect(content['application/json'].schema).toBeDefined();
@@ -88,9 +94,9 @@ describe('OpenAPI Completeness', () => {
       const pathItem = document.paths[path] as any;
       for (const method of Object.keys(pathItem)) {
         const operation = pathItem[method];
-        
+
         const responses = Object.keys(operation.responses);
-        const has2xx = responses.some(code => code.startsWith('2'));
+        const has2xx = responses.some((code) => code.startsWith('2'));
         expect(has2xx).toBe(true);
       }
     }
@@ -102,11 +108,11 @@ describe('OpenAPI Completeness', () => {
       for (const method of Object.keys(pathItem)) {
         const operation = pathItem[method];
         const responses = Object.keys(operation.responses);
-        
+
         if (['post', 'put', 'patch'].includes(method.toLowerCase())) {
           expect(responses).toContain('400');
         }
-        
+
         if (operation.security && operation.security.length > 0) {
           expect(responses).toContain('401');
         }
@@ -121,7 +127,8 @@ describe('OpenAPI Completeness', () => {
       if (schema.properties) {
         for (const propName of Object.keys(schema.properties)) {
           // Check if propName is camelCase
-          const isCamelCase = /^[a-z][a-zA-Z0-9]*$/.test(propName) || propName.startsWith('_'); // Allow _ for internal stuff if any? Usually camelCase only.
+          const isCamelCase =
+            /^[a-z][a-zA-Z0-9]*$/.test(propName) || propName.startsWith('_'); // Allow _ for internal stuff if any? Usually camelCase only.
           expect(isCamelCase).toBe(true);
         }
       }

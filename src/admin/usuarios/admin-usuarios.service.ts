@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ConflictException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AdminPrismaService } from '../admin-prisma.service';
 import { CreateAdminUserDto } from './dto/create-admin-user.dto';
 import { UpdateAdminUserDto } from './dto/update-admin-user.dto';
@@ -18,7 +23,9 @@ export class AdminUsuariosService {
     });
 
     if (existing) {
-      throw new ConflictException('E-mail já está em uso por outro administrador');
+      throw new ConflictException(
+        'E-mail já está em uso por outro administrador',
+      );
     }
 
     const hashedPassword = await bcrypt.hash(createAdminUserDto.senha, 10);
@@ -68,7 +75,7 @@ export class AdminUsuariosService {
 
   async update(id: string, updateAdminUserDto: UpdateAdminUserDto) {
     const data: any = { ...updateAdminUserDto };
-    
+
     if (updateAdminUserDto.senha) {
       data.senhaHash = await bcrypt.hash(updateAdminUserDto.senha, 10);
       delete data.senha;
@@ -100,7 +107,9 @@ export class AdminUsuariosService {
   async login(email: string, senhaPlana: string) {
     const user = await this.prisma.adminUser.findUnique({ where: { email } });
     if (!user || !user.ativo) {
-      throw new UnauthorizedException('Credenciais inválidas ou usuário inativo');
+      throw new UnauthorizedException(
+        'Credenciais inválidas ou usuário inativo',
+      );
     }
 
     const isMatch = await bcrypt.compare(senhaPlana, user.senhaHash);
@@ -108,7 +117,12 @@ export class AdminUsuariosService {
       throw new UnauthorizedException('Credenciais inválidas');
     }
 
-    const payload = { sub: user.id, email: user.email, role: user.role, isAdmin: true };
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      isAdmin: true,
+    };
     const token = this.jwtService.sign(payload);
 
     const { senhaHash, ...result } = user;

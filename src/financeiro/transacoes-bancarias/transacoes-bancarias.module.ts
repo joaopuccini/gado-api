@@ -4,6 +4,6 @@ import { TransacoesBancariasService } from './transacoes-bancarias.service';
 
 @Module({
   controllers: [TransacoesBancariasController],
-  providers: [TransacoesBancariasService]
+  providers: [TransacoesBancariasService],
 })
 export class TransacoesBancariasModule {}

@@ -4,6 +4,6 @@ import { PedidosCompraService } from './pedidos-compra.service';
 
 @Module({
   controllers: [PedidosCompraController],
-  providers: [PedidosCompraService]
+  providers: [PedidosCompraService],
 })
 export class PedidosCompraModule {}

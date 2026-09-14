@@ -1,4 +1,11 @@
-import { IsString, IsNotEmpty, IsInt, IsOptional, IsEnum, IsUUID } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsInt,
+  IsOptional,
+  IsEnum,
+  IsUUID,
+} from 'class-validator';
 import { AssinaturaStatus } from '@prisma/client-admin';
 
 export class CreateAssinaturaDto {

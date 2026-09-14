@@ -4,6 +4,6 @@ import { AlmoxarifadosService } from './almoxarifados.service';
 
 @Module({
   controllers: [AlmoxarifadosController],
-  providers: [AlmoxarifadosService]
+  providers: [AlmoxarifadosService],
 })
 export class AlmoxarifadosModule {}
