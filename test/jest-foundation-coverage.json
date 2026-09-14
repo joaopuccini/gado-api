@@ -1,6 +1,7 @@
 {
   "moduleFileExtensions": ["js", "json", "ts"],
   "rootDir": "..",
+  "modulePathIgnorePatterns": ["<rootDir>/.worktrees/"],
   "testEnvironment": "node",
   "testRegex": [
     "src[\\\\/].*\\.spec\\.ts$",

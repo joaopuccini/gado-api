@@ -1,6 +1,7 @@
 {
   "moduleFileExtensions": ["js", "json", "ts"],
   "rootDir": "..",
+  "modulePathIgnorePatterns": ["<rootDir>/.worktrees/"],
   "testEnvironment": "node",
   "testRegex": "test[\\\\/]contracts[\\\\/].*\\.e2e-spec\\.ts$",
   "transform": { "^.+\\.(t|j)s$": "ts-jest" },

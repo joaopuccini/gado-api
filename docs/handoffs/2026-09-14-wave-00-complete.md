@@ -38,7 +38,7 @@ Executada contra a base descartável `gado_wave00_test_f466c425f59d`, com `DATAB
 lint:check          exit 0
 build               exit 0
 unit                13 suites / 61 tests
-architecture         3 suites / 11 tests
+architecture         3 suites / 12 tests
 contract             2 suites / 9 tests
 integration          1 suite  / 1 test
 migrations            3 suites / 3 tests
@@ -52,6 +52,8 @@ Coverage da fundação: 96,35% statements, 84,21% branches, 100% functions e 97,
 ## Particularidade local Neon
 
 O endpoint disponível no `.env` é PgBouncer (`-pooler`). Prisma Migrate usa advisory lock de sessão; portanto, o spec de admin é executado uma vez no gate dedicado de migrations e não é repetido pelo coverage. As migrations tenant continuam no coverage. CI usa PostgreSQL direto e preserva todos os gates.
+
+Os projetos Jest com raiz no repositório ignoram `.worktrees/`, impedindo descoberta duplicada de testes quando a verificação é executada a partir do checkout principal.
 
 ## Como continuar em outra IA
 

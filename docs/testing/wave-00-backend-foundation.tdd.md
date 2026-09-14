@@ -31,7 +31,7 @@ Os commits RED preservam os testes antes da implementação. Para as Tasks 2–8
 | 7 | Prisma dinâmico isola schemas reais sem reescrever SQL | `npm run test:integration`; falha histórica antes da factory isolada, saída detalhada não retida | Fechamento: integration `1 suite/1 test` PASS e isolation PASS | `9328e08` / `ab0920e` | Incluída no agregado final |
 | 8 | Persistência tenant não possui client default nem bypass manual | `npm run test:unit -- tenant-prisma.service.spec.ts`; falha histórica exigindo contexto, saída detalhada não retida | Checkpoint e fechamento: unit/isolation PASS; busca pelas APIs proibidas sem ocorrências | `bcd9185` / `2ed2871` | Incluída no agregado final |
 | 9 | Admin vazio, tenant vazio e upgrade/retry são reproduzíveis e checksummed | `npm run test:migrations`: admin retornou zero tabelas e os caminhos tenant falharam por implementações ausentes | `npm run test:migrations -- --runInBand`: `3 suites/3 tests` PASS; `prisma migrate status`: database schema up to date | `a201329`, `1d62efc`, `4e62c76` / `534270b` | Incluída no agregado final |
-| 10 | Limites hexagonais e OpenAPI completo para toda rota nova | `npm run test:architecture`: UseCase dependia de Nest e havia import cross-module de infraestrutura; `test:contract` falhou tags, erros e camelCase legados antes da quarentena ser aplicada corretamente | Architecture `3 suites/11 tests` PASS; contract `2 suites/9 tests` PASS | `3418e3e` / `ccb0759` | Incluída no agregado final |
+| 10 | Limites hexagonais e OpenAPI completo para toda rota nova | `npm run test:architecture`: UseCase dependia de Nest e havia import cross-module de infraestrutura; `test:contract` falhou tags, erros e camelCase legados antes da quarentena ser aplicada corretamente | Architecture `3 suites/12 tests` PASS; contract `2 suites/9 tests` PASS | `3418e3e` / `ccb0759` | Incluída no agregado final |
 | 11 | CI executa todos os gates e impede regressão abaixo de 80% | `ci-workflow.spec.ts`: workflow inexistente; primeiro coverage: 77,08% statements, 58,94% branches, 83% functions, 79,17% lines | Workflow GREEN; sequência completa exit `0`; coverage 96,35/84,21/100/97,82 | `d6aeb6e` / `85591f8`; robustez do coverage concluída no commit final | Gate aprovado |
 
 ## Sequência final observada
@@ -42,7 +42,7 @@ Executada em ordem, com `DATABASE_URL` e `TEST_DATABASE_URL` apontando somente p
 npm run lint:check                                      exit 0
 npm run build                                           exit 0
 npm run test:unit -- --runInBand                        13 suites, 61 tests, PASS
-npm run test:architecture -- --runInBand                3 suites, 11 tests, PASS
+npm run test:architecture -- --runInBand                3 suites, 12 tests, PASS
 npm run test:contract -- --runInBand                    2 suites, 9 tests, PASS
 npm run test:integration -- --runInBand                 1 suite, 1 test, PASS
 npm run test:migrations -- --runInBand                  3 suites, 3 tests, PASS

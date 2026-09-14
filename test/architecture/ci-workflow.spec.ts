@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 describe('backend continuous integration workflow', () => {
@@ -60,5 +60,25 @@ describe('backend continuous integration workflow', () => {
     expect(coverageConfig.testPathIgnorePatterns).not.toContain(
       'test[\\\\/]migrations',
     );
+  });
+
+  it('keeps linked worktrees outside every external Jest project', () => {
+    const testDirectory = resolve(process.cwd(), 'test');
+    const configs = readdirSync(testDirectory).filter(
+      (fileName) =>
+        fileName.startsWith('jest-') &&
+        fileName.endsWith('.json') &&
+        fileName !== 'jest-e2e.json',
+    );
+
+    expect(configs.length).toBeGreaterThan(0);
+    for (const fileName of configs) {
+      const config = JSON.parse(
+        readFileSync(resolve(testDirectory, fileName), 'utf8'),
+      ) as { modulePathIgnorePatterns?: string[] };
+      expect(config.modulePathIgnorePatterns).toContain(
+        '<rootDir>/.worktrees/',
+      );
+    }
   });
 });
