@@ -3,6 +3,10 @@ import { resolve } from 'node:path';
 
 describe('backend continuous integration workflow', () => {
   const workflowPath = resolve(process.cwd(), '.github/workflows/ci.yml');
+  const coverageConfigPath = resolve(
+    process.cwd(),
+    'test/jest-foundation-coverage.json',
+  );
 
   it('runs every foundation gate in dependency order', () => {
     expect(existsSync(workflowPath)).toBe(true);
@@ -42,5 +46,19 @@ describe('backend continuous integration workflow', () => {
     expect(workflow).toContain('prisma/admin/schema.prisma');
     expect(workflow).toContain('prisma/tenant/schema.prisma');
     expect(workflow).toContain('TEST_DATABASE_URL');
+  });
+
+  it('does not deploy admin migrations twice while collecting source coverage', () => {
+    expect(existsSync(coverageConfigPath)).toBe(true);
+    const coverageConfig = JSON.parse(
+      readFileSync(coverageConfigPath, 'utf8'),
+    ) as { testPathIgnorePatterns?: string[] };
+
+    expect(coverageConfig.testPathIgnorePatterns).toContain(
+      'admin-empty-database.e2e-spec.ts',
+    );
+    expect(coverageConfig.testPathIgnorePatterns).not.toContain(
+      'test[\\\\/]migrations',
+    );
   });
 });

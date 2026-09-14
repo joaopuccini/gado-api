@@ -7,6 +7,7 @@
     "src[\\\\/].*\\.integration-spec\\.ts$",
     "test[\\\\/](contracts|integration|isolation|migrations)[\\\\/].*\\.e2e-spec\\.ts$"
   ],
+  "testPathIgnorePatterns": ["admin-empty-database.e2e-spec.ts"],
   "transform": { "^.+\\.(t|j)s$": "ts-jest" },
   "moduleNameMapper": { "^uuid$": "<rootDir>/test/mocks/uuid.ts" },
   "collectCoverageFrom": [

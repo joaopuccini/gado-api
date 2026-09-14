@@ -100,6 +100,8 @@ Entregas obrigatórias:
 
 Gate `G0`:
 
+**Status: concluído em 2026-09-14.** Evidências auditáveis em `docs/testing/wave-00-backend-foundation.tdd.md`.
+
 ```text
 contextConcurrency = pass
 missingTenantFailsClosed = pass
@@ -109,7 +111,7 @@ openApiContract = pass
 emptyDatabaseMigration = pass
 previousVersionUpgrade = pass
 newTenantProvisioning = pass
-changedCodeCoverage >= 80%
+foundationCoverage = 96.35% statements / 84.21% branches / 100% functions / 97.82% lines
 ```
 
 ## 6. Onda 01 — dois frontends e plataforma compartilhada

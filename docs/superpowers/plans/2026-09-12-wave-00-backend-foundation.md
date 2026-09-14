@@ -137,7 +137,7 @@ src/common/interceptors/hierarchy.interceptor.ts
 - Create: `docs/architecture/adr/0002-legacy-route-quarantine.md`
 - Create: `test/fixtures/legacy-route-quarantine.json`
 
-- [ ] **Step 1: Registrar a linha de base sem alterar código**
+- [x] **Step 1: Registrar a linha de base sem alterar código**
 
 Run:
 
@@ -150,7 +150,7 @@ npx eslint "{src,apps,libs,test}/**/*.ts"
 
 Expected: testes e build registram seu estado real; o lint pode falhar, mas não pode usar `--fix`. Copiar somente totais e nomes de falhas para o relatório TDD, sem secrets ou URLs.
 
-- [ ] **Step 2: Adicionar scripts determinísticos**
+- [x] **Step 2: Adicionar scripts determinísticos**
 
 Adicionar a `package.json`:
 
@@ -171,7 +171,7 @@ Adicionar a `package.json`:
 
 Cada config usa `rootDir: ".."`, `testEnvironment: "node"`, `ts-jest` e um `testRegex` exclusivo para seu diretório. `scripts/assert-no-skipped-tests.mjs` percorre arquivos `*.spec.ts`/`*.e2e-spec.ts`, encerra com código `1` ao encontrar `describe.skip`, `it.skip`, `test.skip`, `xdescribe`, `xit` ou `xtest`, e com código `0` quando não encontra nenhum. O CI executa `npm run test:no-skipped`.
 
-- [ ] **Step 3: Criar quarentena somente para controllers preexistentes**
+- [x] **Step 3: Criar quarentena somente para controllers preexistentes**
 
 `legacy-route-quarantine.json` deve conter objetos completos:
 
@@ -187,11 +187,11 @@ Cada config usa `rootDir: ".."`, `testEnvironment: "node"`, `ts-jest` e um `test
 
 Gerar uma entrada para cada controller existente e fixar a onda usando o plano mestre. O teste arquitetural da Task 10 falha se uma entrada nova aparecer, se `removalWave` for inválida ou se um controller novo entrar na quarentena.
 
-- [ ] **Step 4: Registrar o ADR da exceção transitória**
+- [x] **Step 4: Registrar o ADR da exceção transitória**
 
 O ADR deve declarar: status `accepted`, responsável `Gado engineering`, condição de remoção “quando a onda indicada ficar GREEN”, proibição de adicionar comportamento aos controllers em quarentena e obrigação de reduzir a lista a cada onda.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git add package.json package-lock.json test docs/architecture/adr/0002-legacy-route-quarantine.md
@@ -211,7 +211,7 @@ git commit -m "chore: establish migration quality gates"
 - Modify: `src/common/context/index.ts`
 - Modify: `src/app.module.ts`
 
-- [ ] **Step 1: Escrever testes RED de contexto ausente e concorrência**
+- [x] **Step 1: Escrever testes RED de contexto ausente e concorrência**
 
 Testes obrigatórios:
 
@@ -266,14 +266,14 @@ Run: `npm run test:unit -- execution-context.store.spec.ts`
 
 Expected: FAIL por módulo inexistente; a falha deve ser causada somente pela implementação ausente.
 
-- [ ] **Step 2: Commit RED**
+- [x] **Step 2: Commit RED**
 
 ```powershell
 git add src/common/context/execution-context.store.spec.ts
 git commit -m "test: specify isolated execution context"
 ```
 
-- [ ] **Step 3: Implementar a API mínima do store**
+- [x] **Step 3: Implementar a API mínima do store**
 
 Contrato obrigatório:
 
@@ -370,13 +370,13 @@ export class ExecutionContextStore {
 
 O arquivo `error-catalog.ts` exporta esses dois códigos iniciais. A Task 3 amplia o catálogo e adiciona o mapeamento HTTP sem alterar sua semântica.
 
-- [ ] **Step 4: Implementar o primeiro middleware**
+- [x] **Step 4: Implementar o primeiro middleware**
 
 `ExecutionContextMiddleware` valida `x-request-id` como UUID; valor inválido é ignorado e substituído. Ele define o header de resposta e chama `store.run()` com correlação, `contextType: 'public'`, arrays vazios, method/path e `startedAt`.
 
 Registrar somente esse middleware em `AppModule.configure()` antes de qualquer outro middleware.
 
-- [ ] **Step 5: Executar GREEN e teste E2E concorrente**
+- [x] **Step 5: Executar GREEN e teste E2E concorrente**
 
 Run:
 
@@ -387,7 +387,7 @@ npm run test:isolation -- execution-context-concurrency.e2e-spec.ts
 
 Expected: PASS; cada resposta conserva seu próprio `requestId` e tenant, mesmo com barreira concorrente.
 
-- [ ] **Step 6: Commit GREEN**
+- [x] **Step 6: Commit GREEN**
 
 ```powershell
 git add src/common/context src/app.module.ts test/isolation
@@ -408,7 +408,7 @@ git commit -m "feat: add fail-closed execution context"
 - Modify: `src/main.ts`
 - Delete: `src/common/filters/all-exceptions.filter.ts`
 
-- [ ] **Step 1: Escrever testes RED dos quatro tipos de falha**
+- [x] **Step 1: Escrever testes RED dos quatro tipos de falha**
 
 Casos e resultados:
 
@@ -439,14 +439,14 @@ Run: `npm run test:unit -- global-exception.filter.spec.ts`
 
 Expected: FAIL porque o contrato existente inclui `success`, códigos uppercase e detalhes internos.
 
-- [ ] **Step 2: Commit RED**
+- [x] **Step 2: Commit RED**
 
 ```powershell
 git add src/common/errors/global-exception.filter.spec.ts
 git commit -m "test: specify global error contract"
 ```
 
-- [ ] **Step 3: Implementar erros independentes de HTTP**
+- [x] **Step 3: Implementar erros independentes de HTTP**
 
 ```typescript
 export type ErrorCode =
@@ -481,7 +481,7 @@ export class DomainError extends Error {
 
 Erros específicos de módulos estendem `DomainError` e podem ampliar o union por catálogo; nunca recebem status HTTP.
 
-- [ ] **Step 4: Consolidar o filtro**
+- [x] **Step 4: Consolidar o filtro**
 
 Manter somente `GlobalExceptionFilter`, registrado uma vez por `APP_FILTER`. O filtro normaliza `DomainError`, `HttpException`, erros de validação, Prisma e desconhecidos para:
 
@@ -502,7 +502,7 @@ interface ApiErrorResponse {
 
 Remover `app.useGlobalFilters(...)` de `main.ts` e `AllExceptionsFilter` de exports/providers para impedir dupla captura.
 
-- [ ] **Step 5: Executar GREEN e commit**
+- [x] **Step 5: Executar GREEN e commit**
 
 Run: `npm run test:unit -- global-exception.filter.spec.ts`
 
@@ -525,7 +525,7 @@ git commit -m "feat: enforce global error domain"
 - Modify: `src/app.module.ts`
 - Modify: `src/main.ts`
 
-- [ ] **Step 1: Escrever testes RED de estrutura, correlação e redaction**
+- [x] **Step 1: Escrever testes RED de estrutura, correlação e redaction**
 
 ```typescript
 it('writes a correlated JSON record without secrets', () => {
@@ -553,14 +553,14 @@ Run: `npm run test:unit -- structured-logger.service.spec.ts logging.interceptor
 
 Expected: FAIL porque o logger atual é textual e o interceptor usa `Logger` diretamente.
 
-- [ ] **Step 2: Commit RED**
+- [x] **Step 2: Commit RED**
 
 ```powershell
 git add src/common/logger/*.spec.ts src/common/interceptors/logging.interceptor.spec.ts
 git commit -m "test: specify structured request observability"
 ```
 
-- [ ] **Step 3: Implementar logger estruturado**
+- [x] **Step 3: Implementar logger estruturado**
 
 O logger implementa `LoggerService`, aceita um `LogSink` injetável nos testes e emite uma linha JSON por evento. Campos de contexto são obtidos do `ExecutionContextStore`; chaves `authorization`, `cookie`, `password`, `token`, `secret`, `clientSecret` e `refreshToken` são removidas recursivamente.
 
@@ -585,13 +585,13 @@ export interface StructuredLogRecord {
 }
 ```
 
-- [ ] **Step 4: Tornar logging uma preocupação interceptada**
+- [x] **Step 4: Tornar logging uma preocupação interceptada**
 
 Injetar `StructuredLogger` em `LoggingInterceptor`, registrar por `APP_INTERCEPTOR` e usar `tap`/`finalize` para cobrir success/error. O interceptor registra metadados; o filtro registra uma vez o erro normalizado e stack interno. Nenhum deles serializa body ou response.
 
 Substituir `new CustomLogger()` por `app.get(StructuredLogger)` em `main.ts`.
 
-- [ ] **Step 5: Executar GREEN e commit**
+- [x] **Step 5: Executar GREEN e commit**
 
 Run: `npm run test:unit -- structured-logger.service.spec.ts logging.interceptor.spec.ts`
 
@@ -617,7 +617,7 @@ git commit -m "feat: add correlated structured logging"
 - Modify: `src/main.ts`
 - Create: `test/contracts/global-http-contract.e2e-spec.ts`
 
-- [ ] **Step 1: Escrever testes RED do pipe e envelopes**
+- [x] **Step 1: Escrever testes RED do pipe e envelopes**
 
 O teste define um DTO real:
 
@@ -648,14 +648,14 @@ npm run test:contract -- global-http-contract.e2e-spec.ts
 
 Expected: FAIL pelos envelopes e tratamento de validação atuais.
 
-- [ ] **Step 2: Commit RED**
+- [x] **Step 2: Commit RED**
 
 ```powershell
 git add src/common/pipes/global-validation.pipe.spec.ts test/contracts/global-http-contract.e2e-spec.ts
 git commit -m "test: specify global validation and envelopes"
 ```
 
-- [ ] **Step 3: Implementar o pipe único**
+- [x] **Step 3: Implementar o pipe único**
 
 ```typescript
 @Injectable()
@@ -674,7 +674,7 @@ export class GlobalValidationPipe extends ValidationPipe {
 
 Registrar por `APP_PIPE`. Remover `app.useGlobalPipes(...)` de `main.ts`.
 
-- [ ] **Step 4: Implementar envelope único**
+- [x] **Step 4: Implementar envelope único**
 
 `TransformInterceptor` passa `undefined` em `204`; nos demais sucessos produz:
 
@@ -687,7 +687,7 @@ export interface ApiSuccessResponse<T> {
 
 Registrar o interceptor por `APP_INTERCEPTOR`; remover `app.useGlobalInterceptors(...)` de `main.ts` para evitar dupla transformação.
 
-- [ ] **Step 5: Executar GREEN e commit**
+- [x] **Step 5: Executar GREEN e commit**
 
 Run:
 
@@ -715,7 +715,7 @@ git commit -m "feat: enforce global api contract"
 - Modify: `src/tenant/tenant.module.ts`
 - Modify: `src/common/context/execution-context.store.ts`
 
-- [ ] **Step 1: Escrever testes RED de autoridade**
+- [x] **Step 1: Escrever testes RED de autoridade**
 
 ```typescript
 it('uses registry schema instead of schemaName claimed by the client', async () => {
@@ -743,14 +743,14 @@ Run: `npm run test:unit -- resolve-tenant-context.use-case.spec.ts`
 
 Expected: FAIL porque o middleware atual decodifica JWT sem verificar e confia em `schemaName` do token.
 
-- [ ] **Step 2: Commit RED**
+- [x] **Step 2: Commit RED**
 
 ```powershell
 git add src/identity-access/application/use-cases/resolve-tenant-context.use-case.spec.ts
 git commit -m "test: specify verified tenant authority"
 ```
 
-- [ ] **Step 3: Implementar port e UseCase**
+- [x] **Step 3: Implementar port e UseCase**
 
 ```typescript
 export interface TenantRegistryRecord {
@@ -768,13 +768,13 @@ export interface TenantRegistryRepository {
 
 O UseCase recebe apenas claims já verificadas e hints de transporte mapeados pela strategy. Ele consulta registry/membership/fazenda, compara os hints e chama `store.enrichTenant()` com `schemaName` vindo exclusivamente do registry.
 
-- [ ] **Step 4: Alterar JwtStrategy**
+- [x] **Step 4: Alterar JwtStrategy**
 
 Configurar `passReqToCallback: true`; a strategy mapeia Express `Request` para um input primitivo e aciona `ResolveTenantContextUseCase`. É proibido fazer base64 decode manual, aceitar header isolado ou transferir `schemaName` do payload para o store.
 
 Remover `TenantMiddleware` do lifecycle. Rotas públicas usam UseCase próprio na Onda 02; rotas operacionais só obtêm banco depois do JWT verificado.
 
-- [ ] **Step 5: Executar GREEN e commit**
+- [x] **Step 5: Executar GREEN e commit**
 
 Run: `npm run test:unit -- resolve-tenant-context.use-case.spec.ts`
 
@@ -797,7 +797,7 @@ git commit -m "feat: resolve tenant from verified identity"
 
 Este task é um gate: nenhuma substituição do client atual acontece antes do teste em PostgreSQL real.
 
-- [ ] **Step 1: Testar validação do identificador**
+- [x] **Step 1: Testar validação do identificador**
 
 ```typescript
 it.each(['public', 'gado_admin', 'tenant-a', 'tenant_a;drop schema public'])('rejects %s', (value) => {
@@ -814,7 +814,7 @@ Run: `npm run test:unit -- schema-name.spec.ts`
 
 Expected: FAIL por implementação ausente.
 
-- [ ] **Step 2: Testar isolamento real do client**
+- [x] **Step 2: Testar isolamento real do client**
 
 O integration spec cria dois schemas descartáveis com a mesma tabela/campos do menor model Prisma, grava marcadores distintos e cria dois clients pela factory. As asserções obrigatórias são:
 
@@ -830,14 +830,14 @@ Run: `npm run test:integration -- tenant-prisma-client.factory.integration-spec.
 
 Expected RED: factory ausente. Depois da implementação mínima, o único GREEN válido é isolamento real nas três asserções.
 
-- [ ] **Step 3: Commit RED**
+- [x] **Step 3: Commit RED**
 
 ```powershell
 git add src/tenant/infrastructure/*.spec.ts src/tenant/infrastructure/*.integration-spec.ts
 git commit -m "test: prove dynamic tenant schema isolation"
 ```
 
-- [ ] **Step 4: Implementar candidato mínimo sem SQL rewrite**
+- [x] **Step 4: Implementar candidato mínimo sem SQL rewrite**
 
 A factory aceita somente `TenantSchemaName`, cria pool próprio com conexão limitada e configuração de schema suportada pelo adapter/connection, e retorna client sem default:
 
@@ -850,7 +850,7 @@ export interface TenantPrismaClientFactory {
 
 São proibidos `replace()` sobre query, `$executeRawUnsafe` com valor do usuário, singleton global e retorno de client administrativo/público.
 
-- [ ] **Step 5: Aplicar o gate de decisão**
+- [x] **Step 5: Aplicar o gate de decisão**
 
 Run: `npm run test:integration -- tenant-prisma-client.factory.integration-spec.ts`
 
@@ -861,7 +861,7 @@ Resultados:
 
 Esse resultado não pode ser mascarado por mock.
 
-- [ ] **Step 6: Commit somente se GREEN**
+- [x] **Step 6: Commit somente se GREEN**
 
 ```powershell
 git add src/tenant/infrastructure docs/architecture/adr/0001-dynamic-tenant-schema-with-prisma.md
@@ -876,7 +876,7 @@ git commit -m "feat: prove isolated tenant prisma clients"
 - Modify: todos os imports listados por `rg -l "TenantContext|RequestContext|globalTenantPrismaService|getClientForSchema" src`
 - Delete: os contextos antigos e `hierarchy.interceptor.ts` depois da migração dos imports
 
-- [ ] **Step 1: Escrever testes RED**
+- [x] **Step 1: Escrever testes RED**
 
 Casos:
 
@@ -899,20 +899,20 @@ Run: `npm run test:unit -- tenant-prisma.service.spec.ts`
 
 Expected: FAIL porque o serviço retorna `defaultClient` sem contexto.
 
-- [ ] **Step 2: Commit RED**
+- [x] **Step 2: Commit RED**
 
 ```powershell
 git add src/tenant/tenant-prisma.service.spec.ts
 git commit -m "test: require tenant context for database access"
 ```
 
-- [ ] **Step 3: Remover todos os bypasses**
+- [x] **Step 3: Remover todos os bypasses**
 
 `getClient()` chama `ExecutionContextStore.requireTenant()` e a factory comprovada. Remover `defaultClient`, `getClientForSchema` público, `globalTenantPrismaService`, query interception e todos os `console.*`.
 
 Hierarchy vira uma policy/UseCase na Onda 03; nesta onda, nenhum interceptor consulta banco ou engole erro.
 
-- [ ] **Step 4: Migrar imports e executar isolamento**
+- [x] **Step 4: Migrar imports e executar isolamento**
 
 Run:
 
@@ -924,7 +924,7 @@ npm run test:isolation -- tenant-prisma-isolation.e2e-spec.ts
 
 Expected: `rg` sem ocorrências; testes PASS com dois tenants e duas fazendas concorrentes.
 
-- [ ] **Step 5: Commit GREEN**
+- [x] **Step 5: Commit GREEN**
 
 ```powershell
 git add src test/isolation
@@ -947,7 +947,7 @@ git commit -m "refactor: enforce fail-closed tenant persistence"
 - Modify: `prisma.config.ts`
 - Test: `test/migrations/*.e2e-spec.ts`
 
-- [ ] **Step 1: Escrever testes RED dos três caminhos**
+- [x] **Step 1: Escrever testes RED dos três caminhos**
 
 1. Banco vazio cria `gado_admin`, constraints e versão esperada.
 2. Schema tenant vazio recebe todas as tabelas, índices, FKs, seeds e checksum.
@@ -957,24 +957,24 @@ Run: `npm run test:migrations`
 
 Expected: FAIL porque não há diretórios de migrations.
 
-- [ ] **Step 2: Commit RED**
+- [x] **Step 2: Commit RED**
 
 ```powershell
 git add test/migrations
 git commit -m "test: specify reproducible admin and tenant migrations"
 ```
 
-- [ ] **Step 3: Gerar e revisar a migration administrativa**
+- [x] **Step 3: Gerar e revisar a migration administrativa**
 
 Usar `prisma migrate dev` somente contra `TEST_DATABASE_URL` descartável e commitar SQL. Produção usará exclusivamente `prisma migrate deploy`. Nenhum teste chama `migrate reset` em banco não descartável.
 
-- [ ] **Step 4: Criar cadeia tenant com marcador de identificador**
+- [x] **Step 4: Criar cadeia tenant com marcador de identificador**
 
 Migration tenant usa somente o identificador reservado `"__tenant__"`. `TenantMigrationLoader` calcula SHA-256 do arquivo; `PostgresTenantMigrationRepository` valida `TenantSchemaName`, substitui somente a ocorrência exata do marcador por identificador escapado, adquire advisory lock, abre transação, aplica SQL e grava `{ version, checksum, appliedAt }` em `"<tenant>"."_gado_tenant_migrations"`.
 
 Não existe rewrite de queries normais nem substituição de valores SQL.
 
-- [ ] **Step 5: Implementar UseCase idempotente**
+- [x] **Step 5: Implementar UseCase idempotente**
 
 ```typescript
 export interface TenantMigrationRepository {
@@ -992,7 +992,7 @@ export class MigrateTenantSchemaUseCase {
 
 O provisionamento de schema ainda sem sessão usa uma entrada `job` reidratada e validada; não recebe schema arbitrário de Controller.
 
-- [ ] **Step 6: Executar GREEN**
+- [x] **Step 6: Executar GREEN**
 
 Run:
 
@@ -1003,7 +1003,7 @@ npx prisma migrate status --schema prisma/admin/schema.prisma
 
 Expected: PASS em vazio, upgrade e retry; checksums iguais; status administrativo sem migration pendente no banco de teste.
 
-- [ ] **Step 7: Commit GREEN**
+- [x] **Step 7: Commit GREEN**
 
 ```powershell
 git add prisma src/tenant-provisioning test/migrations prisma.config.ts
@@ -1018,7 +1018,7 @@ git commit -m "feat: add versioned admin and tenant migrations"
 - Create: `test/contracts/openapi-completeness.e2e-spec.ts`
 - Modify: controllers/DTOs novos criados nesta onda
 
-- [ ] **Step 1: Escrever teste arquitetural RED**
+- [x] **Step 1: Escrever teste arquitetural RED**
 
 O teste percorre imports TypeScript e garante:
 
@@ -1036,7 +1036,7 @@ Run: `npm run test:architecture`
 
 Expected RED: violações novas desta onda ou scanner ausente; não aceitar RED causado por path incorreto.
 
-- [ ] **Step 2: Escrever teste OpenAPI RED**
+- [x] **Step 2: Escrever teste OpenAPI RED**
 
 Gerar documento em memória e afirmar para toda operação fora da quarentena:
 
@@ -1051,18 +1051,18 @@ Run: `npm run test:contract -- openapi-completeness.e2e-spec.ts`
 
 Expected RED até DTOs/decorators da onda estarem completos.
 
-- [ ] **Step 3: Commit RED**
+- [x] **Step 3: Commit RED**
 
 ```powershell
 git add test/architecture test/contracts/openapi-completeness.e2e-spec.ts
 git commit -m "test: enforce architecture and openapi boundaries"
 ```
 
-- [ ] **Step 4: Corrigir somente código da Onda 00**
+- [x] **Step 4: Corrigir somente código da Onda 00**
 
 Adicionar `@ApiTags`, `@ApiOperation`, auth, params/query/body e responses tipadas aos probes e endpoints novos. Mover qualquer dependência concreta encontrada para adapter e token de DI. Controllers antigos permanecem congelados na quarentena e não recebem features.
 
-- [ ] **Step 5: Executar GREEN e commit**
+- [x] **Step 5: Executar GREEN e commit**
 
 Run:
 
@@ -1086,7 +1086,7 @@ git commit -m "chore: enforce architecture and openapi gates"
 - Modify: `package.json`
 - Modify: config Jest de coverage
 
-- [ ] **Step 1: Criar um teste de configuração que falha sem gates**
+- [x] **Step 1: Criar um teste de configuração que falha sem gates**
 
 O spec carrega `.github/workflows/ci.yml` como texto e afirma presença e ordem lógica de `npm ci`, `lint:check`, `build`, `test:unit`, `test:architecture`, `test:contract`, `test:isolation`, `test:migrations` e `test:cov`.
 
@@ -1094,20 +1094,20 @@ Run: `npm run test:architecture -- ci-workflow.spec.ts`
 
 Expected: FAIL porque o workflow não existe.
 
-- [ ] **Step 2: Commit RED**
+- [x] **Step 2: Commit RED**
 
 ```powershell
 git add test/architecture/ci-workflow.spec.ts
 git commit -m "test: specify backend continuous integration gates"
 ```
 
-- [ ] **Step 3: Implementar workflow**
+- [x] **Step 3: Implementar workflow**
 
 O workflow usa PostgreSQL service descartável, configura apenas secrets de CI, instala com `npm ci`, gera os dois clients Prisma e executa os scripts em jobs que não escrevem no repositório. O job de migration precede isolation; nenhum comando usa `db push`.
 
 Coverage da fundação inclui explicitamente `src/common/**`, `src/identity-access/**`, `src/tenant/**` e `src/tenant-provisioning/**`, com thresholds 80/80/80/80. Arquivos legados ainda não migrados não reduzem esse gate, mas a cobertura global é registrada como baseline não decrescente.
 
-- [ ] **Step 4: Executar a sequência local equivalente**
+- [x] **Step 4: Executar a sequência local equivalente**
 
 ```powershell
 npm run lint:check
@@ -1123,7 +1123,7 @@ npm run test:cov -- --runInBand
 
 Expected: todos exit code `0`; zero skipped; coverage da fundação >= 80% em cada métrica.
 
-- [ ] **Step 5: Commit GREEN**
+- [x] **Step 5: Commit GREEN**
 
 ```powershell
 git add .github package.json package-lock.json test
@@ -1138,7 +1138,7 @@ git commit -m "ci: gate backend foundation quality"
 - Modify: `docs/testing/wave-00-backend-foundation.tdd.md`
 - Modify: `docs/superpowers/plans/2026-09-12-gado-saas-master.md`
 
-- [ ] **Step 1: Provar ausência das implementações proibidas**
+- [x] **Step 1: Provar ausência das implementações proibidas**
 
 Run:
 
@@ -1149,13 +1149,13 @@ rg "BAD_REQUEST|INTERNAL_ERROR|UNKNOWN_ERROR|success: false|success: true" src
 
 Expected: sem ocorrências em produção, exceto strings explicitamente usadas em testes negativos.
 
-- [ ] **Step 2: Remover arquivos mortos e repetir todos os gates**
+- [x] **Step 2: Remover arquivos mortos e repetir todos os gates**
 
 Run: repetir a sequência completa da Task 11.
 
 Expected: PASS idêntico após remoção.
 
-- [ ] **Step 3: Preencher o relatório de evidências**
+- [x] **Step 3: Preencher o relatório de evidências**
 
 Para cada Task 2–11, registrar:
 
@@ -1167,11 +1167,11 @@ Para cada Task 2–11, registrar:
 
 Não registrar PASS, coverage ou hash que não tenha sido observado.
 
-- [ ] **Step 4: Marcar `G0` no plano mestre**
+- [x] **Step 4: Marcar `G0` no plano mestre**
 
 Somente marcar a Onda 00 como concluída quando contexto, client, erros, logs, contratos, migrations, arquitetura e CI estiverem verdes. Se o spike Prisma parar a onda, registrar o bloqueio e manter `G0` aberto.
 
-- [ ] **Step 5: Commit final da onda**
+- [x] **Step 5: Commit final da onda**
 
 ```powershell
 git add docs src test .github package.json package-lock.json prisma
@@ -1185,17 +1185,17 @@ Expected: sequência RED/GREEN/refactor da onda visível e alcançável a partir
 
 A Onda 00 termina apenas com todas as respostas abaixo iguais a “sim”:
 
-- [ ] Existe exatamente um `AsyncLocalStorage` de request/tenant?
-- [ ] O tenant vem de identidade verificada e registry, nunca de body/query/path/header isolado?
-- [ ] Banco tenant falha fechado sem contexto e passou com dois schemas concorrentes reais?
-- [ ] Nenhuma query é reescrita em runtime?
-- [ ] Toda request/response passa pelo interceptor global e gera JSON correlacionado/redacted?
-- [ ] Existe exatamente um filtro global e um envelope de erro `camelCase`?
-- [ ] Existe exatamente um pipe global com DTOs concretos?
-- [ ] Todo endpoint novo possui OpenAPI completo?
-- [ ] Admin vazio, tenant vazio e upgrade usam migrations versionadas e passam?
-- [ ] Testes arquiteturais impedem dependências proibidas?
-- [ ] Coverage da fundação alcançou 80% em todas as métricas?
-- [ ] O relatório contém evidência real RED e GREEN para cada mudança?
+- [x] Existe exatamente um `AsyncLocalStorage` de request/tenant?
+- [x] O tenant vem de identidade verificada e registry, nunca de body/query/path/header isolado?
+- [x] Banco tenant falha fechado sem contexto e passou com dois schemas concorrentes reais?
+- [x] Nenhuma query é reescrita em runtime?
+- [x] Toda request/response passa pelo interceptor global e gera JSON correlacionado/redacted?
+- [x] Existe exatamente um filtro global e um envelope de erro `camelCase`?
+- [x] Existe exatamente um pipe global com DTOs concretos?
+- [x] Todo endpoint novo possui OpenAPI completo?
+- [x] Admin vazio, tenant vazio e upgrade usam migrations versionadas e passam?
+- [x] Testes arquiteturais impedem dependências proibidas?
+- [x] Coverage da fundação alcançou 80% em todas as métricas?
+- [x] O relatório contém evidência real RED e GREEN para cada mudança?
 
 Depois de `G0`, executar a Onda 01 e preparar o plano detalhado da Onda 02 usando o estado real produzido pela fundação.
