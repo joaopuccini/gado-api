@@ -133,3 +133,25 @@ Não havia URL de banco de teste configurada; por segurança, a migration não f
 aplicada nesta sessão. Nenhum `db push` ou `migrate reset` foi executado. O gate
 global de arquitetura conserva apenas a dívida preexistente do
 `AdminLoginUseCase`.
+
+## Tasks 2.3.3–2.3.4 — criação e migração do schema tenant
+
+Jornada: como orquestrador de onboarding, preciso executar a cadeia versionada
+no schema tenant validado, dentro de um contexto de job isolado e sem aceitar
+nomes arbitrários controlados pelo cliente.
+
+| Garantia | Tipo | Resultado | Evidência |
+|---|---|---|---|
+| Nome de schema fora do padrão reservado falha antes da migration | unitário | PASS | `provision-schema.use-case.spec.ts` |
+| Identidades administrativas vazias falham fechadas | unitário | PASS | `provision-schema.use-case.spec.ts` |
+| Contexto de job contém tenant, organização, ator e permissão de migration | unitário | PASS | `provision-schema.use-case.spec.ts` |
+| Contexto assíncrono é descartado após a execução | unitário | PASS | `provision-schema.use-case.spec.ts` |
+| Cadeia de migrations existente continua idempotente | unitário | PASS | `migrate-tenant-schema.use-case.spec.ts` — 5/5 testes |
+| Aplicação compila | build | PASS | `npm run build` |
+
+RED no commit `8097ed0`: o orquestrador ainda não existia. GREEN no commit
+`fb9d5e4`: 99/99 testes unitários passaram, lint focado e build passaram, e a
+cobertura focada do novo UseCase ficou em 100% em todas as métricas. A primeira
+migration tenant já contém `CREATE SCHEMA IF NOT EXISTS`, portanto a criação e
+a evolução usam a mesma cadeia versionada; nenhum comando destrutivo ou
+`db push` foi executado.

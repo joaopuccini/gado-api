@@ -75,8 +75,8 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 |---|---|---|---|---|
 | 2.3.1 | **RED**: state machine `registered → provisioning → migrations → seeding → validating → active` | `[x]` | 57e4633, 58ce7b6 | `provisioning-state.spec.ts`, `provisioning-run-schema.spec.ts` |
 | 2.3.2 | **GREEN**: implementar state machine e `ProvisioningRun` no admin | `[x]` | 9d5828d | `provisioning-run.ts`, `schema.prisma`, migration admin |
-| 2.3.3 | **RED**: criação de schema, aplicação de migrations | `[ ]` | | `provision-schema.spec.ts` |
-| 2.3.4 | **GREEN**: implementar criação de schema e migrations | `[ ]` | | `provision-schema.use-case.ts` |
+| 2.3.3 | **RED**: criação de schema, aplicação de migrations | `[x]` | 8097ed0 | `provision-schema.use-case.spec.ts` |
+| 2.3.4 | **GREEN**: implementar criação de schema e migrations | `[x]` | fb9d5e4 | `provision-schema.use-case.ts` |
 | 2.3.5 | **RED**: sync de permissões — ler catálogo, upsert na tabela `permissoes` do tenant | `[ ]` | | `sync-permissions.spec.ts` |
 | 2.3.6 | **GREEN**: implementar sync de permissões no provisioning | `[ ]` | | `sync-permissions.service.ts` |
 | 2.3.7 | **RED**: criação de perfis-base a partir de `DEFAULT_PROFILE_PERMISSIONS` | `[ ]` | | `seed-profiles.spec.ts` |
@@ -255,6 +255,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 2026-09-16 21:45 | Antigravity | — | ADR-0003 criado | Onda 02 Task 2.1.1 | Planejamento concluído |
 | 2026-09-16 22:35 | Antigravity | 02 | Onda 02 Task 2.1.7 | Onda 02 Task 2.2.1 | Troca de modelo/LLM a pedido do usuário |
 | 2026-09-17 14:58 | Codex GPT-5 | 02 | Onda 02 Task 2.2.8 | Onda 02 Task 2.2.9 | Checkpoints RED/GREEN concluídos; regressões globais anteriores registradas na evidência TDD |
+| 2026-09-17 15:43 | Codex GPT-5 | 02 | Onda 02 Task 2.3.4 | Onda 02 Task 2.3.5 | Checkpoint seguro após quatro pares RED/GREEN; dívida global preexistente registrada |
 
 ---
 
