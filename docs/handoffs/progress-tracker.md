@@ -77,7 +77,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 2.3.2 | **GREEN**: implementar state machine e `ProvisioningRun` no admin | `[x]` | 9d5828d | `provisioning-run.ts`, `schema.prisma`, migration admin |
 | 2.3.3 | **RED**: criação de schema, aplicação de migrations | `[x]` | 8097ed0 | `provision-schema.use-case.spec.ts` |
 | 2.3.4 | **GREEN**: implementar criação de schema e migrations | `[x]` | fb9d5e4 | `provision-schema.use-case.ts` |
-| 2.3.5 | **RED**: sync de permissões — ler catálogo, upsert na tabela `permissoes` do tenant | `[ ]` | | `sync-permissions.spec.ts` |
+| 2.3.5 | **RED**: sync de permissões — ler catálogo, upsert na tabela `permissoes` do tenant | `[x]` | f24ec32 | `sync-permissions.spec.ts` |
 | 2.3.6 | **GREEN**: implementar sync de permissões no provisioning | `[ ]` | | `sync-permissions.service.ts` |
 | 2.3.7 | **RED**: criação de perfis-base a partir de `DEFAULT_PROFILE_PERMISSIONS` | `[ ]` | | `seed-profiles.spec.ts` |
 | 2.3.8 | **GREEN**: implementar seed de perfis-base | `[ ]` | | `seed-profiles.service.ts` |
