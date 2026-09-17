@@ -22,7 +22,10 @@ describe('ProvisionSchemaUseCase', () => {
           globalUserId: 'global-user-id',
           permissions: ['tenant.migrate'],
         });
-        return Promise.resolve({ fromVersion: null, toVersion: '003_identity' });
+        return Promise.resolve({
+          fromVersion: null,
+          toVersion: '003_identity',
+        });
       }),
     };
     useCase = new ProvisionSchemaUseCase(
@@ -50,6 +53,22 @@ describe('ProvisionSchemaUseCase', () => {
     expect(context.current()).toBeUndefined();
   });
 
+  it('uses server-generated request metadata by default', async () => {
+    const defaultUseCase = new ProvisionSchemaUseCase(
+      context,
+      migrateTenantSchema as MigrateTenantSchemaUseCase,
+    );
+
+    await expect(
+      defaultUseCase.execute({
+        tenantId: 'tenant-id',
+        organizationId: 'organization-id',
+        schemaName,
+        initiatedByGlobalUserId: 'global-user-id',
+      }),
+    ).resolves.toMatchObject({ schemaName });
+  });
+
   it('rejects a client-controlled or malformed schema before migration', async () => {
     await expect(
       useCase.execute({
@@ -61,4 +80,20 @@ describe('ProvisionSchemaUseCase', () => {
     ).rejects.toMatchObject({ code: 'invalidTenantSchemaName' });
     expect(migrateTenantSchema.execute).not.toHaveBeenCalled();
   });
+
+  it.each(['tenantId', 'organizationId', 'initiatedByGlobalUserId'] as const)(
+    'rejects an empty %s before migration',
+    async (field) => {
+      await expect(
+        useCase.execute({
+          tenantId: 'tenant-id',
+          organizationId: 'organization-id',
+          schemaName,
+          initiatedByGlobalUserId: 'global-user-id',
+          [field]: ' ',
+        }),
+      ).rejects.toMatchObject({ code: 'invalidProvisioningRun' });
+      expect(migrateTenantSchema.execute).not.toHaveBeenCalled();
+    },
+  );
 });

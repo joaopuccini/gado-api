@@ -9,6 +9,7 @@ import {
   type TenantMigrationSource,
 } from './application/ports/tenant-migration.repository';
 import { MigrateTenantSchemaUseCase } from './application/use-cases/migrate-tenant-schema.use-case';
+import { ProvisionSchemaUseCase } from './application/use-cases/provision-schema.use-case';
 import { PostgresTenantMigrationRepository } from './infrastructure/postgres-tenant-migration.repository';
 import { TenantMigrationLoader } from './infrastructure/tenant-migration.loader';
 
@@ -46,7 +47,20 @@ import { TenantMigrationLoader } from './infrastructure/tenant-migration.loader'
         TENANT_MIGRATION_SOURCE,
       ],
     },
+    {
+      provide: ProvisionSchemaUseCase,
+      useFactory: (
+        context: ExecutionContextStore,
+        migrateTenantSchema: MigrateTenantSchemaUseCase,
+      ): ProvisionSchemaUseCase =>
+        new ProvisionSchemaUseCase(context, migrateTenantSchema),
+      inject: [ExecutionContextStore, MigrateTenantSchemaUseCase],
+    },
   ],
-  exports: [MigrateTenantSchemaUseCase, StructuredLogger],
+  exports: [
+    MigrateTenantSchemaUseCase,
+    ProvisionSchemaUseCase,
+    StructuredLogger,
+  ],
 })
 export class TenantProvisioningModule {}
