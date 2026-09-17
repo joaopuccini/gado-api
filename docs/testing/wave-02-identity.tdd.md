@@ -43,3 +43,22 @@ Também revelou regressões anteriores no endpoint de catálogo e suites que exi
 dependências de framework no `AdminLoginUseCase` e pela ausência de UseCase no
 `PermissionsController`. Esses problemas antecedem a Task 2.2.4 e devem ser
 corrigidos antes do Gate G1-identity.
+
+## Tasks 2.2.7–2.2.8 — login operacional
+
+Jornada: como usuário operacional, preciso autenticar minha identidade global e
+receber um token restrito ao tenant e às fazendas às quais estou vinculado.
+
+| Garantia | Tipo | Resultado | Evidência |
+|---|---|---|---|
+| E-mail é normalizado e identidade desconhecida falha fechada | unitário | PASS | `tenant-login.use-case.spec.ts` |
+| Identidade Google-only e senha inválida não resolvem acesso tenant | unitário | PASS | `tenant-login.use-case.spec.ts` |
+| Usuário sem vínculo operacional ativo não recebe token | unitário | PASS | `tenant-login.use-case.spec.ts` |
+| Seleção de fazenda expõe apenas acessos ativos e não emite token | unitário | PASS | `tenant-login.use-case.spec.ts` |
+| Fazenda fora do vínculo falha fechada | unitário | PASS | `tenant-login.use-case.spec.ts` |
+| Token recebe audience `gado-tenant` e claims de tenant/fazenda verificadas | unitário | PASS | `tenant-login.use-case.spec.ts` |
+
+RED no commit `b45163f`: a suite foi descoberta e falhou porque o UseCase ainda
+não existia. GREEN no commit `768e190`: 7/7 testes passaram; cobertura restrita
+ao UseCase ficou em 100% statements/lines/functions e 92,85% branches. O lint
+dos três arquivos novos e o build também passaram.

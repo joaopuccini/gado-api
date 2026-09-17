@@ -59,8 +59,8 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 2.2.4 | Modelar e migrar `Usuario`, `UsuarioFazenda` (revisar schema existente) | `[x]` | b0da16b | `schema.prisma` (tenant) |
 | 2.2.5 | **RED**: login administrativo por UseCase separado | `[x]` | 175904d | `admin-login.use-case.spec.ts` |
 | 2.2.6 | **GREEN**: implementar login admin | `[x]` | 175904d | `admin-login.use-case.ts` |
-| 2.2.7 | **RED**: login operacional por UseCase separado | `[ ]` | | `tenant-login.use-case.spec.ts` |
-| 2.2.8 | **GREEN**: implementar login operacional | `[ ]` | | `tenant-login.use-case.ts` |
+| 2.2.7 | **RED**: login operacional por UseCase separado | `[x]` | b45163f | `tenant-login.use-case.spec.ts` |
+| 2.2.8 | **GREEN**: implementar login operacional | `[x]` | 768e190 | `tenant-login.use-case.ts` |
 | 2.2.9 | Validar `aud`, expiração, organização, tenant, fazenda e revogação antes do contexto | `[ ]` | | `jwt-strategy.ts`, guards |
 | 2.2.10 | **GREEN**: testes de audience passam | `[ ]` | | |
 | 2.2.11 | Aplicar @RequirePermissions por decorator/guard em todas as rotas migradas | `[ ]` | | controllers |
@@ -254,6 +254,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 2026-09-14 | — | 00 | Onda 00 completa (G0 pass) | Onda 02 Task 2.1 | Onda 00 entregue |
 | 2026-09-16 21:45 | Antigravity | — | ADR-0003 criado | Onda 02 Task 2.1.1 | Planejamento concluído |
 | 2026-09-16 22:35 | Antigravity | 02 | Onda 02 Task 2.1.7 | Onda 02 Task 2.2.1 | Troca de modelo/LLM a pedido do usuário |
+| 2026-09-17 14:58 | Codex GPT-5 | 02 | Onda 02 Task 2.2.8 | Onda 02 Task 2.2.9 | Checkpoints RED/GREEN concluídos; regressões globais anteriores registradas na evidência TDD |
 
 ---
 
