@@ -8,9 +8,11 @@ import {
 } from './application/ports/tenant-registry.repository';
 import { ResolveTenantContextUseCase } from './application/use-cases/resolve-tenant-context.use-case';
 import { PrismaTenantRegistryRepository } from './infrastructure/prisma-tenant-registry.repository';
+import { PermissionsController } from '../common/rbac/permissions.controller';
 
 @Module({
   imports: [forwardRef(() => AdminModule), TenantModule],
+  controllers: [PermissionsController],
   providers: [
     PrismaTenantRegistryRepository,
     {
