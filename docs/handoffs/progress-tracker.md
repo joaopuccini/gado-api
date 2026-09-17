@@ -55,10 +55,10 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 2.2.1 | **RED**: token operacional rejeitado em `/api/v1/admin/*` | `[x]` | 784e6ff | `admin-audience.e2e-spec.ts` |
 | 2.2.1b | **GREEN**: implementar validação de audience | `[x]` | 91f6570 | `jwt.strategy.ts` |
 | 2.2.2 | **RED/GREEN**: token admin rejeitado em dados tenant | `[x]` | b88ab30 | `tenant-audience.e2e-spec.ts` |
-| 2.2.3 | Modelar e migrar `AdminUser`, `UsuarioGlobal`, `AcessoOrganizacao` (revisar schema existente) | `[ ]` | | `schema.prisma` (admin) |
-| 2.2.4 | Modelar e migrar `Usuario`, `UsuarioFazenda` (revisar schema existente) | `[ ]` | | `schema.prisma` (tenant) |
-| 2.2.5 | **RED**: login administrativo por UseCase separado | `[ ]` | | `admin-login.use-case.spec.ts` |
-| 2.2.6 | **GREEN**: implementar login admin | `[ ]` | | `admin-login.use-case.ts` |
+| 2.2.3 | Modelar e migrar `AdminUser`, `UsuarioGlobal`, `AcessoOrganizacao` (revisar schema existente) | `[x]` | e4f4c3f | `schema.prisma` (admin) |
+| 2.2.4 | Modelar e migrar `Usuario`, `UsuarioFazenda` (revisar schema existente) | `[x]` | b0da16b | `schema.prisma` (tenant) |
+| 2.2.5 | **RED**: login administrativo por UseCase separado | `[x]` | 175904d | `admin-login.use-case.spec.ts` |
+| 2.2.6 | **GREEN**: implementar login admin | `[x]` | 175904d | `admin-login.use-case.ts` |
 | 2.2.7 | **RED**: login operacional por UseCase separado | `[ ]` | | `tenant-login.use-case.spec.ts` |
 | 2.2.8 | **GREEN**: implementar login operacional | `[ ]` | | `tenant-login.use-case.ts` |
 | 2.2.9 | Validar `aud`, expiração, organização, tenant, fazenda e revogação antes do contexto | `[ ]` | | `jwt-strategy.ts`, guards |
