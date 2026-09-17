@@ -7,13 +7,14 @@ import { PermissionsController } from './permissions.controller';
 describe('PermissionsController', () => {
   it('delegates catalog retrieval to the application use case', () => {
     const result = { data: { configuracoes: [] } };
+    const execute = jest.fn().mockReturnValue(result);
     const useCase = {
-      execute: jest.fn().mockReturnValue(result),
+      execute,
     } as unknown as GetPermissionsCatalogUseCase;
     const controller = new PermissionsController(useCase);
 
     expect(controller.getCatalog()).toBe(result);
-    expect(useCase.execute).toHaveBeenCalledTimes(1);
+    expect(execute).toHaveBeenCalledTimes(1);
   });
 
   it('runs authentication before permission authorization', () => {

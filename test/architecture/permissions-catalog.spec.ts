@@ -20,10 +20,7 @@ const quarantinedControllers = new Set(
   (
     JSON.parse(
       readFileSync(
-        resolve(
-          process.cwd(),
-          'test/fixtures/legacy-route-quarantine.json',
-        ),
+        resolve(process.cwd(), 'test/fixtures/legacy-route-quarantine.json'),
         'utf8',
       ),
     ) as QuarantinedController[]
@@ -34,14 +31,16 @@ describe('permissions catalog architecture', () => {
   it('does not have duplicate IDs in the catalog', () => {
     const ids = PERMISSIONS_CATALOG.map((p) => p.id);
     const duplicates = ids.filter((item, index) => ids.indexOf(item) !== index);
-    
+
     expect(duplicates).toEqual([]);
   });
 
   it('does not have duplicate codes in the catalog', () => {
     const codes = PERMISSIONS_CATALOG.map((p) => p.code);
-    const duplicates = codes.filter((item, index) => codes.indexOf(item) !== index);
-    
+    const duplicates = codes.filter(
+      (item, index) => codes.indexOf(item) !== index,
+    );
+
     expect(duplicates).toEqual([]);
   });
 
@@ -52,15 +51,17 @@ describe('permissions catalog architecture', () => {
     files.forEach((file) => {
       const source = readFileSync(file, 'utf8');
       const matches = source.matchAll(/@RequirePermissions\(([^)]+)\)/g);
-      
+
       for (const match of matches) {
         const argsStr = match[1];
         const stringLiterals = [...argsStr.matchAll(/['"]([^'"]+)['"]/g)];
         for (const literalMatch of stringLiterals) {
-           const code = literalMatch[1];
-           if (!catalogCodes.has(code)) {
-             violations.push(`File ${file} requires unknown permission: ${code}`);
-           }
+          const code = literalMatch[1];
+          if (!catalogCodes.has(code)) {
+            violations.push(
+              `File ${file} requires unknown permission: ${code}`,
+            );
+          }
         }
       }
     });

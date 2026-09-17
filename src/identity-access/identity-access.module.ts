@@ -7,13 +7,19 @@ import {
   type TenantRegistryRepository,
 } from './application/ports/tenant-registry.repository';
 import { ResolveTenantContextUseCase } from './application/use-cases/resolve-tenant-context.use-case';
+import { GetPermissionsCatalogUseCase } from './application/use-cases/get-permissions-catalog.use-case';
 import { PrismaTenantRegistryRepository } from './infrastructure/prisma-tenant-registry.repository';
 import { PermissionsController } from '../common/rbac/permissions.controller';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../auth/guards/permissions.guard';
 
 @Module({
   imports: [forwardRef(() => AdminModule), TenantModule],
   controllers: [PermissionsController],
   providers: [
+    GetPermissionsCatalogUseCase,
+    JwtAuthGuard,
+    PermissionsGuard,
     PrismaTenantRegistryRepository,
     {
       provide: TENANT_REGISTRY_REPOSITORY,
