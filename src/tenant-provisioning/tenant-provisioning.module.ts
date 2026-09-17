@@ -3,6 +3,14 @@ import { ConfigService } from '@nestjs/config';
 import { ExecutionContextStore } from '../common/context';
 import { StructuredLogger } from '../common/logger/structured-logger.service';
 import {
+  TENANT_PRISMA_CLIENT_FACTORY,
+  type TenantPrismaClientFactoryPort,
+} from '../tenant/application/ports/tenant-prisma-client-factory.port';
+import {
+  PERMISSION_CATALOG_REPOSITORY,
+  type PermissionCatalogRepository,
+} from './application/ports/permission-catalog.repository';
+import {
   TENANT_MIGRATION_REPOSITORY,
   TENANT_MIGRATION_SOURCE,
   type TenantMigrationRepository,
@@ -10,6 +18,8 @@ import {
 } from './application/ports/tenant-migration.repository';
 import { MigrateTenantSchemaUseCase } from './application/use-cases/migrate-tenant-schema.use-case';
 import { ProvisionSchemaUseCase } from './application/use-cases/provision-schema.use-case';
+import { SyncPermissionsService } from './application/services/sync-permissions.service';
+import { PrismaPermissionCatalogRepository } from './infrastructure/persistence/prisma/prisma-permission-catalog.repository';
 import { PostgresTenantMigrationRepository } from './infrastructure/postgres-tenant-migration.repository';
 import { TenantMigrationLoader } from './infrastructure/tenant-migration.loader';
 
@@ -17,6 +27,22 @@ import { TenantMigrationLoader } from './infrastructure/tenant-migration.loader'
   providers: [
     StructuredLogger,
     TenantMigrationLoader,
+    {
+      provide: PERMISSION_CATALOG_REPOSITORY,
+      useFactory: (
+        context: ExecutionContextStore,
+        clientFactory: TenantPrismaClientFactoryPort,
+      ): PermissionCatalogRepository =>
+        new PrismaPermissionCatalogRepository(context, clientFactory),
+      inject: [ExecutionContextStore, TENANT_PRISMA_CLIENT_FACTORY],
+    },
+    {
+      provide: SyncPermissionsService,
+      useFactory: (
+        repository: PermissionCatalogRepository,
+      ): SyncPermissionsService => new SyncPermissionsService(repository),
+      inject: [PERMISSION_CATALOG_REPOSITORY],
+    },
     {
       provide: TENANT_MIGRATION_SOURCE,
       useExisting: TenantMigrationLoader,
@@ -60,6 +86,7 @@ import { TenantMigrationLoader } from './infrastructure/tenant-migration.loader'
   exports: [
     MigrateTenantSchemaUseCase,
     ProvisionSchemaUseCase,
+    SyncPermissionsService,
     StructuredLogger,
   ],
 })
