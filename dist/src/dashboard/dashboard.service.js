@@ -13,7 +13,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DashboardService = void 0;
 const common_1 = require("@nestjs/common");
 const tenant_prisma_service_1 = require("../tenant/tenant-prisma.service");
-const context_1 = require("../common/context");
 let DashboardService = DashboardService_1 = class DashboardService {
     tenantPrisma;
     logger = new common_1.Logger(DashboardService_1.name);
@@ -21,14 +20,11 @@ let DashboardService = DashboardService_1 = class DashboardService {
         this.tenantPrisma = tenantPrisma;
     }
     getTenantClient() {
-        const schemaName = context_1.RequestContext.getSchemaName();
-        if (!schemaName)
-            throw new Error('Schema do tenant não encontrado no contexto');
-        return this.tenantPrisma.getClientForSchema(schemaName);
+        return this.tenantPrisma.getClient();
     }
     async getStats() {
         const tenant = this.getTenantClient();
-        const fazendaId = context_1.RequestContext.getFazendaId();
+        const { farmId: fazendaId } = this.tenantPrisma.getContext();
         const baseWhere = { ativo: true, fazendaId };
         const [totalAnimais, totalVendido, totalMorte, totalLotes, totalPastos] = await Promise.all([
             tenant.animal.count({ where: { ...baseWhere, status: 'ATIVO' } }),
@@ -63,7 +59,7 @@ let DashboardService = DashboardService_1 = class DashboardService {
     }
     async getTotalMachoFemea() {
         const tenant = this.getTenantClient();
-        const fazendaId = context_1.RequestContext.getFazendaId();
+        const { farmId: fazendaId } = this.tenantPrisma.getContext();
         const femeas = await tenant.animal.count({ where: { sexo: 'FEMEA', ativo: true, status: 'ATIVO', fazendaId } });
         const machos = await tenant.animal.count({ where: { sexo: 'MACHO', ativo: true, status: 'ATIVO', fazendaId } });
         return [
@@ -73,7 +69,7 @@ let DashboardService = DashboardService_1 = class DashboardService {
     }
     async getTotalCustoAnimaisComCusto() {
         const tenant = this.getTenantClient();
-        const fazendaId = context_1.RequestContext.getFazendaId();
+        const { farmId: fazendaId } = this.tenantPrisma.getContext();
         const animaisAtivos = await tenant.animal.findMany({
             where: { ativo: true, status: 'ATIVO', fazendaId },
             select: { id: true, valorCompra: true, valorCustoTotal: true }
@@ -93,7 +89,7 @@ let DashboardService = DashboardService_1 = class DashboardService {
     }
     async getTotalLotesPastosRacasClientesAtivos(query) {
         const tenant = this.getTenantClient();
-        const fazendaId = context_1.RequestContext.getFazendaId();
+        const { farmId: fazendaId } = this.tenantPrisma.getContext();
         const response = { Lotes: {}, Pastos: {}, Racas: {}, Clientes: {} };
         if (query.lotes === 'true') {
             const data = await tenant.animal.groupBy({

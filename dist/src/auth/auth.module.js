@@ -18,6 +18,8 @@ const google_strategy_1 = require("./strategies/google.strategy");
 const social_provisioning_service_1 = require("./services/social-provisioning.service");
 const admin_module_1 = require("../admin/admin.module");
 const tenant_module_1 = require("../tenant/tenant.module");
+const tenant_provisioning_module_1 = require("../tenant-provisioning/tenant-provisioning.module");
+const identity_access_module_1 = require("../identity-access/identity-access.module");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -31,12 +33,15 @@ exports.AuthModule = AuthModule = __decorate([
                 useFactory: (configService) => ({
                     secret: configService.getOrThrow('JWT_SECRET'),
                     signOptions: {
-                        expiresIn: configService.get('JWT_EXPIRES_IN', '1h'),
+                        expiresIn: configService.get('JWT_EXPIRES_IN') ??
+                            '1h',
                     },
                 }),
             }),
             (0, common_1.forwardRef)(() => admin_module_1.AdminModule),
             (0, common_1.forwardRef)(() => tenant_module_1.TenantModule),
+            (0, common_1.forwardRef)(() => identity_access_module_1.IdentityAccessModule),
+            tenant_provisioning_module_1.TenantProvisioningModule,
         ],
         controllers: [auth_controller_1.AuthController],
         providers: [

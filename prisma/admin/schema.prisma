@@ -16,16 +16,16 @@ datasource db {
 
 model Organizacao {
   id           String              @id @default(uuid()) @db.Uuid
-  razaoSocial  String              @db.VarChar(200)
-  nomeFantasia String              @db.VarChar(200)
+  razaoSocial  String              @map("razao_social") @db.VarChar(200)
+  nomeFantasia String              @map("nome_fantasia") @db.VarChar(200)
   cnpj         String?             @unique @db.VarChar(18)
   email        String              @db.VarChar(150)
   telefone     String?             @db.VarChar(20)
   subdomain    String              @unique @db.VarChar(63)
-  schemaName   String              @unique @db.VarChar(63)
+  schemaName   String              @map("schema_name") @unique @db.VarChar(63)
   status       OrganizacaoStatus   @default(TRIAL)
-  createdAt    DateTime            @default(now()) @db.Timestamptz(6)
-  updatedAt    DateTime            @updatedAt @db.Timestamptz(6)
+  createdAt    DateTime            @map("created_at") @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime            @map("updated_at") @updatedAt @db.Timestamptz(6)
 
   assinaturas    Assinatura[]
   tenantRegistry TenantRegistry?
@@ -39,12 +39,12 @@ model Organizacao {
 model Plano {
   id            String   @id @default(uuid()) @db.Uuid
   nome          String   @db.VarChar(100)
-  maxUsuarios   Int
-  maxFazendas   Int      @default(1)
-  precoMensal   Decimal  @db.Decimal(10, 2)
+  maxUsuarios   Int      @map("max_usuarios")
+  maxFazendas   Int      @map("max_fazendas") @default(1)
+  precoMensal   Decimal  @map("preco_mensal") @db.Decimal(10, 2)
   ativo         Boolean  @default(true)
-  createdAt     DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt     DateTime @updatedAt @db.Timestamptz(6)
+  createdAt     DateTime @map("created_at") @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime @map("updated_at") @updatedAt @db.Timestamptz(6)
 
   assinaturas Assinatura[]
 
@@ -54,15 +54,15 @@ model Plano {
 
 model Assinatura {
   id              String           @id @default(uuid()) @db.Uuid
-  organizacaoId   String           @db.Uuid
-  planoId         String           @db.Uuid
+  organizacaoId   String           @map("organizacao_id") @db.Uuid
+  planoId         String           @map("plano_id") @db.Uuid
   status          AssinaturaStatus @default(ATIVA)
-  dataInicio      DateTime         @db.Date
-  dataVencimento  DateTime         @db.Date
-  diaVencimento   Int
-  gracePeriodDias Int              @default(7)
-  createdAt       DateTime         @default(now()) @db.Timestamptz(6)
-  updatedAt       DateTime         @updatedAt @db.Timestamptz(6)
+  dataInicio      DateTime         @map("data_inicio") @db.Date
+  dataVencimento  DateTime         @map("data_vencimento") @db.Date
+  diaVencimento   Int              @map("dia_vencimento")
+  gracePeriodDias Int              @map("grace_period_dias") @default(7)
+  createdAt       DateTime         @map("created_at") @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime         @map("updated_at") @updatedAt @db.Timestamptz(6)
 
   organizacao Organizacao @relation(fields: [organizacaoId], references: [id])
   plano       Plano      @relation(fields: [planoId], references: [id])
@@ -74,14 +74,14 @@ model Assinatura {
 
 model Pagamento {
   id            String          @id @default(uuid()) @db.Uuid
-  assinaturaId  String          @db.Uuid
+  assinaturaId  String          @map("assinatura_id") @db.Uuid
   valor         Decimal         @db.Decimal(10, 2)
   competencia   String          @db.VarChar(7) // "2026-09"
   status        PagamentoStatus @default(PENDENTE)
-  dataPagamento DateTime?       @db.Date
+  dataPagamento DateTime?       @map("data_pagamento") @db.Date
   observacao    String?
-  createdAt     DateTime        @default(now()) @db.Timestamptz(6)
-  updatedAt     DateTime        @updatedAt @db.Timestamptz(6)
+  createdAt     DateTime        @map("created_at") @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime        @map("updated_at") @updatedAt @db.Timestamptz(6)
 
   assinatura Assinatura @relation(fields: [assinaturaId], references: [id])
 
@@ -91,13 +91,13 @@ model Pagamento {
 
 model TenantRegistry {
   id            String               @id @default(uuid()) @db.Uuid
-  organizacaoId String               @unique @db.Uuid
+  organizacaoId String               @map("organizacao_id") @unique @db.Uuid
   subdomain     String               @unique @db.VarChar(63)
-  schemaName    String               @unique @db.VarChar(63)
+  schemaName    String               @map("schema_name") @unique @db.VarChar(63)
   status        TenantRegistryStatus @default(PROVISIONANDO)
-  provisionedAt DateTime?            @db.Timestamptz(6)
-  createdAt     DateTime             @default(now()) @db.Timestamptz(6)
-  updatedAt     DateTime             @updatedAt @db.Timestamptz(6)
+  provisionedAt DateTime?            @map("provisioned_at") @db.Timestamptz(6)
+  createdAt     DateTime             @map("created_at") @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime             @map("updated_at") @updatedAt @db.Timestamptz(6)
 
   organizacao Organizacao @relation(fields: [organizacaoId], references: [id])
 
@@ -109,11 +109,11 @@ model AdminUser {
   id        String    @id @default(uuid()) @db.Uuid
   nome      String    @db.VarChar(200)
   email     String    @unique @db.VarChar(150)
-  senhaHash String    @db.VarChar(255)
+  senhaHash String    @map("senha_hash") @db.VarChar(255)
   role      AdminRole @default(SUPPORT)
   ativo     Boolean   @default(true)
-  createdAt DateTime  @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime  @updatedAt @db.Timestamptz(6)
+  createdAt DateTime  @map("created_at") @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime  @map("updated_at") @updatedAt @db.Timestamptz(6)
 
   @@map("admin_users")
   @@schema("gado_admin")
@@ -123,13 +123,13 @@ model UsuarioGlobal {
   id            String       @id @default(uuid()) @db.Uuid
   nome          String       @db.VarChar(200)
   email         String       @unique @db.VarChar(150)
-  senhaHash     String?      @db.VarChar(255)
-  googleId      String?      @unique @db.VarChar(255)
-  fotoUrl       String?      @db.VarChar(500)
-  authProvider  AuthProvider @default(EMAIL)
+  senhaHash     String?      @map("senha_hash") @db.VarChar(255)
+  googleId      String?      @map("google_id") @unique @db.VarChar(255)
+  fotoUrl       String?      @map("foto_url") @db.VarChar(500)
+  authProvider  AuthProvider @map("auth_provider") @default(EMAIL)
   ativo         Boolean      @default(true)
-  createdAt     DateTime     @default(now()) @db.Timestamptz(6)
-  updatedAt     DateTime     @updatedAt @db.Timestamptz(6)
+  createdAt     DateTime     @map("created_at") @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime     @map("updated_at") @updatedAt @db.Timestamptz(6)
 
   acessos  AcessoOrganizacao[]
   convites Convite[]           @relation("ConviteConvidadoPor")
@@ -140,12 +140,12 @@ model UsuarioGlobal {
 
 model AcessoOrganizacao {
   id              String          @id @default(uuid()) @db.Uuid
-  usuarioGlobalId String          @db.Uuid
-  organizacaoId   String          @db.Uuid
+  usuarioGlobalId String          @map("usuario_global_id") @db.Uuid
+  organizacaoId   String          @map("organizacao_id") @db.Uuid
   role            RoleOrganizacao @default(CONVIDADO)
   status          StatusAcesso    @default(PENDENTE)
-  createdAt       DateTime        @default(now()) @db.Timestamptz(6)
-  updatedAt       DateTime        @updatedAt @db.Timestamptz(6)
+  createdAt       DateTime        @map("created_at") @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime        @map("updated_at") @updatedAt @db.Timestamptz(6)
 
   usuario     UsuarioGlobal @relation(fields: [usuarioGlobalId], references: [id], onDelete: Cascade)
   organizacao Organizacao   @relation(fields: [organizacaoId], references: [id], onDelete: Cascade)
@@ -158,13 +158,13 @@ model AcessoOrganizacao {
 model Convite {
   id              String        @id @default(uuid()) @db.Uuid
   email           String        @db.VarChar(150)
-  organizacaoId   String        @db.Uuid
-  convidadoPorId  String        @db.Uuid
+  organizacaoId   String        @map("organizacao_id") @db.Uuid
+  convidadoPorId  String        @map("convidado_por_id") @db.Uuid
   token           String        @unique @db.VarChar(255)
   role            RoleOrganizacao @default(CONVIDADO)
   status          StatusConvite @default(PENDENTE)
-  expiresAt       DateTime      @db.Timestamptz(6)
-  createdAt       DateTime      @default(now()) @db.Timestamptz(6)
+  expiresAt       DateTime      @map("expires_at") @db.Timestamptz(6)
+  createdAt       DateTime      @map("created_at") @default(now()) @db.Timestamptz(6)
 
   organizacao  Organizacao   @relation(fields: [organizacaoId], references: [id])
   convidadoPor UsuarioGlobal @relation("ConviteConvidadoPor", fields: [convidadoPorId], references: [id])

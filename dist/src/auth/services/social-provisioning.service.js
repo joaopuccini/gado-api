@@ -8,29 +8,41 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var SocialProvisioningService_1;
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SocialProvisioningService = void 0;
 const common_1 = require("@nestjs/common");
+const node_crypto_1 = require("node:crypto");
 const config_1 = require("@nestjs/config");
 const admin_prisma_service_1 = require("../../admin/admin-prisma.service");
-const tenant_prisma_service_1 = require("../../tenant/tenant-prisma.service");
+const tenant_prisma_client_factory_port_1 = require("../../tenant/application/ports/tenant-prisma-client-factory.port");
+const tenant_schema_name_1 = require("../../tenant/domain/tenant-schema-name");
 const rbac_config_1 = require("../../common/rbac/rbac.config");
-let SocialProvisioningService = SocialProvisioningService_1 = class SocialProvisioningService {
+const context_1 = require("../../common/context");
+const structured_logger_service_1 = require("../../common/logger/structured-logger.service");
+const migrate_tenant_schema_use_case_1 = require("../../tenant-provisioning/application/use-cases/migrate-tenant-schema.use-case");
+const domain_error_1 = require("../../common/errors/domain-error");
+let SocialProvisioningService = class SocialProvisioningService {
     adminPrisma;
-    tenantPrisma;
+    tenantClientFactory;
     configService;
-    logger = new common_1.Logger(SocialProvisioningService_1.name);
-    constructor(adminPrisma, tenantPrisma, configService) {
+    context;
+    migrateTenantSchema;
+    logger;
+    constructor(adminPrisma, tenantClientFactory, configService, context, migrateTenantSchema, logger) {
         this.adminPrisma = adminPrisma;
-        this.tenantPrisma = tenantPrisma;
+        this.tenantClientFactory = tenantClientFactory;
         this.configService = configService;
+        this.context = context;
+        this.migrateTenantSchema = migrateTenantSchema;
+        this.logger = logger;
     }
     async provisionTrial(profile) {
         const slug = await this.generateUniqueSlug(profile.email);
-        const schemaName = `fazenda_${slug}`;
+        const schemaName = `tenant_${(0, node_crypto_1.randomBytes)(16).toString('hex')}`;
         const subdomain = slug;
-        this.logger.log(`Provisionando TRIAL para ${profile.email}: schema=${schemaName}`);
         const org = await this.adminPrisma.organizacao.create({
             data: {
                 razaoSocial: profile.nome,
@@ -46,8 +58,7 @@ let SocialProvisioningService = SocialProvisioningService_1 = class SocialProvis
                 organizacaoId: org.id,
                 subdomain,
                 schemaName,
-                status: 'ATIVO',
-                provisionedAt: new Date(),
+                status: 'PROVISIONANDO',
             },
         });
         await this.adminPrisma.acessoOrganizacao.create({
@@ -72,34 +83,65 @@ let SocialProvisioningService = SocialProvisioningService_1 = class SocialProvis
                 diaVencimento: new Date().getDate(),
             },
         });
-        await this.createTenantSchema(schemaName);
-        const tenantClient = this.tenantPrisma.getClientForSchema(schemaName);
-        await this.seedDefaultPermissions(tenantClient);
-        const adminPerfil = await this.seedDefaultProfiles(tenantClient);
-        const usuarioLocal = await tenantClient.usuario.create({
-            data: {
-                globalUserId: profile.globalUserId,
-                nome: profile.nome,
-                email: profile.email,
-                senhaHash: '',
-                perfilId: adminPerfil.id,
-            },
+        const tenantSchema = tenant_schema_name_1.TenantSchemaName.parse(schemaName);
+        const migrationRequestId = (0, node_crypto_1.randomUUID)();
+        await this.context.run({
+            requestId: migrationRequestId,
+            traceId: migrationRequestId,
+            contextType: 'job',
+            startedAt: Date.now(),
+            tenantId: tenant.id,
+            organizationId: org.id,
+            schemaName,
+            globalUserId: profile.globalUserId,
+            accessibleFarmIds: [],
+            permissions: ['tenant.migrate'],
+        }, () => this.migrateTenantSchema.execute());
+        const tenantClient = this.tenantClientFactory.create(tenantSchema);
+        const adminPerfil = await tenantClient.perfil.findUnique({
+            where: { nome: 'Administrador' },
         });
-        const fazenda = await tenantClient.fazenda.create({
-            data: {
-                nome: 'Fazenda Principal',
-                nomeProprietario: profile.nome,
-            },
+        if (!adminPerfil) {
+            throw new domain_error_1.DomainError('tenantMigrationFailed', 'Seed de autorização do tenant ausente');
+        }
+        const { usuarioLocal, fazenda } = await tenantClient.$transaction(async (transaction) => {
+            const createdUser = await transaction.usuario.create({
+                data: {
+                    globalUserId: profile.globalUserId,
+                    nome: profile.nome,
+                    email: profile.email,
+                    senhaHash: '',
+                    perfilId: adminPerfil.id,
+                },
+            });
+            const createdFarm = await transaction.fazenda.create({
+                data: {
+                    nome: 'Fazenda Principal',
+                    nomeProprietario: profile.nome,
+                },
+            });
+            await transaction.usuarioFazenda.create({
+                data: {
+                    usuarioId: createdUser.id,
+                    fazendaId: createdFarm.id,
+                    role: rbac_config_1.FazendaRole.DONO,
+                },
+            });
+            await this.seedDefaultFarmData(transaction, createdFarm.id);
+            return { usuarioLocal: createdUser, fazenda: createdFarm };
         });
-        await tenantClient.usuarioFazenda.create({
-            data: {
-                usuarioId: usuarioLocal.id,
-                fazendaId: fazenda.id,
-                role: rbac_config_1.FazendaRole.DONO,
-            },
+        await tenantClient.fazenda.findUniqueOrThrow({ where: { id: fazenda.id } });
+        await this.adminPrisma.tenantRegistry.update({
+            where: { id: tenant.id },
+            data: { status: 'ATIVO', provisionedAt: new Date() },
         });
-        await this.seedDefaultFarmData(tenantClient, fazenda.id);
-        this.logger.log(`✅ TRIAL provisionado: org=${org.id}, schema=${schemaName}`);
+        this.logger.info('tenantTrialProvisioned', {
+            module: 'tenantProvisioning',
+            operation: 'provisionTrial',
+            tenantId: tenant.id,
+            organizationId: org.id,
+            schemaName,
+        });
         return {
             organizacaoId: org.id,
             tenantId: tenant.id,
@@ -111,7 +153,8 @@ let SocialProvisioningService = SocialProvisioningService_1 = class SocialProvis
         };
     }
     async generateUniqueSlug(email) {
-        let base = email.split('@')[0]
+        let base = email
+            .split('@')[0]
             .toLowerCase()
             .replace(/[^a-z0-9]/g, '')
             .substring(0, 30);
@@ -145,62 +188,6 @@ let SocialProvisioningService = SocialProvisioningService_1 = class SocialProvis
         }
         return plan;
     }
-    async createTenantSchema(schemaName) {
-        await this.adminPrisma.$executeRawUnsafe(`CREATE SCHEMA IF NOT EXISTS "${schemaName}"`);
-        const templateSchema = 'public';
-        const tables = await this.adminPrisma.$queryRawUnsafe(`SELECT tablename FROM pg_tables WHERE schemaname = $1`, templateSchema);
-        for (const { tablename } of tables) {
-            await this.adminPrisma.$executeRawUnsafe(`CREATE TABLE IF NOT EXISTS "${schemaName}"."${tablename}" (LIKE "${templateSchema}"."${tablename}" INCLUDING ALL)`);
-        }
-        this.logger.log(`Schema ${schemaName} criado com ${tables.length} tabelas`);
-    }
-    async seedDefaultPermissions(tenantClient) {
-        const permissoes = [
-            { codigo: 'animais:ler', nome: 'Ler Animais', modulo: 'Animais' },
-            { codigo: 'animais:criar', nome: 'Criar Animais', modulo: 'Animais' },
-            { codigo: 'animais:editar', nome: 'Editar Animais', modulo: 'Animais' },
-            { codigo: 'animais:excluir', nome: 'Excluir Animais', modulo: 'Animais' },
-            { codigo: 'financeiro:ler', nome: 'Ver Financeiro', modulo: 'Financeiro' },
-            { codigo: 'financeiro:criar', nome: 'Lançar Financeiro', modulo: 'Financeiro' },
-            { codigo: 'financeiro:editar', nome: 'Editar Financeiro', modulo: 'Financeiro' },
-            { codigo: 'financeiro:excluir', nome: 'Excluir Financeiro', modulo: 'Financeiro' },
-            { codigo: 'configuracoes:gerenciar', nome: 'Gerenciar Configurações', modulo: 'Configurações' },
-            { codigo: 'sanidade:ler', nome: 'Ver Sanidade', modulo: 'Sanidade' },
-            { codigo: 'sanidade:criar', nome: 'Registrar Sanidade', modulo: 'Sanidade' },
-            { codigo: 'sanidade:gerenciar', nome: 'Gerenciar Sanidade', modulo: 'Sanidade' },
-            { codigo: 'manejo:ler', nome: 'Ver Manejo', modulo: 'Manejo' },
-            { codigo: 'manejo:criar', nome: 'Registrar Manejo', modulo: 'Manejo' },
-            { codigo: 'manejo:gerenciar', nome: 'Gerenciar Manejo', modulo: 'Manejo' },
-            { codigo: 'pesagens:ler', nome: 'Ver Pesagens', modulo: 'Pesagens' },
-            { codigo: 'pesagens:criar', nome: 'Registrar Pesagens', modulo: 'Pesagens' },
-        ];
-        for (const p of permissoes) {
-            await tenantClient.permissao.upsert({
-                where: { codigo: p.codigo },
-                update: {},
-                create: p,
-            });
-        }
-    }
-    async seedDefaultProfiles(tenantClient) {
-        const adminPerfil = await tenantClient.perfil.upsert({
-            where: { nome: 'Administrador' },
-            update: {},
-            create: {
-                nome: 'Administrador',
-                descricao: 'Acesso total ao sistema da fazenda',
-            },
-        });
-        const allPerms = await tenantClient.permissao.findMany();
-        for (const perm of allPerms) {
-            await tenantClient.perfilPermissao.upsert({
-                where: { perfilId_permissaoId: { perfilId: adminPerfil.id, permissaoId: perm.id } },
-                update: {},
-                create: { perfilId: adminPerfil.id, permissaoId: perm.id },
-            });
-        }
-        return adminPerfil;
-    }
     async seedDefaultFarmData(tenantClient, fazendaId) {
         await tenantClient.raca.upsert({
             where: { id: 1 },
@@ -220,10 +207,12 @@ let SocialProvisioningService = SocialProvisioningService_1 = class SocialProvis
     }
 };
 exports.SocialProvisioningService = SocialProvisioningService;
-exports.SocialProvisioningService = SocialProvisioningService = SocialProvisioningService_1 = __decorate([
+exports.SocialProvisioningService = SocialProvisioningService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [admin_prisma_service_1.AdminPrismaService,
-        tenant_prisma_service_1.TenantPrismaService,
-        config_1.ConfigService])
+    __param(1, (0, common_1.Inject)(tenant_prisma_client_factory_port_1.TENANT_PRISMA_CLIENT_FACTORY)),
+    __metadata("design:paramtypes", [admin_prisma_service_1.AdminPrismaService, Object, config_1.ConfigService,
+        context_1.ExecutionContextStore,
+        migrate_tenant_schema_use_case_1.MigrateTenantSchemaUseCase,
+        structured_logger_service_1.StructuredLogger])
 ], SocialProvisioningService);
 //# sourceMappingURL=social-provisioning.service.js.map

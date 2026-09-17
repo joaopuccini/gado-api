@@ -14,7 +14,6 @@ exports.AnimaisService = void 0;
 const common_1 = require("@nestjs/common");
 const tenant_prisma_service_1 = require("../tenant/tenant-prisma.service");
 const services_1 = require("../common/services");
-const request_context_1 = require("../common/context/request-context");
 let AnimaisService = AnimaisService_1 = class AnimaisService extends services_1.BaseTenantService {
     logger = new common_1.Logger(AnimaisService_1.name);
     modelName = 'Animal';
@@ -102,8 +101,7 @@ let AnimaisService = AnimaisService_1 = class AnimaisService extends services_1.
     }
     async transferir(id, dto) {
         const tenant = this.getTenantClient();
-        const currentFazendaId = request_context_1.RequestContext.getFazendaId();
-        const accessibleFazendaIds = request_context_1.RequestContext.getAccessibleFazendaIds() || (currentFazendaId ? [currentFazendaId] : []);
+        const { accessibleFarmIds: accessibleFazendaIds } = this.tenantPrisma.getContext();
         if (!accessibleFazendaIds.includes(dto.fazendaDestinoId)) {
             throw new Error('Você não tem acesso à fazenda de destino.');
         }

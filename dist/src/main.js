@@ -4,20 +4,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@nestjs/core");
-const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const swagger_1 = require("@nestjs/swagger");
 const helmet_1 = __importDefault(require("helmet"));
 const app_module_1 = require("./app.module");
-const custom_logger_service_1 = require("./common/logger/custom-logger.service");
-const transform_interceptor_1 = require("./common/interceptors/transform.interceptor");
-const global_exception_filter_1 = require("./common/filters/global-exception.filter");
+const structured_logger_service_1 = require("./common/logger/structured-logger.service");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule, {
         bufferLogs: true,
     });
-    const customLogger = new custom_logger_service_1.CustomLogger();
-    app.useLogger(customLogger);
+    const structuredLogger = app.get(structured_logger_service_1.StructuredLogger);
+    app.useLogger(structuredLogger);
     const configService = app.get(config_1.ConfigService);
     const port = configService.get('PORT', 8080);
     const prefix = configService.get('API_PREFIX', '');
@@ -31,14 +28,6 @@ async function bootstrap() {
         methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
         credentials: true,
     });
-    app.useGlobalPipes(new common_1.ValidationPipe({
-        whitelist: true,
-        forbidNonWhitelisted: true,
-        transform: true,
-        transformOptions: { enableImplicitConversion: true },
-    }));
-    app.useGlobalInterceptors(new transform_interceptor_1.TransformInterceptor());
-    app.useGlobalFilters(new global_exception_filter_1.GlobalExceptionFilter());
     if (configService.get('NODE_ENV') !== 'production') {
         const swaggerConfig = new swagger_1.DocumentBuilder()
             .setTitle('Gado API')
@@ -50,8 +39,8 @@ async function bootstrap() {
         swagger_1.SwaggerModule.setup('api-docs', app, document);
     }
     await app.listen(port);
-    common_1.Logger.log(`🐂 Gado API running on port ${port}`, 'Bootstrap');
-    common_1.Logger.log(`📄 Swagger: http://localhost:${port}/api-docs`, 'Bootstrap');
+    structuredLogger.info('applicationStarted', { port });
+    structuredLogger.info('swaggerAvailable', { path: '/api-docs' });
 }
-bootstrap();
+void bootstrap();
 //# sourceMappingURL=main.js.map

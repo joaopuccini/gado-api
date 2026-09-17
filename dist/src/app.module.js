@@ -13,10 +13,12 @@ const config_1 = require("@nestjs/config");
 const throttler_1 = require("@nestjs/throttler");
 const prisma_module_1 = require("./prisma/prisma.module");
 const tenant_module_1 = require("./tenant/tenant.module");
-const request_context_middleware_1 = require("./common/context/request-context.middleware");
+const context_1 = require("./common/context");
 const filters_1 = require("./common/filters");
 const interceptors_1 = require("./common/interceptors");
 const subscription_guard_1 = require("./common/guards/subscription.guard");
+const structured_logger_service_1 = require("./common/logger/structured-logger.service");
+const global_validation_pipe_1 = require("./common/pipes/global-validation.pipe");
 const auth_module_1 = require("./auth/auth.module");
 const animais_module_1 = require("./animais/animais.module");
 const lotes_module_1 = require("./lotes/lotes.module");
@@ -47,7 +49,7 @@ const abastecimentos_module_1 = require("./frota/abastecimentos/abastecimentos.m
 const manutencoes_module_1 = require("./frota/manutencoes/manutencoes.module");
 let AppModule = class AppModule {
     configure(consumer) {
-        consumer.apply(request_context_middleware_1.RequestContextMiddleware).forRoutes('*');
+        consumer.apply(context_1.ExecutionContextMiddleware).forRoutes('*');
     }
 };
 exports.AppModule = AppModule;
@@ -55,11 +57,14 @@ exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
             config_1.ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
-            throttler_1.ThrottlerModule.forRoot([{
+            throttler_1.ThrottlerModule.forRoot([
+                {
                     ttl: parseInt(process.env.THROTTLE_TTL || '60000', 10),
                     limit: parseInt(process.env.THROTTLE_LIMIT || '100', 10),
-                }]),
+                },
+            ]),
             prisma_module_1.PrismaModule,
+            context_1.ContextModule,
             tenant_module_1.TenantModule,
             auth_module_1.AuthModule,
             animais_module_1.AnimaisModule,
@@ -91,9 +96,11 @@ exports.AppModule = AppModule = __decorate([
             manutencoes_module_1.ManutencoesModule,
         ],
         providers: [
-            { provide: core_1.APP_FILTER, useClass: filters_1.AllExceptionsFilter },
+            structured_logger_service_1.StructuredLogger,
+            { provide: core_1.APP_PIPE, useClass: global_validation_pipe_1.GlobalValidationPipe },
+            { provide: core_1.APP_FILTER, useClass: filters_1.GlobalExceptionFilter },
             { provide: core_1.APP_INTERCEPTOR, useClass: interceptors_1.LoggingInterceptor },
-            { provide: core_1.APP_INTERCEPTOR, useClass: interceptors_1.HierarchyInterceptor },
+            { provide: core_1.APP_INTERCEPTOR, useClass: interceptors_1.TransformInterceptor },
             { provide: core_1.APP_GUARD, useClass: throttler_1.ThrottlerGuard },
             { provide: core_1.APP_GUARD, useClass: subscription_guard_1.SubscriptionGuard },
         ],

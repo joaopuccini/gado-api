@@ -4,6 +4,8 @@ node_modules
 
 /generated/prisma
 /coverage/
+/dist/
+tsconfig.build.tsbuildinfo
 
 # Isolated implementation worktrees
 .worktrees/

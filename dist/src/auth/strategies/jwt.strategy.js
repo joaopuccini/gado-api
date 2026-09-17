@@ -14,30 +14,59 @@ const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const passport_1 = require("@nestjs/passport");
 const passport_jwt_1 = require("passport-jwt");
-const context_1 = require("../../common/context");
+const resolve_tenant_context_use_case_1 = require("../../identity-access/application/use-cases/resolve-tenant-context.use-case");
 let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy) {
-    constructor(configService) {
+    configService;
+    resolveTenantContext;
+    constructor(configService, resolveTenantContext) {
         super({
             jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
             ignoreExpiration: false,
             secretOrKey: configService.getOrThrow('JWT_SECRET'),
+            passReqToCallback: true,
         });
+        this.configService = configService;
+        this.resolveTenantContext = resolveTenantContext;
     }
-    validate(payload) {
-        context_1.RequestContext.set({
-            userId: payload.usuarioLocalId,
-            globalUserId: payload.sub,
+    async validate(request, payload) {
+        const context = await this.resolveTenantContext.execute({
+            verifiedSubject: payload.sub,
             tenantId: payload.tenantId,
-            schemaName: payload.schemaName,
-            fazendaId: payload.fazendaId,
-            userEmail: payload.email,
+            requestedFarmId: Number(payload.fazendaId),
+            requestedSchemaName: payload.schemaName,
+            hostTenant: this.transportTenantHint(request),
         });
-        return payload;
+        return {
+            sub: context.globalUserId,
+            email: payload.email,
+            nome: payload.nome,
+            tenantId: context.tenantId,
+            organizationId: context.organizationId,
+            usuarioLocalId: context.localUserId,
+            fazendaId: context.farmId,
+            role: payload.role,
+            permissoes: [...context.permissions],
+        };
+    }
+    transportTenantHint(request) {
+        const header = request.headers['x-tenant'];
+        if (typeof header === 'string' && header.trim()) {
+            return header.trim().toLowerCase();
+        }
+        const hostname = request.hostname.toLowerCase();
+        const baseDomain = this.configService
+            .get('TENANT_BASE_DOMAIN', 'gado.com.br')
+            .toLowerCase();
+        if (!hostname.endsWith(`.${baseDomain}`))
+            return undefined;
+        const subdomain = hostname.slice(0, -(baseDomain.length + 1));
+        return subdomain && !subdomain.includes('.') ? subdomain : undefined;
     }
 };
 exports.JwtStrategy = JwtStrategy;
 exports.JwtStrategy = JwtStrategy = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [config_1.ConfigService])
+    __metadata("design:paramtypes", [config_1.ConfigService,
+        resolve_tenant_context_use_case_1.ResolveTenantContextUseCase])
 ], JwtStrategy);
 //# sourceMappingURL=jwt.strategy.js.map

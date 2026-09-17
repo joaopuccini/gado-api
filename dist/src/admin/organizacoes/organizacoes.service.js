@@ -11,8 +11,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrganizacoesService = void 0;
 const common_1 = require("@nestjs/common");
+const node_crypto_1 = require("node:crypto");
 const admin_prisma_service_1 = require("../admin-prisma.service");
-const client_1 = require("@prisma/client");
 let OrganizacoesService = class OrganizacoesService {
     prisma;
     constructor(prisma) {
@@ -30,7 +30,7 @@ let OrganizacoesService = class OrganizacoesService {
         if (existingOrg) {
             throw new common_1.ConflictException('Organização já existe com este subdomínio ou CNPJ');
         }
-        const schemaName = `tenant_${createOrganizacaoDto.subdomain}`;
+        const schemaName = `tenant_${(0, node_crypto_1.randomBytes)(16).toString('hex')}`;
         return await this.prisma.$transaction(async (tx) => {
             const org = await tx.organizacao.create({
                 data: {
@@ -52,19 +52,7 @@ let OrganizacoesService = class OrganizacoesService {
                     status: 'PROVISIONANDO',
                 },
             });
-            try {
-                const tenantDb = new client_1.PrismaClient();
-                await tenantDb.$executeRawUnsafe(`CREATE SCHEMA IF NOT EXISTS "${schemaName}";`);
-                await tenantDb.$disconnect();
-                await tx.tenantRegistry.update({
-                    where: { id: registry.id },
-                    data: { status: 'ATIVO', provisionedAt: new Date() }
-                });
-            }
-            catch (e) {
-                console.error('Erro ao provisionar schema', e);
-            }
-            return org;
+            return { ...org, tenantRegistryId: registry.id };
         });
     }
     async findAll() {

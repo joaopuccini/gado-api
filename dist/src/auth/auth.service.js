@@ -41,6 +41,9 @@ var __importStar = (this && this.__importStar) || (function () {
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var AuthService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
@@ -48,18 +51,19 @@ const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const bcrypt = __importStar(require("bcrypt"));
 const admin_prisma_service_1 = require("../admin/admin-prisma.service");
-const tenant_prisma_service_1 = require("../tenant/tenant-prisma.service");
+const tenant_prisma_client_factory_port_1 = require("../tenant/application/ports/tenant-prisma-client-factory.port");
+const tenant_schema_name_1 = require("../tenant/domain/tenant-schema-name");
 const social_provisioning_service_1 = require("./services/social-provisioning.service");
 const rbac_config_1 = require("../common/rbac/rbac.config");
 let AuthService = AuthService_1 = class AuthService {
     adminPrisma;
-    tenantPrisma;
+    tenantClientFactory;
     jwtService;
     provisioningService;
     logger = new common_1.Logger(AuthService_1.name);
-    constructor(adminPrisma, tenantPrisma, jwtService, provisioningService) {
+    constructor(adminPrisma, tenantClientFactory, jwtService, provisioningService) {
         this.adminPrisma = adminPrisma;
-        this.tenantPrisma = tenantPrisma;
+        this.tenantClientFactory = tenantClientFactory;
         this.jwtService = jwtService;
         this.provisioningService = provisioningService;
     }
@@ -150,7 +154,7 @@ let AuthService = AuthService_1 = class AuthService {
             const org = acesso.organizacao;
             if (!org.schemaName)
                 continue;
-            const tenantClient = this.tenantPrisma.getClientForSchema(org.schemaName);
+            const tenantClient = this.tenantClientFactory.create(tenant_schema_name_1.TenantSchemaName.parse(org.schemaName));
             const userLocal = await tenantClient.usuario.findFirst({
                 where: { globalUserId: globalUser.id, ativo: true }
             });
@@ -231,9 +235,8 @@ let AuthService = AuthService_1 = class AuthService {
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = AuthService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [admin_prisma_service_1.AdminPrismaService,
-        tenant_prisma_service_1.TenantPrismaService,
-        jwt_1.JwtService,
+    __param(1, (0, common_1.Inject)(tenant_prisma_client_factory_port_1.TENANT_PRISMA_CLIENT_FACTORY)),
+    __metadata("design:paramtypes", [admin_prisma_service_1.AdminPrismaService, Object, jwt_1.JwtService,
         social_provisioning_service_1.SocialProvisioningService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

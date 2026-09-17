@@ -1,23 +1,10 @@
-import { OnModuleDestroy } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
-export declare let globalTenantPrismaService: TenantPrismaService | null;
-export declare class TenantPrismaService implements OnModuleDestroy {
-    private readonly logger;
-    private readonly clients;
-    private readonly MAX_CLIENTS;
-    private readonly CLIENT_IDLE_MS;
-    private readonly defaultClient;
-    private cleanupInterval;
-    constructor();
+import type { PrismaClient } from '@prisma/client';
+import { ExecutionContextStore, type RequiredTenantContext } from '../common/context';
+import { type TenantPrismaClientFactoryPort } from './application/ports/tenant-prisma-client-factory.port';
+export declare class TenantPrismaService {
+    private readonly contextStore;
+    private readonly clientFactory;
+    constructor(contextStore: ExecutionContextStore, clientFactory: TenantPrismaClientFactoryPort);
     getClient(): PrismaClient;
-    getClientForSchema(schemaName: string): PrismaClient;
-    private createClientForSchema;
-    private evictLeastRecentlyUsed;
-    private evictIdleClients;
-    getPoolStats(): {
-        activeClients: number;
-        maxClients: number;
-        schemas: string[];
-    };
-    onModuleDestroy(): Promise<void>;
+    getContext(): Readonly<RequiredTenantContext>;
 }

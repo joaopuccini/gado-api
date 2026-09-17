@@ -52,8 +52,9 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 
 | # | Sub-item | Status | Commit | Arquivo(s) |
 |---|---|---|---|---|
-| 2.2.1 | **RED**: token operacional rejeitado em `/api/v1/admin/*` | `[ ]` | | `admin-audience.spec.ts` |
-| 2.2.2 | **RED**: token admin rejeitado em dados tenant | `[ ]` | | `tenant-audience.spec.ts` |
+| 2.2.1 | **RED**: token operacional rejeitado em `/api/v1/admin/*` | `[x]` | 784e6ff | `admin-audience.e2e-spec.ts` |
+| 2.2.1b | **GREEN**: implementar validação de audience | `[x]` | 91f6570 | `jwt.strategy.ts` |
+| 2.2.2 | **RED/GREEN**: token admin rejeitado em dados tenant | `[x]` | b88ab30 | `tenant-audience.e2e-spec.ts` |
 | 2.2.3 | Modelar e migrar `AdminUser`, `UsuarioGlobal`, `AcessoOrganizacao` (revisar schema existente) | `[ ]` | | `schema.prisma` (admin) |
 | 2.2.4 | Modelar e migrar `Usuario`, `UsuarioFazenda` (revisar schema existente) | `[ ]` | | `schema.prisma` (tenant) |
 | 2.2.5 | **RED**: login administrativo por UseCase separado | `[ ]` | | `admin-login.use-case.spec.ts` |

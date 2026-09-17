@@ -6,7 +6,6 @@ export declare class PrismaService extends PrismaClient implements OnModuleInit,
     constructor();
     onModuleInit(): Promise<void>;
     onModuleDestroy(): Promise<void>;
-    executeInTenantSchema<T>(fazendaId: number, operation: (prisma: PrismaClient) => Promise<T>): Promise<T>;
     excludeDeleted(): {
         excluido: boolean;
     };

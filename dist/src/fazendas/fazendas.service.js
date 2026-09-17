@@ -12,17 +12,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FazendasService = void 0;
 const common_1 = require("@nestjs/common");
 const tenant_prisma_service_1 = require("../tenant/tenant-prisma.service");
-const context_1 = require("../common/context");
 let FazendasService = class FazendasService {
     tenantPrisma;
     constructor(tenantPrisma) {
         this.tenantPrisma = tenantPrisma;
     }
     getTenantClient() {
-        const schemaName = context_1.RequestContext.getSchemaName();
-        if (!schemaName)
-            throw new Error('Schema do tenant não encontrado no contexto');
-        return this.tenantPrisma.getClientForSchema(schemaName);
+        return this.tenantPrisma.getClient();
     }
     async findAll() {
         const tenant = this.getTenantClient();

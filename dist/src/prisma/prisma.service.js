@@ -29,16 +29,6 @@ let PrismaService = PrismaService_1 = class PrismaService extends client_1.Prism
         await this.$disconnect();
         this.logger.log('📦 Database disconnected');
     }
-    async executeInTenantSchema(fazendaId, operation) {
-        const schema = `fazenda_${fazendaId}`;
-        await this.$executeRawUnsafe(`SET search_path TO "${schema}", public`);
-        try {
-            return await operation(this);
-        }
-        finally {
-            await this.$executeRawUnsafe(`SET search_path TO "gado_fazendas", public`);
-        }
-    }
     excludeDeleted() {
         return { excluido: false };
     }

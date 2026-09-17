@@ -5,37 +5,51 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LoggingInterceptor = void 0;
 const common_1 = require("@nestjs/common");
 const rxjs_1 = require("rxjs");
-const context_1 = require("../context");
+const structured_logger_service_1 = require("../logger/structured-logger.service");
 let LoggingInterceptor = class LoggingInterceptor {
-    logger = new common_1.Logger('HTTP');
+    logger;
+    constructor(logger) {
+        this.logger = logger;
+    }
     intercept(context, next) {
-        const req = context.switchToHttp().getRequest();
-        const { method, originalUrl, ip } = req;
-        const ctx = context_1.RequestContext.get();
-        const requestId = ctx?.requestId?.substring(0, 8) || '--------';
-        const controller = context.getClass().name;
-        const handler = context.getHandler().name;
-        this.logger.log(`[ReqId:${requestId}] → ${method} ${originalUrl} | ${controller}.${handler} | IP:${ip}`);
+        const request = context.switchToHttp().getRequest();
+        const response = context.switchToHttp().getResponse();
+        const startedAt = Date.now();
+        const fields = {
+            method: request.method,
+            path: request.originalUrl,
+            module: context.getClass().name,
+            operation: context.getHandler().name,
+        };
+        let outcome = 'success';
+        let errorStatusCode;
+        this.logger.info('httpRequestStarted', fields);
         return next.handle().pipe((0, rxjs_1.tap)({
-            next: () => {
-                const res = context.switchToHttp().getResponse();
-                const duration = ctx ? Date.now() - ctx.startTime : 0;
-                this.logger.log(`[ReqId:${requestId}] ← ${method} ${originalUrl} ${res.statusCode} [${duration}ms]`);
-            },
             error: (error) => {
-                const duration = ctx ? Date.now() - ctx.startTime : 0;
-                const status = error?.status || error?.getStatus?.() || 500;
-                this.logger.error(`[ReqId:${requestId}] ✗ ${method} ${originalUrl} ${status} [${duration}ms] | ${error?.message}`);
+                outcome = 'error';
+                errorStatusCode =
+                    error instanceof common_1.HttpException ? error.getStatus() : 500;
             },
+        }), (0, rxjs_1.finalize)(() => {
+            this.logger.info('httpRequestCompleted', {
+                ...fields,
+                statusCode: errorStatusCode ?? response.statusCode,
+                durationMs: Math.max(0, Date.now() - startedAt),
+                outcome,
+            });
         }));
     }
 };
 exports.LoggingInterceptor = LoggingInterceptor;
 exports.LoggingInterceptor = LoggingInterceptor = __decorate([
-    (0, common_1.Injectable)()
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [structured_logger_service_1.StructuredLogger])
 ], LoggingInterceptor);
 //# sourceMappingURL=logging.interceptor.js.map

@@ -5,28 +5,34 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TransformInterceptor = void 0;
 const common_1 = require("@nestjs/common");
 const rxjs_1 = require("rxjs");
 const context_1 = require("../context");
 let TransformInterceptor = class TransformInterceptor {
+    contextStore;
+    constructor(contextStore) {
+        this.contextStore = contextStore;
+    }
     intercept(context, next) {
-        const req = context.switchToHttp().getRequest();
-        const ctx = context_1.RequestContext.get();
-        return next.handle().pipe((0, rxjs_1.map)((data) => ({
-            success: true,
-            data,
-            meta: {
-                requestId: ctx?.requestId || 'unknown',
-                timestamp: new Date().toISOString(),
-                path: req.originalUrl,
-            },
-        })));
+        const response = context.switchToHttp().getResponse();
+        return next.handle().pipe((0, rxjs_1.map)((data) => {
+            if (response.statusCode === 204)
+                return undefined;
+            return {
+                data,
+                meta: { requestId: this.contextStore.require().requestId },
+            };
+        }));
     }
 };
 exports.TransformInterceptor = TransformInterceptor;
 exports.TransformInterceptor = TransformInterceptor = __decorate([
-    (0, common_1.Injectable)()
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [context_1.ExecutionContextStore])
 ], TransformInterceptor);
 //# sourceMappingURL=transform.interceptor.js.map
