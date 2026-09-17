@@ -257,6 +257,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 2026-09-17 14:58 | Codex GPT-5 | 02 | Onda 02 Task 2.2.8 | Onda 02 Task 2.2.9 | Checkpoints RED/GREEN concluídos; regressões globais anteriores registradas na evidência TDD |
 | 2026-09-17 15:43 | Codex GPT-5 | 02 | Onda 02 Task 2.3.4 | Onda 02 Task 2.3.5 | Checkpoint seguro após quatro pares RED/GREEN; dívida global preexistente registrada |
 | 2026-09-17 | Codex GPT-5 | 02 | Onda 02 Task 2.3.4 | Onda 02 Task 2.3.5 | Plano detalhado para execução serial por um único agente criado; nenhuma task de implementação alterada |
+| 2026-09-17 19:34 | Codex GPT-5 | 02 | Onda 02 Task 2.3.5 | Onda 02 Task 2.3.6 | GREEN focal em `f40059a`, mas gate arquitetural global falhou por `AdminLoginUseCase` e hash da migration publicada; 2.3.6 mantida aberta |
 
 ---
 
