@@ -73,8 +73,14 @@ export class PrismaTenantRegistryRepository implements TenantRegistryRepository 
             organizacaoId: tenant.organizationId,
           },
         },
+        include: { usuario: { select: { ativo: true } } },
       });
-    if (organizationAccess?.status !== 'ATIVO') return null;
+    if (
+      organizationAccess?.status !== 'ATIVO' ||
+      !organizationAccess.usuario.ativo
+    ) {
+      return null;
+    }
 
     const client = this.tenantClientFactory.create(
       TenantSchemaName.parse(tenant.schemaName),

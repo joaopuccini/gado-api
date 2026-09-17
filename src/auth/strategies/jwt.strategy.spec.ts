@@ -12,9 +12,7 @@ const request = (path = '/api/v1/animals'): Request =>
     headers: {},
   }) as Request;
 
-const tenantPayload = (
-  overrides: Partial<JwtPayload> = {},
-): JwtPayload => ({
+const tenantPayload = (overrides: Partial<JwtPayload> = {}): JwtPayload => ({
   sub: 'global-user-id',
   email: 'owner@example.com',
   nome: 'Owner',
@@ -90,10 +88,32 @@ describe('JwtStrategy verified tenant claims', () => {
     ['tenant', { tenantId: '' }],
     ['organization', { organizationId: '' }],
     ['farm', { fazendaId: Number.NaN }],
-  ] as const)('rejects an invalid %s claim before context', async (_name, claims) => {
+  ] as const)(
+    'rejects an invalid %s claim before context',
+    async (_name, claims) => {
+      await expect(
+        strategy.validate(request(), tenantPayload(claims)),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
+      expect(resolveTenantContext.execute).not.toHaveBeenCalled();
+    },
+  );
+
+  it('keeps an admin token outside tenant context resolution', async () => {
     await expect(
-      strategy.validate(request(), tenantPayload(claims)),
-    ).rejects.toBeInstanceOf(UnauthorizedException);
+      strategy.validate(
+        request('/api/v1/admin/dashboard'),
+        tenantPayload({
+          aud: 'gado-admin',
+          tenantId: '',
+          organizationId: '',
+          fazendaId: Number.NaN,
+        }),
+      ),
+    ).resolves.toMatchObject({
+      sub: 'global-user-id',
+      email: 'owner@example.com',
+      role: 'DONO',
+    });
     expect(resolveTenantContext.execute).not.toHaveBeenCalled();
   });
 });

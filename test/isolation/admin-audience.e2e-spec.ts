@@ -40,7 +40,10 @@ describe('Admin Audience Validation (e2e)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
-        ConfigModule.forRoot({ isGlobal: true, load: [() => ({ JWT_SECRET: 'test-secret' })] }),
+        ConfigModule.forRoot({
+          isGlobal: true,
+          load: [() => ({ JWT_SECRET: 'test-secret' })],
+        }),
         PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule.register({
           secret: 'test-secret',
@@ -88,7 +91,7 @@ describe('Admin Audience Validation (e2e)', () => {
   describe('Admin Routes (/api/v1/admin/*)', () => {
     it('should REJECT token with tenant audience (gado-tenant)', () => {
       const token = generateTokenForAudience('gado-tenant');
-      
+
       return request(app.getHttpServer())
         .get('/api/v1/admin/dashboard')
         .set('Authorization', `Bearer ${token}`)
@@ -97,7 +100,7 @@ describe('Admin Audience Validation (e2e)', () => {
 
     it('should ALLOW token with admin audience (gado-admin)', () => {
       const token = generateTokenForAudience('gado-admin');
-      
+
       return request(app.getHttpServer())
         .get('/api/v1/admin/dashboard')
         .set('Authorization', `Bearer ${token}`)

@@ -7,6 +7,7 @@ export interface JwtPayload {
     email: string;
     nome: string;
     tenantId: string;
+    organizationId?: string;
     schemaName?: string;
     usuarioLocalId?: number;
     fazendaId: number;
@@ -22,6 +23,16 @@ export declare class JwtStrategy extends JwtStrategy_base {
     private readonly resolveTenantContext;
     constructor(configService: ConfigService, resolveTenantContext: ResolveTenantContextUseCase);
     validate(request: Request, payload: JwtPayload): Promise<{
+        sub: string;
+        email: string;
+        nome: string;
+        role: string;
+        tenantId?: undefined;
+        organizationId?: undefined;
+        usuarioLocalId?: undefined;
+        fazendaId?: undefined;
+        permissoes?: undefined;
+    } | {
         sub: string;
         email: string;
         nome: string;

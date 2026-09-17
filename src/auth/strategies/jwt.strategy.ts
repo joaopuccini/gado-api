@@ -10,6 +10,7 @@ export interface JwtPayload {
   email: string;
   nome: string;
   tenantId: string;
+  organizationId?: string;
   schemaName?: string;
   usuarioLocalId?: number;
   fazendaId: number;
@@ -35,18 +36,44 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(request: Request, payload: JwtPayload) {
     const path = request.path || request.url;
     const isAdminRoute = path.startsWith('/api/v1/admin');
-    const audiences = Array.isArray(payload.aud) ? payload.aud : (payload.aud ? [payload.aud] : []);
+    const audiences = Array.isArray(payload.aud)
+      ? payload.aud
+      : payload.aud
+        ? [payload.aud]
+        : [];
 
     if (isAdminRoute && !audiences.includes('gado-admin')) {
-      throw new UnauthorizedException('Token inválido para rotas administrativas');
+      throw new UnauthorizedException(
+        'Token inválido para rotas administrativas',
+      );
     }
-    
-    if (!isAdminRoute && !audiences.includes('gado-app')) {
+
+    if (isAdminRoute) {
+      return {
+        sub: payload.sub,
+        email: payload.email,
+        nome: payload.nome,
+        role: payload.role,
+      };
+    }
+
+    if (!audiences.includes('gado-tenant')) {
       throw new UnauthorizedException('Token inválido para rotas de tenant');
+    }
+
+    if (
+      !payload.sub?.trim() ||
+      !payload.tenantId?.trim() ||
+      !payload.organizationId?.trim() ||
+      !Number.isInteger(payload.fazendaId) ||
+      payload.fazendaId <= 0
+    ) {
+      throw new UnauthorizedException('Token operacional incompleto');
     }
 
     const context = await this.resolveTenantContext.execute({
       verifiedSubject: payload.sub,
+      verifiedOrganizationId: payload.organizationId,
       tenantId: payload.tenantId,
       requestedFarmId: Number(payload.fazendaId),
       requestedSchemaName: payload.schemaName,

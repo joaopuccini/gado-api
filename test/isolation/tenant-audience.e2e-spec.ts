@@ -37,7 +37,10 @@ describe('Tenant Audience Validation (e2e)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
-        ConfigModule.forRoot({ isGlobal: true, load: [() => ({ JWT_SECRET: 'test-secret' })] }),
+        ConfigModule.forRoot({
+          isGlobal: true,
+          load: [() => ({ JWT_SECRET: 'test-secret' })],
+        }),
         PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule.register({
           secret: 'test-secret',
@@ -73,6 +76,7 @@ describe('Tenant Audience Validation (e2e)', () => {
       email: 'test@example.com',
       nome: 'Test',
       tenantId: 'tenant-1',
+      organizationId: 'organization-1',
       schemaName: 'schema-1',
       usuarioLocalId: 1,
       fazendaId: 1,
@@ -84,7 +88,7 @@ describe('Tenant Audience Validation (e2e)', () => {
   describe('Tenant Routes (/api/v1/* not admin)', () => {
     it('should REJECT token with admin audience (gado-admin)', () => {
       const token = generateTokenForAudience('gado-admin');
-      
+
       return request(app.getHttpServer())
         .get('/api/v1/animals')
         .set('Authorization', `Bearer ${token}`)
@@ -93,7 +97,7 @@ describe('Tenant Audience Validation (e2e)', () => {
 
     it('should ALLOW token with tenant audience (gado-tenant)', () => {
       const token = generateTokenForAudience('gado-tenant');
-      
+
       return request(app.getHttpServer())
         .get('/api/v1/animals')
         .set('Authorization', `Bearer ${token}`)

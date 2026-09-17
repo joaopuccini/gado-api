@@ -109,7 +109,7 @@ describe('ResolveTenantContextUseCase', () => {
         verifiedOrganizationId: 'organization-attacker',
       }),
     ).rejects.toMatchObject({ code: 'forbidden' });
-    expect(registry.findMembership).not.toHaveBeenCalled();
+    expect(registry.findMembership.mock.calls).toHaveLength(0);
   });
 
   it('rejects a subject without active organization membership', async () => {

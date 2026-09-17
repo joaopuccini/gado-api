@@ -8,6 +8,7 @@ import type { TenantRegistryRepository } from '../ports/tenant-registry.reposito
 export interface ResolveTenantContextInput {
   verifiedSubject: string;
   tenantId: string;
+  verifiedOrganizationId: string;
   requestedFarmId: number;
   hostTenant?: string;
   requestedSchemaName?: string;
@@ -25,6 +26,13 @@ export class ResolveTenantContextUseCase {
     const tenant = await this.registry.findById(input.tenantId);
     if (!tenant || tenant.status !== 'active') {
       throw new DomainError('tenantUnavailable', 'Organização indisponível');
+    }
+
+    if (input.verifiedOrganizationId !== tenant.organizationId) {
+      throw new DomainError(
+        'forbidden',
+        'Organização divergente da identidade',
+      );
     }
 
     const acceptedTransportHints = new Set([
