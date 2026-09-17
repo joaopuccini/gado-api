@@ -2,6 +2,10 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { PERMISSIONS_CATALOG } from '../../src/common/rbac/permissions-catalog';
 
+interface QuarantinedController {
+  readonly controller: string;
+}
+
 const srcDirectory = resolve(process.cwd(), 'src');
 
 const sourceFiles = (directory: string): string[] =>
@@ -12,6 +16,19 @@ const sourceFiles = (directory: string): string[] =>
   });
 
 const files = sourceFiles(srcDirectory);
+const quarantinedControllers = new Set(
+  (
+    JSON.parse(
+      readFileSync(
+        resolve(
+          process.cwd(),
+          'test/fixtures/legacy-route-quarantine.json',
+        ),
+        'utf8',
+      ),
+    ) as QuarantinedController[]
+  ).map(({ controller }) => controller),
+);
 
 describe('permissions catalog architecture', () => {
   it('does not have duplicate IDs in the catalog', () => {
@@ -46,6 +63,35 @@ describe('permissions catalog architecture', () => {
            }
         }
       }
+    });
+
+    expect(violations).toEqual([]);
+  });
+
+  it('activates authentication and permission guards on migrated controllers', () => {
+    const violations = files.flatMap((file) => {
+      const source = readFileSync(file, 'utf8');
+      const controllerNames = [
+        ...source.matchAll(/export\s+class\s+(\w+Controller)\b/g),
+      ].map((match) => match[1]);
+      const migratedControllers = controllerNames.filter(
+        (controller) => !quarantinedControllers.has(controller),
+      );
+
+      if (migratedControllers.length === 0) return [];
+
+      const hasPermissions = source.includes('@RequirePermissions(');
+      const hasActiveGuards =
+        /@UseGuards\([^)]*JwtAuthGuard[^)]*PermissionsGuard[^)]*\)/s.test(
+          source,
+        );
+
+      return hasPermissions && hasActiveGuards
+        ? []
+        : migratedControllers.map(
+            (controller) =>
+              `${controller} must activate JwtAuthGuard and PermissionsGuard with @RequirePermissions`,
+          );
     });
 
     expect(violations).toEqual([]);
