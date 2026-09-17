@@ -124,4 +124,54 @@ describe('TenantLoginUseCase', () => {
       permissions: operationalAccess.permissions,
     });
   });
+
+  it('returns allowed farms without issuing a token when selection is required', async () => {
+    identityRepository.findActiveByEmail.mockResolvedValue(globalUser);
+    passwordVerifier.compare.mockResolvedValue(true);
+    accessRepository.listActiveByGlobalUser.mockResolvedValue([
+      operationalAccess,
+      {
+        ...operationalAccess,
+        organizationId: 'second-organization-id',
+        farmId: 9,
+        farmName: 'Fazenda Filial',
+      },
+    ]);
+
+    await expect(
+      useCase.execute({ email: globalUser.email, password: 'secret' }),
+    ).resolves.toEqual({
+      requiresFarmSelection: true,
+      farms: [
+        {
+          id: 7,
+          name: 'Fazenda Principal',
+          organizationId: 'organization-id',
+        },
+        {
+          id: 9,
+          name: 'Fazenda Filial',
+          organizationId: 'second-organization-id',
+        },
+      ],
+    });
+    expect(tokenIssuer.sign).not.toHaveBeenCalled();
+  });
+
+  it('fails closed when the requested farm is outside active access', async () => {
+    identityRepository.findActiveByEmail.mockResolvedValue(globalUser);
+    passwordVerifier.compare.mockResolvedValue(true);
+    accessRepository.listActiveByGlobalUser.mockResolvedValue([
+      operationalAccess,
+    ]);
+
+    await expect(
+      useCase.execute({
+        email: globalUser.email,
+        password: 'secret',
+        farmId: 999,
+      }),
+    ).rejects.toMatchObject({ code: 'unauthenticated' });
+    expect(tokenIssuer.sign).not.toHaveBeenCalled();
+  });
 });
