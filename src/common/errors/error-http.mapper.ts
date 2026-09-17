@@ -25,6 +25,8 @@ const statusByCode: Readonly<Record<ErrorCode, number>> = {
   migrationChecksumMismatch: HttpStatus.INTERNAL_SERVER_ERROR,
   migrationChainInvalid: HttpStatus.INTERNAL_SERVER_ERROR,
   tenantMigrationFailed: HttpStatus.INTERNAL_SERVER_ERROR,
+  invalidProvisioningRun: HttpStatus.INTERNAL_SERVER_ERROR,
+  invalidProvisioningTransition: HttpStatus.CONFLICT,
 };
 
 export const mapDomainErrorToHttp = (

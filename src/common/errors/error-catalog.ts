@@ -13,7 +13,9 @@ export type ErrorCode =
   | 'invalidTenantSchemaName'
   | 'migrationChecksumMismatch'
   | 'migrationChainInvalid'
-  | 'tenantMigrationFailed';
+  | 'tenantMigrationFailed'
+  | 'invalidProvisioningRun'
+  | 'invalidProvisioningTransition';
 
 export interface ErrorDetail {
   field?: string;

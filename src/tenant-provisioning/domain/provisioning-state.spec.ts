@@ -1,8 +1,21 @@
 import { DomainError } from '../../common/errors/domain-error';
-import {
-  ProvisioningRun,
-  ProvisioningState,
-} from './provisioning-run';
+import { ProvisioningRun, ProvisioningState } from './provisioning-run';
+
+const expectDomainError = (
+  operation: () => void,
+  code: DomainError['code'],
+): void => {
+  try {
+    operation();
+  } catch (error: unknown) {
+    expect(error).toBeInstanceOf(DomainError);
+    if (!(error instanceof DomainError)) return;
+    expect(error.code).toBe(code);
+    return;
+  }
+
+  throw new Error(`Expected DomainError ${code}`);
+};
 
 describe('ProvisioningRun state machine', () => {
   it('starts registered and advances through every provisioning stage', () => {
@@ -39,28 +52,29 @@ describe('ProvisioningRun state machine', () => {
       state: current,
     });
 
-    expect(() => run.transitionTo(target)).toThrow(
-      expect.objectContaining<Partial<DomainError>>({
-        code: 'invalidProvisioningTransition',
-      }),
+    expectDomainError(
+      () => run.transitionTo(target),
+      'invalidProvisioningTransition',
     );
     expect(run.state).toBe(current);
   });
 
   it('rejects an empty run or tenant registry identity', () => {
-    expect(() =>
-      ProvisioningRun.start({ id: ' ', tenantRegistryId: 'tenant-1' }),
-    ).toThrow(
-      expect.objectContaining<Partial<DomainError>>({
-        code: 'invalidProvisioningRun',
-      }),
+    expectDomainError(
+      () =>
+        void ProvisioningRun.start({
+          id: ' ',
+          tenantRegistryId: 'tenant-1',
+        }),
+      'invalidProvisioningRun',
     );
-    expect(() =>
-      ProvisioningRun.start({ id: 'run-1', tenantRegistryId: '' }),
-    ).toThrow(
-      expect.objectContaining<Partial<DomainError>>({
-        code: 'invalidProvisioningRun',
-      }),
+    expectDomainError(
+      () =>
+        void ProvisioningRun.start({
+          id: 'run-1',
+          tenantRegistryId: '',
+        }),
+      'invalidProvisioningRun',
     );
   });
 });

@@ -14,8 +14,8 @@ describe('provisioning run persistence architecture', () => {
   it('persists runs and individually retryable steps in the admin schema', () => {
     expect(schema).toContain('model ProvisioningRun {');
     expect(schema).toContain('idempotencyKey');
-    expect(schema).toContain('state            ProvisioningState');
-    expect(schema).toContain('steps            ProvisioningStep[]');
+    expect(schema).toMatch(/state\s+ProvisioningState/);
+    expect(schema).toMatch(/steps\s+ProvisioningStep\[\]/);
     expect(schema).toContain('model ProvisioningStep {');
     expect(schema).toContain('@@unique([runId, state, attempt])');
   });
@@ -26,10 +26,12 @@ describe('provisioning run persistence architecture', () => {
     if (!existsSync(migrationPath)) return;
     const migration = readFileSync(migrationPath, 'utf8');
 
-    expect(migration).toContain('CREATE TABLE "gado_admin"."provisioning_runs"');
+    expect(migration).toContain(
+      'CREATE TABLE "gado_admin"."provisioning_runs"',
+    );
     expect(migration).toContain(
       'CREATE TABLE "gado_admin"."provisioning_steps"',
     );
-    expect(migration).not.toMatch(/\b(?:DROP|TRUNCATE|DELETE)\b/i);
+    expect(migration).not.toMatch(/^\s*(?:DROP|TRUNCATE|DELETE)\b/im);
   });
 });

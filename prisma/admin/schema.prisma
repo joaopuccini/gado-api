@@ -99,9 +99,49 @@ model TenantRegistry {
   createdAt     DateTime             @map("created_at") @default(now()) @db.Timestamptz(6)
   updatedAt     DateTime             @map("updated_at") @updatedAt @db.Timestamptz(6)
 
-  organizacao Organizacao @relation(fields: [organizacaoId], references: [id])
+  organizacao      Organizacao       @relation(fields: [organizacaoId], references: [id])
+  provisioningRuns ProvisioningRun[]
 
   @@map("tenant_registry")
+  @@schema("gado_admin")
+}
+
+model ProvisioningRun {
+  id               String            @id @default(uuid()) @db.Uuid
+  tenantRegistryId String            @map("tenant_registry_id") @db.Uuid
+  idempotencyKey   String            @map("idempotency_key") @unique @db.VarChar(100)
+  state            ProvisioningState @default(REGISTERED)
+  attempt          Int               @default(1)
+  createdAt        DateTime          @map("created_at") @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime          @map("updated_at") @updatedAt @db.Timestamptz(6)
+  completedAt      DateTime?         @map("completed_at") @db.Timestamptz(6)
+
+  tenantRegistry TenantRegistry     @relation(fields: [tenantRegistryId], references: [id], onDelete: Cascade)
+  steps          ProvisioningStep[]
+
+  @@index([tenantRegistryId, state])
+  @@map("provisioning_runs")
+  @@schema("gado_admin")
+}
+
+model ProvisioningStep {
+  id           String                 @id @default(uuid()) @db.Uuid
+  runId        String                 @map("run_id") @db.Uuid
+  state        ProvisioningState
+  attempt      Int                    @default(1)
+  status       ProvisioningStepStatus @default(PENDING)
+  startedAt    DateTime?              @map("started_at") @db.Timestamptz(6)
+  completedAt  DateTime?              @map("completed_at") @db.Timestamptz(6)
+  errorCode    String?                @map("error_code") @db.VarChar(100)
+  errorMessage String?                @map("error_message")
+  createdAt    DateTime               @map("created_at") @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime               @map("updated_at") @updatedAt @db.Timestamptz(6)
+
+  run ProvisioningRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@unique([runId, state, attempt])
+  @@index([runId, status])
+  @@map("provisioning_steps")
   @@schema("gado_admin")
 }
 
@@ -202,6 +242,24 @@ enum TenantRegistryStatus {
   ATIVO
   BLOQUEADO
   REMOVIDO
+  @@schema("gado_admin")
+}
+
+enum ProvisioningState {
+  REGISTERED
+  PROVISIONING_SCHEMA
+  APPLYING_MIGRATIONS
+  SEEDING
+  VALIDATING
+  ACTIVE
+  @@schema("gado_admin")
+}
+
+enum ProvisioningStepStatus {
+  PENDING
+  RUNNING
+  SUCCEEDED
+  FAILED
   @@schema("gado_admin")
 }
 
