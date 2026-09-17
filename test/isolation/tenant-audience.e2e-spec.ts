@@ -91,13 +91,33 @@ describe('Tenant Audience Validation (e2e)', () => {
         .expect(401);
     });
 
-    it('should ALLOW token with tenant audience (gado-app)', () => {
-      const token = generateTokenForAudience('gado-app');
+    it('should ALLOW token with tenant audience (gado-tenant)', () => {
+      const token = generateTokenForAudience('gado-tenant');
       
       return request(app.getHttpServer())
         .get('/api/v1/animals')
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
+    });
+
+    it('should REJECT an expired tenant token before context resolution', () => {
+      const token = jwtService.sign(
+        {
+          sub: 'test-user',
+          email: 'test@example.com',
+          nome: 'Test',
+          tenantId: 'tenant-1',
+          organizationId: 'organization-1',
+          fazendaId: 1,
+          role: 'COLABORADOR',
+        },
+        { audience: 'gado-tenant', expiresIn: -1 },
+      );
+
+      return request(app.getHttpServer())
+        .get('/api/v1/animals')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(401);
     });
   });
 });

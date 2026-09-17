@@ -80,7 +80,10 @@ describe('PrismaTenantRegistryRepository', () => {
   );
 
   it('fails closed when organization access is absent or inactive', async () => {
-    findAccess.mockResolvedValue({ status: 'PENDENTE' });
+    findAccess.mockResolvedValue({
+      status: 'PENDENTE',
+      usuario: { ativo: true },
+    });
 
     await expect(
       repository.findMembership(activeTenant, 'global-user'),
@@ -88,8 +91,23 @@ describe('PrismaTenantRegistryRepository', () => {
     expect(createTenantClient.mock.calls).toHaveLength(0);
   });
 
+  it('treats a disabled global user as a revoked identity', async () => {
+    findAccess.mockResolvedValue({
+      status: 'ATIVO',
+      usuario: { ativo: false },
+    });
+
+    await expect(
+      repository.findMembership(activeTenant, 'global-user'),
+    ).resolves.toBeNull();
+    expect(createTenantClient).not.toHaveBeenCalled();
+  });
+
   it('returns null when there is no active local user', async () => {
-    findAccess.mockResolvedValue({ status: 'ATIVO' });
+    findAccess.mockResolvedValue({
+      status: 'ATIVO',
+      usuario: { ativo: true },
+    });
     findLocalUser.mockResolvedValue(null);
 
     await expect(
@@ -99,7 +117,10 @@ describe('PrismaTenantRegistryRepository', () => {
   });
 
   it('combines role, profile and active direct permissions for active farms', async () => {
-    findAccess.mockResolvedValue({ status: 'ATIVO' });
+    findAccess.mockResolvedValue({
+      status: 'ATIVO',
+      usuario: { ativo: true },
+    });
     findLocalUser.mockResolvedValue({
       id: 41,
       perfil: {

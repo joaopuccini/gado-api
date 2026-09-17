@@ -86,8 +86,8 @@ describe('Admin Audience Validation (e2e)', () => {
   };
 
   describe('Admin Routes (/api/v1/admin/*)', () => {
-    it('should REJECT token with tenant audience (gado-app)', () => {
-      const token = generateTokenForAudience('gado-app');
+    it('should REJECT token with tenant audience (gado-tenant)', () => {
+      const token = generateTokenForAudience('gado-tenant');
       
       return request(app.getHttpServer())
         .get('/api/v1/admin/dashboard')

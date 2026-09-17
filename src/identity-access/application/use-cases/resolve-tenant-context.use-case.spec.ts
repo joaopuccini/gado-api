@@ -45,6 +45,7 @@ const membership = (
 const verifiedInput = () => ({
   verifiedSubject: 'user-a',
   tenantId: 'tenant-a',
+  verifiedOrganizationId: 'organization-a',
   requestedSchemaName: 'tenant_attacker',
   requestedFarmId: 10,
   hostTenant: 'fazenda-a',
@@ -99,6 +100,16 @@ describe('ResolveTenantContextUseCase', () => {
     await expect(
       executeInRequest({ ...verifiedInput(), hostTenant: 'another-farm' }),
     ).rejects.toMatchObject({ code: 'forbidden' });
+  });
+
+  it('rejects divergence between signed organization and tenant registry', async () => {
+    await expect(
+      executeInRequest({
+        ...verifiedInput(),
+        verifiedOrganizationId: 'organization-attacker',
+      }),
+    ).rejects.toMatchObject({ code: 'forbidden' });
+    expect(registry.findMembership).not.toHaveBeenCalled();
   });
 
   it('rejects a subject without active organization membership', async () => {
