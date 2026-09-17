@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import type { Request } from 'express';
@@ -15,6 +15,7 @@ export interface JwtPayload {
   fazendaId: number;
   role: string;
   permissoes?: string[];
+  aud?: string | string[];
 }
 
 @Injectable()
@@ -32,6 +33,18 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(request: Request, payload: JwtPayload) {
+    const path = request.path || request.url;
+    const isAdminRoute = path.startsWith('/api/v1/admin');
+    const audiences = Array.isArray(payload.aud) ? payload.aud : (payload.aud ? [payload.aud] : []);
+
+    if (isAdminRoute && !audiences.includes('gado-admin')) {
+      throw new UnauthorizedException('Token inválido para rotas administrativas');
+    }
+    
+    if (!isAdminRoute && !audiences.includes('gado-app')) {
+      throw new UnauthorizedException('Token inválido para rotas de tenant');
+    }
+
     const context = await this.resolveTenantContext.execute({
       verifiedSubject: payload.sub,
       tenantId: payload.tenantId,
