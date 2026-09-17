@@ -62,3 +62,25 @@ RED no commit `b45163f`: a suite foi descoberta e falhou porque o UseCase ainda
 não existia. GREEN no commit `768e190`: 7/7 testes passaram; cobertura restrita
 ao UseCase ficou em 100% statements/lines/functions e 92,85% branches. O lint
 dos três arquivos novos e o build também passaram.
+
+## Tasks 2.2.9–2.2.10 — validação do token antes do contexto
+
+Jornada: como usuário autenticado, só posso entrar no contexto operacional se o
+token tiver audience e claims coerentes com o registry e se minha identidade,
+organização, tenant, usuário local e fazenda continuarem ativos.
+
+| Garantia | Tipo | Resultado | Evidência |
+|---|---|---|---|
+| Somente `gado-tenant` é aceito em rota operacional | unitário/E2E | PASS | `jwt.strategy.spec.ts`; `tenant-audience.e2e-spec.ts` |
+| Token tenant é rejeitado em rota administrativa e vice-versa | E2E | PASS | suites de audience — 5/5 testes |
+| Token expirado é rejeitado pelo Passport antes da resolução do contexto | E2E | PASS | `tenant-audience.e2e-spec.ts` |
+| Subject, tenant, organização e fazenda inválidos falham antes do contexto | unitário | PASS | `jwt.strategy.spec.ts` |
+| Organização assinada precisa coincidir com o registry | unitário | PASS | `resolve-tenant-context.use-case.spec.ts` |
+| Identidade global desativada revoga acesso antes de abrir client tenant | unitário | PASS | `prisma-tenant-registry.repository.spec.ts` |
+| Token administrativo não recebe contexto tenant implícito | unitário | PASS | `jwt.strategy.spec.ts` |
+
+RED no commit `0e8b002`: 28 testes unitários executaram com 4 falhas esperadas,
+e o E2E rejeitou incorretamente `gado-tenant`. GREEN no commit `2bd8308`: 86/86
+testes unitários, 5/5 testes E2E de audience/expiração, lint focado e build
+passaram. A cobertura focada ficou em 96,7% statements, 86,41% branches, 100%
+functions e 97,61% lines.
