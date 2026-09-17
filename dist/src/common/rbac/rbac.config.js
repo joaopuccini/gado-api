@@ -1,117 +1,33 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RolePermissions = exports.FazendaRole = exports.AppAction = exports.AppModule = void 0;
+exports.RolePermissions = exports.FazendaRole = exports.AppModule = exports.AppAction = void 0;
 exports.hasPermission = hasPermission;
 exports.getPermissionsForRole = getPermissionsForRole;
-var AppModule;
-(function (AppModule) {
-    AppModule["DASHBOARD"] = "dashboard";
-    AppModule["ANIMAIS"] = "animais";
-    AppModule["PESAGENS"] = "pesagens";
-    AppModule["SANIDADE"] = "sanidade";
-    AppModule["MANEJO"] = "manejo";
-    AppModule["FINANCEIRO"] = "financeiro";
-    AppModule["PASTOS"] = "pastos";
-    AppModule["LOTES"] = "lotes";
-    AppModule["RACAS"] = "racas";
-    AppModule["CLIENTES"] = "clientes";
-    AppModule["FOTOS"] = "fotos";
-    AppModule["MOVIMENTACOES"] = "movimentacoes";
-    AppModule["CONFIGURACOES"] = "configuracoes";
-})(AppModule || (exports.AppModule = AppModule = {}));
-var AppAction;
-(function (AppAction) {
-    AppAction["LER"] = "ler";
-    AppAction["CRIAR"] = "criar";
-    AppAction["EDITAR"] = "editar";
-    AppAction["EXCLUIR"] = "excluir";
-    AppAction["GERENCIAR"] = "gerenciar";
-})(AppAction || (exports.AppAction = AppAction = {}));
-var FazendaRole;
-(function (FazendaRole) {
-    FazendaRole["DONO"] = "DONO";
-    FazendaRole["GESTOR"] = "GESTOR";
-    FazendaRole["COLABORADOR"] = "COLABORADOR";
-    FazendaRole["VETERINARIO"] = "VETERINARIO";
-    FazendaRole["CONSULTOR"] = "CONSULTOR";
-})(FazendaRole || (exports.FazendaRole = FazendaRole = {}));
-exports.RolePermissions = {
-    [FazendaRole.DONO]: [
-        'dashboard:ler',
-        'animais:gerenciar',
-        'pesagens:gerenciar',
-        'sanidade:gerenciar',
-        'manejo:gerenciar',
-        'financeiro:gerenciar',
-        'pastos:gerenciar',
-        'lotes:gerenciar',
-        'racas:gerenciar',
-        'clientes:gerenciar',
-        'fotos:gerenciar',
-        'movimentacoes:gerenciar',
-        'configuracoes:gerenciar',
-    ],
-    [FazendaRole.GESTOR]: [
-        'dashboard:ler',
-        'animais:gerenciar',
-        'pesagens:gerenciar',
-        'sanidade:gerenciar',
-        'manejo:gerenciar',
-        'financeiro:gerenciar',
-        'pastos:gerenciar',
-        'lotes:gerenciar',
-        'racas:gerenciar',
-        'clientes:gerenciar',
-        'fotos:gerenciar',
-        'movimentacoes:gerenciar',
-        'configuracoes:ler',
-    ],
-    [FazendaRole.COLABORADOR]: [
-        'dashboard:ler',
-        'animais:ler', 'animais:criar', 'animais:editar',
-        'pesagens:ler', 'pesagens:criar',
-        'sanidade:ler', 'sanidade:criar',
-        'manejo:ler', 'manejo:criar',
-        'pastos:ler',
-        'lotes:ler',
-        'racas:ler',
-        'fotos:ler', 'fotos:criar',
-        'movimentacoes:ler', 'movimentacoes:criar',
-    ],
-    [FazendaRole.VETERINARIO]: [
-        'dashboard:ler',
-        'animais:ler',
-        'pesagens:ler', 'pesagens:criar',
-        'sanidade:gerenciar',
-        'manejo:gerenciar',
-        'fotos:ler', 'fotos:criar',
-    ],
-    [FazendaRole.CONSULTOR]: [
-        'dashboard:ler',
-        'animais:ler',
-        'pesagens:ler',
-        'sanidade:ler',
-        'manejo:ler',
-        'financeiro:ler',
-        'pastos:ler',
-        'lotes:ler',
-        'racas:ler',
-        'clientes:ler',
-        'fotos:ler',
-        'movimentacoes:ler',
-    ],
-};
+const default_profiles_1 = require("./default-profiles");
+const permissions_catalog_1 = require("./permissions-catalog");
+const rbac_enums_1 = require("./rbac.enums");
+var rbac_enums_2 = require("./rbac.enums");
+Object.defineProperty(exports, "AppAction", { enumerable: true, get: function () { return rbac_enums_2.AppAction; } });
+Object.defineProperty(exports, "AppModule", { enumerable: true, get: function () { return rbac_enums_2.AppModule; } });
+Object.defineProperty(exports, "FazendaRole", { enumerable: true, get: function () { return rbac_enums_2.FazendaRole; } });
+exports.RolePermissions = Object.entries(default_profiles_1.DEFAULT_PROFILE_PERMISSIONS).reduce((acc, [role, permissionIds]) => {
+    acc[role] = permissionIds
+        .map((id) => permissions_catalog_1.PERMISSIONS_CATALOG.find((p) => p.id === id))
+        .filter((p) => p !== undefined)
+        .map((p) => `${p.module}:${p.action}`);
+    return acc;
+}, {});
 function hasPermission(role, module, action) {
-    if (role === FazendaRole.DONO)
+    if (role === rbac_enums_1.FazendaRole.DONO)
         return true;
     const permissions = exports.RolePermissions[role] || [];
     const required = `${module}:${action}`;
-    const manageAll = `${module}:${AppAction.GERENCIAR}`;
+    const manageAll = `${module}:${rbac_enums_1.AppAction.GERENCIAR}`;
     return permissions.includes(required) || permissions.includes(manageAll);
 }
 function getPermissionsForRole(role) {
-    if (role === FazendaRole.DONO) {
-        return Object.values(AppModule).flatMap((mod) => Object.values(AppAction).map((act) => `${mod}:${act}`));
+    if (role === rbac_enums_1.FazendaRole.DONO) {
+        return Object.values(rbac_enums_1.AppModule).flatMap((mod) => Object.values(rbac_enums_1.AppAction).map((act) => `${mod}:${act}`));
     }
     return exports.RolePermissions[role] || [];
 }

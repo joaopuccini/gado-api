@@ -29,6 +29,15 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
         this.resolveTenantContext = resolveTenantContext;
     }
     async validate(request, payload) {
+        const path = request.path || request.url;
+        const isAdminRoute = path.startsWith('/api/v1/admin');
+        const audiences = Array.isArray(payload.aud) ? payload.aud : (payload.aud ? [payload.aud] : []);
+        if (isAdminRoute && !audiences.includes('gado-admin')) {
+            throw new common_1.UnauthorizedException('Token inválido para rotas administrativas');
+        }
+        if (!isAdminRoute && !audiences.includes('gado-app')) {
+            throw new common_1.UnauthorizedException('Token inválido para rotas de tenant');
+        }
         const context = await this.resolveTenantContext.execute({
             verifiedSubject: payload.sub,
             tenantId: payload.tenantId,
