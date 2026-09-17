@@ -40,9 +40,9 @@ O gate de coverage global executou 83 testes, com 80,51% de statements, 81% de
 functions e 81,35% de lines, mas falhou no threshold de branches: 74,38% (<80%).
 Também revelou regressões anteriores no endpoint de catálogo e suites que exigem
 `TEST_DATABASE_URL`. O gate completo de arquitetura permanece vermelho por
-dependências de framework no `AdminLoginUseCase` e pela ausência de UseCase no
-`PermissionsController`. Esses problemas antecedem a Task 2.2.4 e devem ser
-corrigidos antes do Gate G1-identity.
+dependências de framework no `AdminLoginUseCase`. A ausência de UseCase no
+`PermissionsController` foi corrigida na Task 2.2.11. A dependência restante
+antecede a Task 2.2.4 e deve ser corrigida antes do Gate G1-identity.
 
 ## Tasks 2.2.7–2.2.8 — login operacional
 
@@ -84,3 +84,27 @@ e o E2E rejeitou incorretamente `gado-tenant`. GREEN no commit `2bd8308`: 86/86
 testes unitários, 5/5 testes E2E de audience/expiração, lint focado e build
 passaram. A cobertura focada ficou em 96,7% statements, 86,41% branches, 100%
 functions e 97,61% lines.
+
+## Task 2.2.11 — autorização das rotas migradas
+
+Jornada: como usuário operacional, só posso consultar uma rota migrada quando o
+token for autenticado e contiver a permissão exigida pelo catálogo canônico.
+
+| Garantia | Tipo | Resultado | Evidência |
+|---|---|---|---|
+| Todo controller fora da quarentena ativa autenticação e autorização | arquitetura | PASS | `permissions-catalog.spec.ts` — 4/4 testes |
+| Autenticação executa antes da verificação de permissão | unitário | PASS | `permissions.controller.spec.ts` |
+| Controller apenas traduz HTTP e delega ao UseCase | unitário/arquitetura | PASS | `permissions.controller.spec.ts`; `hexagonal-boundaries.spec.ts` |
+| Catálogo é agrupado sem duplicar permissões | unitário | PASS | `get-permissions-catalog.use-case.spec.ts` |
+| Arquivos alterados atendem ao lint | estático | PASS | `npx eslint` focado |
+| Aplicação compila | build | PASS | `npm run build` |
+
+RED no commit `108627c`: as duas suites unitárias falharam pela ausência do
+UseCase, da delegação e dos guards; o gate arquitetural identificou o único
+controller migrado desprotegido. GREEN no commit `1a88887`: 88/88 testes
+unitários passaram, o gate específico de arquitetura passou e a cobertura
+focada ficou em 100% statements/lines/functions e 83,33% branches.
+
+O gate completo de arquitetura continua vermelho exclusivamente pelos imports
+Nest/JWT preexistentes no `AdminLoginUseCase`. O lint global também continua
+vermelho por dívida anterior; o lint restrito aos arquivos desta task passou.

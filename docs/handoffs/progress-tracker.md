@@ -63,7 +63,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 2.2.8 | **GREEN**: implementar login operacional | `[x]` | 768e190 | `tenant-login.use-case.ts` |
 | 2.2.9 | Validar `aud`, expiração, organização, tenant, fazenda e revogação antes do contexto | `[x]` | 2bd8308 | `jwt-strategy.ts`, guards |
 | 2.2.10 | **GREEN**: testes de audience passam | `[x]` | 2bd8308 | |
-| 2.2.11 | Aplicar @RequirePermissions por decorator/guard em todas as rotas migradas | `[ ]` | | controllers |
+| 2.2.11 | Aplicar @RequirePermissions por decorator/guard em todas as rotas migradas | `[x]` | 1a88887 | `permissions.controller.ts`, `permissions-catalog.spec.ts` |
 
 **Task 2.2 concluída?** `[ ]` | **Evidência:** |
 
