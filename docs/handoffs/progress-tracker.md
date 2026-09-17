@@ -36,15 +36,15 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 
 | # | Sub-item | Status | Commit | Arquivo(s) |
 |---|---|---|---|---|
-| 2.1.1 | Criar `src/common/rbac/permissions-catalog.ts` com `PERMISSIONS_CATALOG` (IDs estáveis) | `[ ]` | | `permissions-catalog.ts` |
-| 2.1.2 | Criar `src/common/rbac/default-profiles.ts` com `DEFAULT_PROFILE_PERMISSIONS` por FazendaRole | `[ ]` | | `default-profiles.ts` |
-| 2.1.3 | Refatorar `rbac.config.ts` para derivar `RolePermissions` do catálogo | `[ ]` | | `rbac.config.ts` |
-| 2.1.4 | **RED**: teste de validação — @RequirePermissions vs catálogo (órfãs, duplicatas, IDs) | `[ ]` | | `permissions-catalog.spec.ts` |
-| 2.1.5 | **GREEN**: implementar validação e corrigir até verde | `[ ]` | | |
-| 2.1.6 | **RED**: teste do endpoint `GET /permissions/catalog` | `[ ]` | | `permissions.controller.spec.ts` |
-| 2.1.7 | **GREEN**: criar controller e UseCase do catálogo | `[ ]` | | `permissions.controller.ts` |
+| 2.1.1 | Criar `src/common/rbac/permissions-catalog.ts` com `PERMISSIONS_CATALOG` (IDs estáveis) | `[x]` | 1616bc8 | `permissions-catalog.ts` |
+| 2.1.2 | Criar `src/common/rbac/default-profiles.ts` com `DEFAULT_PROFILE_PERMISSIONS` por FazendaRole | `[x]` | 1616bc8 | `default-profiles.ts` |
+| 2.1.3 | Refatorar `rbac.config.ts` para derivar `RolePermissions` do catálogo | `[x]` | 1616bc8 | `rbac.config.ts` |
+| 2.1.4 | **RED**: teste de validação — @RequirePermissions vs catálogo (órfãs, duplicatas, IDs) | `[x]` | 0ff7095 | `permissions-catalog.spec.ts` |
+| 2.1.5 | **GREEN**: implementar validação e corrigir até verde | `[x]` | 0ff7095 | |
+| 2.1.6 | **RED**: teste do endpoint `GET /permissions/catalog` | `[x]` | 37ae700 | `permissions.controller.spec.ts` |
+| 2.1.7 | **GREEN**: criar controller e UseCase do catálogo | `[x]` | 7813ff0 | `permissions.controller.ts` |
 
-**Task 2.1 concluída?** `[ ]` | **Evidência:** |
+**Task 2.1 concluída?** `[x]` | **Evidência:** API endpoint implementado e coberto por testes |
 
 ---
 
@@ -252,7 +252,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 |---|---|---|---|---|---|
 | 2026-09-14 | — | 00 | Onda 00 completa (G0 pass) | Onda 02 Task 2.1 | Onda 00 entregue |
 | 2026-09-16 21:45 | Antigravity | — | ADR-0003 criado | Onda 02 Task 2.1.1 | Planejamento concluído |
-| | | | | | |
+| 2026-09-16 22:35 | Antigravity | 02 | Onda 02 Task 2.1.7 | Onda 02 Task 2.2.1 | Troca de modelo/LLM a pedido do usuário |
 
 ---
 
