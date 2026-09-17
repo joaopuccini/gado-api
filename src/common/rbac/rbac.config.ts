@@ -3,6 +3,10 @@
 // Compartilhado entre Backend (Guards) e Frontend (Menus)
 // ==========================================
 
+import { DEFAULT_PROFILE_PERMISSIONS } from './default-profiles';
+import { PERMISSIONS_CATALOG } from './permissions-catalog';
+
+
 export enum AppModule {
   DASHBOARD = 'dashboard',
   ANIMAIS = 'animais',
@@ -38,80 +42,21 @@ export enum FazendaRole {
 export type PermissionString = `${AppModule}:${AppAction}`;
 
 /**
- * Matriz de permissões por role da fazenda.
+ * Matriz de permissões por role da fazenda derivada do catálogo.
  * DONO não precisa de lista — tem acesso total (bypass no hasPermission).
  */
-export const RolePermissions: Record<FazendaRole, PermissionString[]> = {
-  [FazendaRole.DONO]: [
-    // Acesso total — listado para documentação e UI
-    'dashboard:ler',
-    'animais:gerenciar',
-    'pesagens:gerenciar',
-    'sanidade:gerenciar',
-    'manejo:gerenciar',
-    'financeiro:gerenciar',
-    'pastos:gerenciar',
-    'lotes:gerenciar',
-    'racas:gerenciar',
-    'clientes:gerenciar',
-    'fotos:gerenciar',
-    'movimentacoes:gerenciar',
-    'configuracoes:gerenciar',
-  ],
-
-  [FazendaRole.GESTOR]: [
-    'dashboard:ler',
-    'animais:gerenciar',
-    'pesagens:gerenciar',
-    'sanidade:gerenciar',
-    'manejo:gerenciar',
-    'financeiro:gerenciar',
-    'pastos:gerenciar',
-    'lotes:gerenciar',
-    'racas:gerenciar',
-    'clientes:gerenciar',
-    'fotos:gerenciar',
-    'movimentacoes:gerenciar',
-    'configuracoes:ler',
-  ],
-
-  [FazendaRole.COLABORADOR]: [
-    'dashboard:ler',
-    'animais:ler', 'animais:criar', 'animais:editar',
-    'pesagens:ler', 'pesagens:criar',
-    'sanidade:ler', 'sanidade:criar',
-    'manejo:ler', 'manejo:criar',
-    'pastos:ler',
-    'lotes:ler',
-    'racas:ler',
-    'fotos:ler', 'fotos:criar',
-    'movimentacoes:ler', 'movimentacoes:criar',
-  ],
-
-  [FazendaRole.VETERINARIO]: [
-    'dashboard:ler',
-    'animais:ler',
-    'pesagens:ler', 'pesagens:criar',
-    'sanidade:gerenciar',
-    'manejo:gerenciar',
-    'fotos:ler', 'fotos:criar',
-  ],
-
-  [FazendaRole.CONSULTOR]: [
-    'dashboard:ler',
-    'animais:ler',
-    'pesagens:ler',
-    'sanidade:ler',
-    'manejo:ler',
-    'financeiro:ler',
-    'pastos:ler',
-    'lotes:ler',
-    'racas:ler',
-    'clientes:ler',
-    'fotos:ler',
-    'movimentacoes:ler',
-  ],
-};
+export const RolePermissions: Record<FazendaRole, PermissionString[]> = Object.entries(
+  DEFAULT_PROFILE_PERMISSIONS,
+).reduce(
+  (acc, [role, permissionIds]) => {
+    acc[role as FazendaRole] = permissionIds
+      .map((id) => PERMISSIONS_CATALOG.find((p) => p.id === id))
+      .filter((p): p is NonNullable<typeof p> => p !== undefined)
+      .map((p) => `${p.module}:${p.action}` as PermissionString);
+    return acc;
+  },
+  {} as Record<FazendaRole, PermissionString[]>,
+);
 
 /**
  * Verifica se um role tem permissão específica.
