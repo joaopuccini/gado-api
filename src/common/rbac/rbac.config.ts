@@ -5,41 +5,9 @@
 
 import { DEFAULT_PROFILE_PERMISSIONS } from './default-profiles';
 import { PERMISSIONS_CATALOG } from './permissions-catalog';
+import { AppAction, AppModule, FazendaRole, PermissionString } from './rbac.enums';
 
-
-export enum AppModule {
-  DASHBOARD = 'dashboard',
-  ANIMAIS = 'animais',
-  PESAGENS = 'pesagens',
-  SANIDADE = 'sanidade',
-  MANEJO = 'manejo',
-  FINANCEIRO = 'financeiro',
-  PASTOS = 'pastos',
-  LOTES = 'lotes',
-  RACAS = 'racas',
-  CLIENTES = 'clientes',
-  FOTOS = 'fotos',
-  MOVIMENTACOES = 'movimentacoes',
-  CONFIGURACOES = 'configuracoes',
-}
-
-export enum AppAction {
-  LER = 'ler',
-  CRIAR = 'criar',
-  EDITAR = 'editar',
-  EXCLUIR = 'excluir',
-  GERENCIAR = 'gerenciar',
-}
-
-export enum FazendaRole {
-  DONO = 'DONO',
-  GESTOR = 'GESTOR',
-  COLABORADOR = 'COLABORADOR',
-  VETERINARIO = 'VETERINARIO',
-  CONSULTOR = 'CONSULTOR',
-}
-
-export type PermissionString = `${AppModule}:${AppAction}`;
+export { AppAction, AppModule, FazendaRole, type PermissionString } from './rbac.enums';
 
 /**
  * Matriz de permissões por role da fazenda derivada do catálogo.

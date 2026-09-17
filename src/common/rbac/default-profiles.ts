@@ -1,4 +1,4 @@
-import { FazendaRole } from './rbac.config';
+import { FazendaRole } from './rbac.enums';
 import { PERMISSIONS_CATALOG } from './permissions-catalog';
 
 export const DEFAULT_PROFILE_PERMISSIONS: Record<FazendaRole, number[]> = {

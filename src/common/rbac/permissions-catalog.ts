@@ -1,4 +1,4 @@
-import { AppAction, AppModule } from './rbac.config';
+import { AppAction, AppModule } from './rbac.enums';
 
 export interface PermissionEntry {
   readonly id: number;
