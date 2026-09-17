@@ -73,8 +73,8 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 
 | # | Sub-item | Status | Commit | Arquivo(s) |
 |---|---|---|---|---|
-| 2.3.1 | **RED**: state machine `registered → provisioning → migrations → seeding → validating → active` | `[ ]` | | `provisioning-state.spec.ts` |
-| 2.3.2 | **GREEN**: implementar state machine e `ProvisioningRun` no admin | `[ ]` | | `provisioning-run.ts` |
+| 2.3.1 | **RED**: state machine `registered → provisioning → migrations → seeding → validating → active` | `[x]` | 57e4633, 58ce7b6 | `provisioning-state.spec.ts`, `provisioning-run-schema.spec.ts` |
+| 2.3.2 | **GREEN**: implementar state machine e `ProvisioningRun` no admin | `[x]` | 9d5828d | `provisioning-run.ts`, `schema.prisma`, migration admin |
 | 2.3.3 | **RED**: criação de schema, aplicação de migrations | `[ ]` | | `provision-schema.spec.ts` |
 | 2.3.4 | **GREEN**: implementar criação de schema e migrations | `[ ]` | | `provision-schema.use-case.ts` |
 | 2.3.5 | **RED**: sync de permissões — ler catálogo, upsert na tabela `permissoes` do tenant | `[ ]` | | `sync-permissions.spec.ts` |

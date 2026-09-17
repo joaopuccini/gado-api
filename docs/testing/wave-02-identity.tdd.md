@@ -108,3 +108,28 @@ focada ficou em 100% statements/lines/functions e 83,33% branches.
 O gate completo de arquitetura continua vermelho exclusivamente pelos imports
 Nest/JWT preexistentes no `AdminLoginUseCase`. O lint global também continua
 vermelho por dívida anterior; o lint restrito aos arquivos desta task passou.
+
+## Tasks 2.3.1–2.3.2 — state machine persistida
+
+Jornada: como orquestrador de onboarding, preciso persistir o progresso de cada
+execução e etapa para avançar apenas na ordem válida e permitir retries futuros
+sem perder o ponto confirmado.
+
+| Garantia | Tipo | Resultado | Evidência |
+|---|---|---|---|
+| A sequência `registered → provisioningSchema → applyingMigrations → seeding → validating → active` é obrigatória | unitário | PASS | `provisioning-state.spec.ts` — 6/6 testes |
+| Saltos, retrocessos e reabertura de estado terminal falham fechados | unitário | PASS | `provisioning-state.spec.ts` |
+| Runs e tentativas de cada etapa são persistíveis no admin | arquitetura | PASS | `provisioning-run-schema.spec.ts` — 2/2 testes |
+| Mudança de banco é aditiva e versionada | arquitetura | PASS | migration `20260917153000_add_provisioning_runs` |
+| Schema e client admin são válidos | contrato ORM | PASS | `prisma validate` e `prisma generate` com `--schema prisma/admin/schema.prisma` |
+| Aplicação compila | build | PASS | `npm run build` |
+
+RED nos commits `57e4633` e `58ce7b6`: o agregado, os modelos Prisma e a
+migration ainda não existiam. GREEN no commit `9d5828d`: 94/94 testes unitários
+passaram, os testes específicos de arquitetura passaram, o build passou e a
+cobertura focada da máquina de estados ficou em 100% em todas as métricas.
+
+Não havia URL de banco de teste configurada; por segurança, a migration não foi
+aplicada nesta sessão. Nenhum `db push` ou `migrate reset` foi executado. O gate
+global de arquitetura conserva apenas a dívida preexistente do
+`AdminLoginUseCase`.
