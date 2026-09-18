@@ -85,7 +85,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 2.3.10 | **GREEN**: implementar provisioning completo | `[x]` | c4e522f | Fluxo completo validado por gates unitários, arquitetura, migrations, isolamento, build e integração Neon descartável |
 | 2.3.11 | **RED**: outbox de onboarding + adapter SES | `[x]` | 9a0667b | `onboarding-outbox.spec.ts` |
 | 2.3.12 | **GREEN**: implementar outbox e SES adapter | `[x]` | df2943b | Focused outbox spec, ESLint do escopo, arquitetura, build e `prisma validate` admin |
-| 2.3.13 | **RED**: retry após falha em cada etapa sem duplicar recursos | `[ ]` | | `provisioning-retry.spec.ts` |
+| 2.3.13 | **RED**: retry após falha em cada etapa sem duplicar recursos | `[x]` | b9fcb80 | `provisioning-retry.spec.ts` falha contra assinatura antiga do orquestrador |
 | 2.3.14 | **GREEN**: implementar retry idempotente | `[ ]` | | |
 | 2.3.15 | **RED**: retornar `202` e endpoint de status até tenant `active` | `[ ]` | | `provisioning-status.spec.ts` |
 | 2.3.16 | **GREEN**: implementar endpoint de status | `[ ]` | | |
