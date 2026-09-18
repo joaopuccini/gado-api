@@ -1,5 +1,7 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { AdminModule } from '../admin/admin.module';
+import { AdminPrismaService } from '../admin/admin-prisma.service';
 import { ExecutionContextStore } from '../common/context';
 import { StructuredLogger } from '../common/logger/structured-logger.service';
 import {
@@ -10,6 +12,14 @@ import {
   DEFAULT_PROFILE_REPOSITORY,
   type DefaultProfileRepository,
 } from './application/ports/default-profile.repository';
+import {
+  EMAIL_GATEWAY,
+  type EmailGateway,
+} from './application/ports/email.gateway';
+import {
+  ONBOARDING_OUTBOX_REPOSITORY,
+  type OnboardingOutboxRepository,
+} from './application/ports/onboarding-outbox.repository';
 import {
   PERMISSION_CATALOG_REPOSITORY,
   type PermissionCatalogRepository,
@@ -29,13 +39,19 @@ import {
   type TenantSchemaLifecycleRepository,
 } from './application/ports/tenant-schema-lifecycle.repository';
 import { CreateTenantSchemaUseCase } from './application/use-cases/create-tenant-schema.use-case';
+import {
+  DispatchOnboardingOutboxUseCase,
+  type OnboardingOutboxLogger,
+} from './application/use-cases/dispatch-onboarding-outbox.use-case';
 import { MigrateTenantSchemaUseCase } from './application/use-cases/migrate-tenant-schema.use-case';
 import { ProvisionSchemaUseCase } from './application/use-cases/provision-schema.use-case';
 import { ProvisionTenantOrchestratorUseCase } from './application/use-cases/provision-tenant-orchestrator.use-case';
 import { ProvisionTenantUseCase } from './application/use-cases/provision-tenant.use-case';
 import { SeedProfilesService } from './application/services/seed-profiles.service';
 import { SyncPermissionsService } from './application/services/sync-permissions.service';
+import { SesEmailGateway } from './infrastructure/email/ses-email.gateway';
 import { PrismaDefaultProfileRepository } from './infrastructure/persistence/prisma/prisma-default-profile.repository';
+import { PrismaOnboardingOutboxRepository } from './infrastructure/persistence/prisma/prisma-onboarding-outbox.repository';
 import { PrismaPermissionCatalogRepository } from './infrastructure/persistence/prisma/prisma-permission-catalog.repository';
 import { PrismaTenantBootstrapRepository } from './infrastructure/persistence/prisma/prisma-tenant-bootstrap.repository';
 import { PostgresTenantMigrationRepository } from './infrastructure/postgres-tenant-migration.repository';
@@ -43,6 +59,7 @@ import { PostgresTenantSchemaLifecycleRepository } from './infrastructure/postgr
 import { TenantMigrationLoader } from './infrastructure/tenant-migration.loader';
 
 @Module({
+  imports: [forwardRef(() => AdminModule)],
   providers: [
     StructuredLogger,
     TenantMigrationLoader,
@@ -76,6 +93,41 @@ import { TenantMigrationLoader } from './infrastructure/tenant-migration.loader'
         repository: PermissionCatalogRepository,
       ): SyncPermissionsService => new SyncPermissionsService(repository),
       inject: [PERMISSION_CATALOG_REPOSITORY],
+    },
+    {
+      provide: ONBOARDING_OUTBOX_REPOSITORY,
+      useFactory: (database: AdminPrismaService): OnboardingOutboxRepository =>
+        new PrismaOnboardingOutboxRepository(database),
+      inject: [AdminPrismaService],
+    },
+    {
+      provide: EMAIL_GATEWAY,
+      useFactory: (config: ConfigService): EmailGateway =>
+        new SesEmailGateway(
+          () => config.getOrThrow<string>('AWS_REGION'),
+          () => config.getOrThrow<string>('SES_FROM_EMAIL'),
+        ),
+      inject: [ConfigService],
+    },
+    {
+      provide: DispatchOnboardingOutboxUseCase,
+      useFactory: (
+        repository: OnboardingOutboxRepository,
+        gateway: EmailGateway,
+        logger: StructuredLogger,
+      ): DispatchOnboardingOutboxUseCase => {
+        const outboxLogger: OnboardingOutboxLogger = {
+          info: (fields) =>
+            logger.info('onboardingOutboxDelivered', { ...fields }),
+          warn: (fields) => logger.warn('onboardingOutboxRetry', { ...fields }),
+        };
+        return new DispatchOnboardingOutboxUseCase(
+          repository,
+          gateway,
+          outboxLogger,
+        );
+      },
+      inject: [ONBOARDING_OUTBOX_REPOSITORY, EMAIL_GATEWAY, StructuredLogger],
     },
     {
       provide: TENANT_BOOTSTRAP_REPOSITORY,
@@ -178,6 +230,7 @@ import { TenantMigrationLoader } from './infrastructure/tenant-migration.loader'
     },
   ],
   exports: [
+    DispatchOnboardingOutboxUseCase,
     MigrateTenantSchemaUseCase,
     ProvisionTenantOrchestratorUseCase,
     ProvisionTenantUseCase,

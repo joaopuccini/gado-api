@@ -24,17 +24,17 @@ describe('onboarding outbox', () => {
   it('activates the run and enqueues one deterministic event in the same transaction', async () => {
     let transactionOpen = false;
     let transactionCommitted = false;
-    const runUpdate = jest.fn(async () => {
+    const runUpdate = jest.fn(() => {
       expect(transactionOpen).toBe(true);
-      return { id: 'run-123' };
+      return Promise.resolve({ id: 'run-123' });
     });
-    const registryUpdate = jest.fn(async () => {
+    const registryUpdate = jest.fn(() => {
       expect(transactionOpen).toBe(true);
-      return { id: 'tenant-123' };
+      return Promise.resolve({ id: 'tenant-123' });
     });
-    const outboxUpsert = jest.fn(async () => {
+    const outboxUpsert = jest.fn(() => {
       expect(transactionOpen).toBe(true);
-      return { id: 'outbox-123' };
+      return Promise.resolve({ id: 'outbox-123' });
     });
     const transaction = {
       provisioningRun: { update: runUpdate },
@@ -52,7 +52,7 @@ describe('onboarding outbox', () => {
         },
       ),
     };
-    const gateway: EmailGateway = { send: jest.fn() };
+    const send = jest.fn();
     const repository = new PrismaOnboardingOutboxRepository(
       database as ConstructorParameters<
         typeof PrismaOnboardingOutboxRepository
@@ -77,7 +77,7 @@ describe('onboarding outbox', () => {
     });
 
     expect(transactionCommitted).toBe(true);
-    expect(gateway.send).not.toHaveBeenCalled();
+    expect(send.mock.calls).toHaveLength(0);
     expect(runUpdate).toHaveBeenCalledTimes(2);
     expect(registryUpdate).toHaveBeenCalledTimes(2);
     expect(outboxUpsert).toHaveBeenCalledTimes(2);
@@ -97,15 +97,17 @@ describe('onboarding outbox', () => {
   it('claims, sends outside the claim transaction, and marks the event sent', async () => {
     let claimCommitted = false;
     const repository = createRepository({
-      claimNext: jest.fn(async () => {
+      claimNext: jest.fn(() => {
         claimCommitted = true;
-        return event;
+        return Promise.resolve(event);
       }),
     });
+    const send = jest.fn(() => {
+      expect(claimCommitted).toBe(true);
+      return Promise.resolve();
+    });
     const gateway: EmailGateway = {
-      send: jest.fn(async () => {
-        expect(claimCommitted).toBe(true);
-      }),
+      send,
     };
     const logger = createLogger();
     const dispatcher = new DispatchOnboardingOutboxUseCase(
@@ -117,29 +119,39 @@ describe('onboarding outbox', () => {
 
     await expect(dispatcher.execute()).resolves.toBe(true);
 
-    expect(repository.claimNext).toHaveBeenCalledWith(now);
-    expect(gateway.send).toHaveBeenCalledWith({
-      recipient: event.recipient,
-      templateKey: event.templateKey,
-      payload: event.payload,
-    });
-    expect(repository.markSent).toHaveBeenCalledWith(event.id, now);
-    expect(repository.markFailed).not.toHaveBeenCalled();
-    expect(logger.info).toHaveBeenCalledWith({
-      provisioningRunId: event.provisioningRunId,
-      outboxId: event.id,
-      outcome: 'sent',
-    });
+    expect(repository.claimNext.mock.calls).toEqual([[now]]);
+    expect(send.mock.calls).toEqual([
+      [
+        {
+          recipient: event.recipient,
+          templateKey: event.templateKey,
+          payload: event.payload,
+        },
+      ],
+    ]);
+    expect(repository.markSent.mock.calls).toEqual([[event.id, now]]);
+    expect(repository.markFailed.mock.calls).toHaveLength(0);
+    expect(logger.info.mock.calls).toEqual([
+      [
+        {
+          provisioningRunId: event.provisioningRunId,
+          outboxId: event.id,
+          outcome: 'sent',
+        },
+      ],
+    ]);
   });
 
   it('keeps the tenant active and schedules a sanitized retry after e-mail failure', async () => {
     const repository = createRepository();
     const gateway: EmailGateway = {
-      send: jest.fn(async () => {
-        throw new Error(
-          'token=secret recipient=owner@example.com body=confidential stack=hidden',
-        );
-      }),
+      send: jest.fn(() =>
+        Promise.reject(
+          new Error(
+            'token=secret recipient=owner@example.com body=confidential stack=hidden',
+          ),
+        ),
+      ),
     };
     const logger = createLogger();
     const dispatcher = new DispatchOnboardingOutboxUseCase(
@@ -151,17 +163,26 @@ describe('onboarding outbox', () => {
 
     await expect(dispatcher.execute()).resolves.toBe(false);
 
-    expect(repository.markSent).not.toHaveBeenCalled();
-    expect(repository.markFailed).toHaveBeenCalledWith(event.id, {
-      errorCode: 'emailDeliveryFailed',
-      nextAttemptAt: new Date('2026-09-17T18:01:00.000Z'),
-    });
-    expect(logger.warn).toHaveBeenCalledWith({
-      provisioningRunId: event.provisioningRunId,
-      outboxId: event.id,
-      outcome: 'retryScheduled',
-      errorCode: 'emailDeliveryFailed',
-    });
+    expect(repository.markSent.mock.calls).toHaveLength(0);
+    expect(repository.markFailed.mock.calls).toEqual([
+      [
+        event.id,
+        {
+          errorCode: 'emailDeliveryFailed',
+          nextAttemptAt: new Date('2026-09-17T18:01:00.000Z'),
+        },
+      ],
+    ]);
+    expect(logger.warn.mock.calls).toEqual([
+      [
+        {
+          provisioningRunId: event.provisioningRunId,
+          outboxId: event.id,
+          outcome: 'retryScheduled',
+          errorCode: 'emailDeliveryFailed',
+        },
+      ],
+    ]);
 
     const persistedAndLogged = JSON.stringify({
       failure: repository.markFailed.mock.calls,
@@ -178,7 +199,7 @@ describe('onboarding outbox', () => {
   ): jest.Mocked<OnboardingOutboxRepository> {
     return {
       activateAndEnqueue: jest.fn(),
-      claimNext: jest.fn(async () => event),
+      claimNext: jest.fn(() => Promise.resolve(event)),
       markSent: jest.fn(),
       markFailed: jest.fn(),
       ...overrides,

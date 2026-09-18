@@ -116,8 +116,9 @@ model ProvisioningRun {
   updatedAt        DateTime          @map("updated_at") @updatedAt @db.Timestamptz(6)
   completedAt      DateTime?         @map("completed_at") @db.Timestamptz(6)
 
-  tenantRegistry TenantRegistry     @relation(fields: [tenantRegistryId], references: [id], onDelete: Cascade)
+  tenantRegistry TenantRegistry      @relation(fields: [tenantRegistryId], references: [id], onDelete: Cascade)
   steps          ProvisioningStep[]
+  outboxEvents   OnboardingOutbox[]
 
   @@index([tenantRegistryId, state])
   @@map("provisioning_runs")
@@ -142,6 +143,28 @@ model ProvisioningStep {
   @@unique([runId, state, attempt])
   @@index([runId, status])
   @@map("provisioning_steps")
+  @@schema("gado_admin")
+}
+
+model OnboardingOutbox {
+  id                String                 @id @default(uuid()) @db.Uuid
+  provisioningRunId String                 @map("provisioning_run_id") @db.Uuid
+  eventKey          String                 @map("event_key") @unique @db.VarChar(160)
+  recipient         String                 @db.VarChar(320)
+  templateKey       String                 @map("template_key") @db.VarChar(100)
+  payload           Json
+  status            OnboardingOutboxStatus @default(PENDING)
+  attempts          Int                    @default(0)
+  nextAttemptAt     DateTime               @map("next_attempt_at") @default(now()) @db.Timestamptz(6)
+  sentAt            DateTime?              @map("sent_at") @db.Timestamptz(6)
+  errorCode         String?                @map("error_code") @db.VarChar(100)
+  createdAt         DateTime               @map("created_at") @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime               @map("updated_at") @updatedAt @db.Timestamptz(6)
+
+  provisioningRun ProvisioningRun @relation(fields: [provisioningRunId], references: [id], onDelete: Cascade)
+
+  @@index([status, nextAttemptAt])
+  @@map("onboarding_outbox")
   @@schema("gado_admin")
 }
 
@@ -259,6 +282,14 @@ enum ProvisioningStepStatus {
   PENDING
   RUNNING
   SUCCEEDED
+  FAILED
+  @@schema("gado_admin")
+}
+
+enum OnboardingOutboxStatus {
+  PENDING
+  PROCESSING
+  SENT
   FAILED
   @@schema("gado_admin")
 }
