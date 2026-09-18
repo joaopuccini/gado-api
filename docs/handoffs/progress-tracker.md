@@ -81,7 +81,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 2.3.6 | **GREEN**: implementar sync de permissões no provisioning | `[x]` | f40059a, 56c666d, 53d7949 | `sync-permissions.service.ts` |
 | 2.3.7 | **RED**: criação de perfis-base a partir de `DEFAULT_PROFILE_PERMISSIONS` | `[x]` | 8f0bae5 | `seed-profiles.spec.ts` |
 | 2.3.8 | **GREEN**: implementar seed de perfis-base | `[x]` | ae6da72 | `seed-profiles.service.ts` |
-| 2.3.9 | **RED**: criação de usuário local, fazenda principal e smoke queries | `[ ]` | | `provision-tenant.spec.ts` |
+| 2.3.9 | **RED**: criação de usuário local, fazenda principal e smoke queries | `[x]` | 9777efb | `provision-tenant.spec.ts` |
 | 2.3.10 | **GREEN**: implementar provisioning completo | `[ ]` | | |
 | 2.3.11 | **RED**: outbox de onboarding + adapter SES | `[ ]` | | `onboarding-outbox.spec.ts` |
 | 2.3.12 | **GREEN**: implementar outbox e SES adapter | `[ ]` | | |
