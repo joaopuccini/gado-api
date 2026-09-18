@@ -78,7 +78,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 2.3.3 | **RED**: criação de schema, aplicação de migrations | `[x]` | 8097ed0 | `provision-schema.use-case.spec.ts` |
 | 2.3.4 | **GREEN**: implementar criação de schema e migrations | `[x]` | fb9d5e4 | `provision-schema.use-case.ts` |
 | 2.3.5 | **RED**: sync de permissões — ler catálogo, upsert na tabela `permissoes` do tenant | `[x]` | f24ec32 | `sync-permissions.spec.ts` |
-| 2.3.6 | **GREEN**: implementar sync de permissões no provisioning | `[ ]` | | `sync-permissions.service.ts` |
+| 2.3.6 | **GREEN**: implementar sync de permissões no provisioning | `[x]` | f40059a, 56c666d, 53d7949 | `sync-permissions.service.ts` |
 | 2.3.7 | **RED**: criação de perfis-base a partir de `DEFAULT_PROFILE_PERMISSIONS` | `[ ]` | | `seed-profiles.spec.ts` |
 | 2.3.8 | **GREEN**: implementar seed de perfis-base | `[ ]` | | `seed-profiles.service.ts` |
 | 2.3.9 | **RED**: criação de usuário local, fazenda principal e smoke queries | `[ ]` | | `provision-tenant.spec.ts` |
