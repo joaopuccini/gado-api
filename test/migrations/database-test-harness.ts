@@ -8,7 +8,7 @@ const tenantSchemaPattern = /^tenant_[0-9a-f]{32}$/;
 
 export const ADMIN_MIGRATION_VERSION = '202609140001_initial_admin';
 export const TENANT_INITIAL_VERSION = '202609140001_initial_tenant';
-export const TENANT_CURRENT_VERSION = '202609170001_modelar_identidades_tenant';
+export const TENANT_CURRENT_VERSION = '202609171600_add_system_profile_role';
 
 export const requireTestDatabaseUrl = (): string => {
   const databaseUrl = process.env.TEST_DATABASE_URL;

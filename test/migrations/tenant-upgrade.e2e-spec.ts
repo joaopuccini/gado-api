@@ -57,6 +57,7 @@ describe('tenant schema upgrade and retry', () => {
     expect(migrations.map(({ version }) => version)).toEqual([
       TENANT_INITIAL_VERSION,
       '202609140002_animal_ear_tag_lookup_index',
+      '202609170001_modelar_identidades_tenant',
       TENANT_CURRENT_VERSION,
     ]);
     await repository.apply(schema, migrations[0]);
@@ -86,8 +87,8 @@ describe('tenant schema upgrade and retry', () => {
     `);
 
     expect(retry.rows).toEqual(firstApplication.rows);
-    expect(retry.rows).toHaveLength(3);
-    expect(logger.info.mock.calls).toHaveLength(3);
+    expect(retry.rows).toHaveLength(4);
+    expect(logger.info.mock.calls).toHaveLength(4);
 
     await expect(
       repository.apply(schema, {
