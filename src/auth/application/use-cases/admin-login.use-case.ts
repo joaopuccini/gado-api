@@ -1,40 +1,48 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
-import { AdminPrismaService } from '../../../admin/admin-prisma.service';
+import { DomainError } from '../../../common/errors/domain-error';
+import type {
+  AdminIdentityRepository,
+  AdminPasswordVerifier,
+  AdminTokenIssuer,
+} from '../ports/admin-login.ports';
 
-@Injectable()
+export interface AdminLoginCommand {
+  readonly email: string;
+  readonly password: string;
+}
+
+export interface AdminLoginResult {
+  readonly token: string;
+}
+
 export class AdminLoginUseCase {
-    constructor(
-        private readonly adminPrisma: AdminPrismaService,
-        private readonly jwtService: JwtService,
-    ) {}
+  constructor(
+    private readonly identities: AdminIdentityRepository,
+    private readonly passwords: AdminPasswordVerifier,
+    private readonly tokens: AdminTokenIssuer,
+  ) {}
 
-    async execute(dto: any) {
-        const email = dto.email.toLowerCase();
+  async execute(command: AdminLoginCommand): Promise<AdminLoginResult> {
+    const email = command.email.trim().toLowerCase();
+    const identity = await this.identities.findByEmail(email);
+    if (!identity?.active) this.rejectCredentials();
 
-        const adminUser = await this.adminPrisma.adminUser.findUnique({
-            where: { email },
-        });
+    const passwordIsValid = await this.passwords.compare(
+      command.password,
+      identity.passwordHash,
+    );
+    if (!passwordIsValid) this.rejectCredentials();
 
-        if (!adminUser || !adminUser.ativo) {
-            throw new UnauthorizedException('Credenciais inválidas ou usuário inativo');
-        }
+    const token = await this.tokens.sign({
+      sub: identity.id,
+      email: identity.email,
+      role: identity.role,
+      aud: 'gado-admin',
+    });
 
-        const passwordValid = await bcrypt.compare(dto.password, adminUser.senhaHash);
-        if (!passwordValid) {
-            throw new UnauthorizedException('Credenciais inválidas');
-        }
+    return { token };
+  }
 
-        const payload = {
-            sub: adminUser.id,
-            email: adminUser.email,
-            role: adminUser.role,
-            aud: 'gado-admin',
-        };
-
-        const token = this.jwtService.sign(payload);
-
-        return { token };
-    }
+  private rejectCredentials(): never {
+    throw new DomainError('unauthenticated', 'Credenciais inválidas');
+  }
 }
