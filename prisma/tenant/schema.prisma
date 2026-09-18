@@ -76,7 +76,7 @@ model UsuarioPermissao {
 
 model Usuario {
   id           Int      @id @default(autoincrement())
-  globalUserId String?  @map("global_user_id") @db.Uuid
+  globalUserId String?  @unique @map("global_user_id") @db.Uuid
   nome         String   @db.VarChar(200)
   email        String   @unique @db.VarChar(150)
   senhaHash    String   @map("senha_hash") @db.VarChar(255)
@@ -99,9 +99,10 @@ model Usuario {
 }
 
 model Fazenda {
-  id               Int      @id @default(autoincrement())
-  parentId         Int?     @map("parent_id")
-  nome             String   @db.VarChar(200)
+  id                Int      @id @default(autoincrement())
+  parentId          Int?     @map("parent_id")
+  provisioningRunId String?  @unique @map("provisioning_run_id") @db.Uuid
+  nome              String   @db.VarChar(200)
   nomeProprietario String?  @map("nome_proprietario") @db.VarChar(200)
   cpfCnpj          String?  @unique @map("cpf_cnpj") @db.VarChar(18)
   celular          String?  @db.VarChar(20)

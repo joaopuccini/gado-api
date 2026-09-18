@@ -32,6 +32,10 @@ export class TenantPrismaClientFactory
     const client = new PrismaClient({
       adapter,
       log: [{ emit: 'event', level: 'query' }],
+      transactionOptions: {
+        maxWait: 5_000,
+        timeout: 15_000,
+      },
     }) as QueryObservablePrismaClient;
     this.clients.set(schemaName.value, client);
     return client;

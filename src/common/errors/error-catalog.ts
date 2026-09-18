@@ -14,6 +14,8 @@ export type ErrorCode =
   | 'migrationChecksumMismatch'
   | 'migrationChainInvalid'
   | 'tenantMigrationFailed'
+  | 'tenantSchemaCreationFailed'
+  | 'tenantSmokeCheckFailed'
   | 'invalidProvisioningRun'
   | 'invalidProvisioningTransition';
 

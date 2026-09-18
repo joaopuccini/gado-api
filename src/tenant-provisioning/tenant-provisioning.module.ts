@@ -15,18 +15,31 @@ import {
   type PermissionCatalogRepository,
 } from './application/ports/permission-catalog.repository';
 import {
+  TENANT_BOOTSTRAP_REPOSITORY,
+  type TenantBootstrapRepository,
+} from './application/ports/tenant-bootstrap.repository';
+import {
   TENANT_MIGRATION_REPOSITORY,
   TENANT_MIGRATION_SOURCE,
   type TenantMigrationRepository,
   type TenantMigrationSource,
 } from './application/ports/tenant-migration.repository';
+import {
+  TENANT_SCHEMA_LIFECYCLE_REPOSITORY,
+  type TenantSchemaLifecycleRepository,
+} from './application/ports/tenant-schema-lifecycle.repository';
+import { CreateTenantSchemaUseCase } from './application/use-cases/create-tenant-schema.use-case';
 import { MigrateTenantSchemaUseCase } from './application/use-cases/migrate-tenant-schema.use-case';
 import { ProvisionSchemaUseCase } from './application/use-cases/provision-schema.use-case';
+import { ProvisionTenantOrchestratorUseCase } from './application/use-cases/provision-tenant-orchestrator.use-case';
+import { ProvisionTenantUseCase } from './application/use-cases/provision-tenant.use-case';
 import { SeedProfilesService } from './application/services/seed-profiles.service';
 import { SyncPermissionsService } from './application/services/sync-permissions.service';
 import { PrismaDefaultProfileRepository } from './infrastructure/persistence/prisma/prisma-default-profile.repository';
 import { PrismaPermissionCatalogRepository } from './infrastructure/persistence/prisma/prisma-permission-catalog.repository';
+import { PrismaTenantBootstrapRepository } from './infrastructure/persistence/prisma/prisma-tenant-bootstrap.repository';
 import { PostgresTenantMigrationRepository } from './infrastructure/postgres-tenant-migration.repository';
+import { PostgresTenantSchemaLifecycleRepository } from './infrastructure/postgres-tenant-schema-lifecycle.repository';
 import { TenantMigrationLoader } from './infrastructure/tenant-migration.loader';
 
 @Module({
@@ -65,8 +78,41 @@ import { TenantMigrationLoader } from './infrastructure/tenant-migration.loader'
       inject: [PERMISSION_CATALOG_REPOSITORY],
     },
     {
+      provide: TENANT_BOOTSTRAP_REPOSITORY,
+      useFactory: (
+        context: ExecutionContextStore,
+        clientFactory: TenantPrismaClientFactoryPort,
+      ): TenantBootstrapRepository =>
+        new PrismaTenantBootstrapRepository(context, clientFactory),
+      inject: [ExecutionContextStore, TENANT_PRISMA_CLIENT_FACTORY],
+    },
+    {
+      provide: ProvisionTenantUseCase,
+      useFactory: (
+        repository: TenantBootstrapRepository,
+      ): ProvisionTenantUseCase => new ProvisionTenantUseCase(repository),
+      inject: [TENANT_BOOTSTRAP_REPOSITORY],
+    },
+    {
       provide: TENANT_MIGRATION_SOURCE,
       useExisting: TenantMigrationLoader,
+    },
+    {
+      provide: TENANT_SCHEMA_LIFECYCLE_REPOSITORY,
+      useFactory: (config: ConfigService): TenantSchemaLifecycleRepository =>
+        new PostgresTenantSchemaLifecycleRepository(() =>
+          config.getOrThrow<string>('DATABASE_URL'),
+        ),
+      inject: [ConfigService],
+    },
+    {
+      provide: CreateTenantSchemaUseCase,
+      useFactory: (
+        context: ExecutionContextStore,
+        repository: TenantSchemaLifecycleRepository,
+      ): CreateTenantSchemaUseCase =>
+        new CreateTenantSchemaUseCase(context, repository),
+      inject: [ExecutionContextStore, TENANT_SCHEMA_LIFECYCLE_REPOSITORY],
     },
     {
       provide: TENANT_MIGRATION_REPOSITORY,
@@ -103,9 +149,38 @@ import { TenantMigrationLoader } from './infrastructure/tenant-migration.loader'
         new ProvisionSchemaUseCase(context, migrateTenantSchema),
       inject: [ExecutionContextStore, MigrateTenantSchemaUseCase],
     },
+    {
+      provide: ProvisionTenantOrchestratorUseCase,
+      useFactory: (
+        context: ExecutionContextStore,
+        createSchema: CreateTenantSchemaUseCase,
+        migrateSchema: MigrateTenantSchemaUseCase,
+        syncPermissions: SyncPermissionsService,
+        seedProfiles: SeedProfilesService,
+        provisionTenant: ProvisionTenantUseCase,
+      ): ProvisionTenantOrchestratorUseCase =>
+        new ProvisionTenantOrchestratorUseCase(
+          context,
+          createSchema,
+          migrateSchema,
+          syncPermissions,
+          seedProfiles,
+          provisionTenant,
+        ),
+      inject: [
+        ExecutionContextStore,
+        CreateTenantSchemaUseCase,
+        MigrateTenantSchemaUseCase,
+        SyncPermissionsService,
+        SeedProfilesService,
+        ProvisionTenantUseCase,
+      ],
+    },
   ],
   exports: [
     MigrateTenantSchemaUseCase,
+    ProvisionTenantOrchestratorUseCase,
+    ProvisionTenantUseCase,
     ProvisionSchemaUseCase,
     SeedProfilesService,
     SyncPermissionsService,
