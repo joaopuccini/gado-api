@@ -7,6 +7,10 @@ import {
   type TenantPrismaClientFactoryPort,
 } from '../tenant/application/ports/tenant-prisma-client-factory.port';
 import {
+  DEFAULT_PROFILE_REPOSITORY,
+  type DefaultProfileRepository,
+} from './application/ports/default-profile.repository';
+import {
   PERMISSION_CATALOG_REPOSITORY,
   type PermissionCatalogRepository,
 } from './application/ports/permission-catalog.repository';
@@ -18,7 +22,9 @@ import {
 } from './application/ports/tenant-migration.repository';
 import { MigrateTenantSchemaUseCase } from './application/use-cases/migrate-tenant-schema.use-case';
 import { ProvisionSchemaUseCase } from './application/use-cases/provision-schema.use-case';
+import { SeedProfilesService } from './application/services/seed-profiles.service';
 import { SyncPermissionsService } from './application/services/sync-permissions.service';
+import { PrismaDefaultProfileRepository } from './infrastructure/persistence/prisma/prisma-default-profile.repository';
 import { PrismaPermissionCatalogRepository } from './infrastructure/persistence/prisma/prisma-permission-catalog.repository';
 import { PostgresTenantMigrationRepository } from './infrastructure/postgres-tenant-migration.repository';
 import { TenantMigrationLoader } from './infrastructure/tenant-migration.loader';
@@ -27,6 +33,21 @@ import { TenantMigrationLoader } from './infrastructure/tenant-migration.loader'
   providers: [
     StructuredLogger,
     TenantMigrationLoader,
+    {
+      provide: DEFAULT_PROFILE_REPOSITORY,
+      useFactory: (
+        context: ExecutionContextStore,
+        clientFactory: TenantPrismaClientFactoryPort,
+      ): DefaultProfileRepository =>
+        new PrismaDefaultProfileRepository(context, clientFactory),
+      inject: [ExecutionContextStore, TENANT_PRISMA_CLIENT_FACTORY],
+    },
+    {
+      provide: SeedProfilesService,
+      useFactory: (repository: DefaultProfileRepository): SeedProfilesService =>
+        new SeedProfilesService(repository),
+      inject: [DEFAULT_PROFILE_REPOSITORY],
+    },
     {
       provide: PERMISSION_CATALOG_REPOSITORY,
       useFactory: (
@@ -86,6 +107,7 @@ import { TenantMigrationLoader } from './infrastructure/tenant-migration.loader'
   exports: [
     MigrateTenantSchemaUseCase,
     ProvisionSchemaUseCase,
+    SeedProfilesService,
     SyncPermissionsService,
     StructuredLogger,
   ],
