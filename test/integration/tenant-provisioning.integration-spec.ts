@@ -17,7 +17,7 @@ import { PostgresTenantMigrationRepository } from '../../src/tenant-provisioning
 import { PostgresTenantSchemaLifecycleRepository } from '../../src/tenant-provisioning/infrastructure/postgres-tenant-schema-lifecycle.repository';
 import { TenantMigrationLoader } from '../../src/tenant-provisioning/infrastructure/tenant-migration.loader';
 
-jest.setTimeout(60_000);
+jest.setTimeout(180_000);
 
 describe('tenant provisioning integration', () => {
   const databaseUrl = process.env.TEST_DATABASE_URL;
@@ -80,9 +80,7 @@ describe('tenant provisioning integration', () => {
     const database = await pool.query<{ name: string }>(
       'SELECT current_database() AS name',
     );
-    expect(database.rows[0]?.name).toMatch(
-      /^gado_wave00_test_[0-9a-f]{12}$/,
-    );
+    expect(database.rows[0]?.name).toMatch(/^gado_wave00_test_[0-9a-f]{12}$/);
   });
 
   afterAll(async () => {

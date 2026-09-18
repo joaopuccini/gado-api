@@ -20,8 +20,8 @@ describe('SyncPermissionsService', () => {
 
     await service.execute();
 
-    expect(repository.sync).toHaveBeenCalledTimes(1);
-    expect(repository.sync).toHaveBeenCalledWith(PERMISSIONS_CATALOG);
+    expect(repository.sync.mock.calls).toHaveLength(1);
+    expect(repository.sync.mock.calls[0]).toEqual([PERMISSIONS_CATALOG]);
     expect(repository.sync.mock.calls[0][0]).toEqual(
       PERMISSIONS_CATALOG.map(({ id, code, module, action, ...copy }) => ({
         id,
@@ -38,8 +38,19 @@ describe('PrismaPermissionCatalogRepository', () => {
   const schemaName = 'tenant_0123456789abcdef0123456789abcdef';
   const upsert = jest.fn();
   const deleteMany = jest.fn();
-  const transaction = jest.fn((operations: readonly Promise<unknown>[]) =>
-    Promise.all(operations),
+  const transaction = jest.fn(
+    (
+      operationsOrCallback:
+        | readonly Promise<unknown>[]
+        | ((client: {
+            permissao: { upsert: typeof upsert; deleteMany: typeof deleteMany };
+          }) => Promise<unknown>),
+    ) => {
+      if (typeof operationsOrCallback === 'function') {
+        return operationsOrCallback(tenantClient);
+      }
+      return Promise.all(operationsOrCallback);
+    },
   );
   const tenantClient = {
     permissao: { upsert, deleteMany },
@@ -81,9 +92,9 @@ describe('PrismaPermissionCatalogRepository', () => {
   it('upserts managed permissions by stable ID and repairs mutable fields', async () => {
     await runInJobContext(() => repository.sync([managedEntry]));
 
-    expect(clientFactory.create).toHaveBeenCalledWith(
+    expect(clientFactory.create.mock.calls[0]).toEqual([
       expect.objectContaining({ value: schemaName }),
-    );
+    ]);
     expect(upsert).toHaveBeenCalledWith({
       where: { id: managedEntry.id },
       create: {
@@ -127,6 +138,6 @@ describe('PrismaPermissionCatalogRepository', () => {
     await expect(repository.sync([managedEntry])).rejects.toMatchObject({
       code: 'executionContextMissing',
     });
-    expect(clientFactory.create).not.toHaveBeenCalled();
+    expect(clientFactory.create.mock.calls).toHaveLength(0);
   });
 });

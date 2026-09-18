@@ -25,6 +25,10 @@ import {
   type PermissionCatalogRepository,
 } from './application/ports/permission-catalog.repository';
 import {
+  PROVISIONING_RUN_REPOSITORY,
+  type ProvisioningRunRepository,
+} from './application/ports/provisioning-run.repository';
+import {
   TENANT_BOOTSTRAP_REPOSITORY,
   type TenantBootstrapRepository,
 } from './application/ports/tenant-bootstrap.repository';
@@ -53,6 +57,7 @@ import { SesEmailGateway } from './infrastructure/email/ses-email.gateway';
 import { PrismaDefaultProfileRepository } from './infrastructure/persistence/prisma/prisma-default-profile.repository';
 import { PrismaOnboardingOutboxRepository } from './infrastructure/persistence/prisma/prisma-onboarding-outbox.repository';
 import { PrismaPermissionCatalogRepository } from './infrastructure/persistence/prisma/prisma-permission-catalog.repository';
+import { PrismaProvisioningRunRepository } from './infrastructure/persistence/prisma/prisma-provisioning-run.repository';
 import { PrismaTenantBootstrapRepository } from './infrastructure/persistence/prisma/prisma-tenant-bootstrap.repository';
 import { PostgresTenantMigrationRepository } from './infrastructure/postgres-tenant-migration.repository';
 import { PostgresTenantSchemaLifecycleRepository } from './infrastructure/postgres-tenant-schema-lifecycle.repository';
@@ -98,6 +103,12 @@ import { TenantMigrationLoader } from './infrastructure/tenant-migration.loader'
       provide: ONBOARDING_OUTBOX_REPOSITORY,
       useFactory: (database: AdminPrismaService): OnboardingOutboxRepository =>
         new PrismaOnboardingOutboxRepository(database),
+      inject: [AdminPrismaService],
+    },
+    {
+      provide: PROVISIONING_RUN_REPOSITORY,
+      useFactory: (database: AdminPrismaService): ProvisioningRunRepository =>
+        new PrismaProvisioningRunRepository(database),
       inject: [AdminPrismaService],
     },
     {
@@ -205,27 +216,35 @@ import { TenantMigrationLoader } from './infrastructure/tenant-migration.loader'
       provide: ProvisionTenantOrchestratorUseCase,
       useFactory: (
         context: ExecutionContextStore,
+        repository: ProvisioningRunRepository,
         createSchema: CreateTenantSchemaUseCase,
         migrateSchema: MigrateTenantSchemaUseCase,
         syncPermissions: SyncPermissionsService,
         seedProfiles: SeedProfilesService,
         provisionTenant: ProvisionTenantUseCase,
+        outboxRepository: OnboardingOutboxRepository,
       ): ProvisionTenantOrchestratorUseCase =>
         new ProvisionTenantOrchestratorUseCase(
           context,
+          repository,
           createSchema,
           migrateSchema,
           syncPermissions,
           seedProfiles,
           provisionTenant,
+          { execute: () => Promise.resolve(undefined) },
+          { execute: () => Promise.resolve(undefined) },
+          outboxRepository,
         ),
       inject: [
         ExecutionContextStore,
+        PROVISIONING_RUN_REPOSITORY,
         CreateTenantSchemaUseCase,
         MigrateTenantSchemaUseCase,
         SyncPermissionsService,
         SeedProfilesService,
         ProvisionTenantUseCase,
+        ONBOARDING_OUTBOX_REPOSITORY,
       ],
     },
   ],

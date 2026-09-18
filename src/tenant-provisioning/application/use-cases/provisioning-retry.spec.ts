@@ -1,7 +1,10 @@
 import { ExecutionContextStore } from '../../../common/context';
 import { ProvisioningState } from '../../domain/provisioning-run';
 import type { OnboardingOutboxRepository } from '../ports/onboarding-outbox.repository';
-import type { ProvisioningRunRepository } from '../ports/provisioning-run.repository';
+import type {
+  CreateOrLoadProvisioningRunCommand,
+  ProvisioningRunRepository,
+} from '../ports/provisioning-run.repository';
 import { ProvisionTenantOrchestratorUseCase } from './provision-tenant-orchestrator.use-case';
 
 type StageName =
@@ -165,8 +168,20 @@ describe('ProvisionTenantOrchestratorUseCase retries', () => {
     ]);
 
     expect(harness.repository.createOrLoadByIdempotencyKey.mock.calls).toEqual([
-      ['tenant-id:global-user-id'],
-      ['tenant-id:global-user-id'],
+      [
+        {
+          idempotencyKey: 'tenant-id:global-user-id',
+          provisioningRunId: command.bootstrap.provisioningRunId,
+          tenantRegistryId: command.tenantId,
+        },
+      ],
+      [
+        {
+          idempotencyKey: 'tenant-id:global-user-id',
+          provisioningRunId: command.bootstrap.provisioningRunId,
+          tenantRegistryId: command.tenantId,
+        },
+      ],
     ]);
     expect(harness.repository.createdRuns()).toBe(1);
     expect(harness.repository.createdTenantRegistries()).toBe(1);
@@ -250,23 +265,48 @@ describe('ProvisionTenantOrchestratorUseCase retries', () => {
   } {
     let runs = 0;
     let tenantRegistries = 0;
+    const completedStages = new Set<StageName>();
     const repository = {
-      createOrLoadByIdempotencyKey: jest.fn((idempotencyKey: string) => {
-        if (idempotencyKey === 'tenant-id:global-user-id' && runs === 0) {
-          runs += 1;
-          tenantRegistries += 1;
-        }
-        return Promise.resolve({
-          provisioningRunId: command.bootstrap.provisioningRunId,
-          tenantRegistryId: command.tenantId,
-          state: ProvisioningState.REGISTERED,
-        });
-      }),
-      loadPersistedState: jest.fn(() =>
-        Promise.resolve({ nextStage: 'createSchema' as StageName }),
+      createOrLoadByIdempotencyKey: jest.fn(
+        (request: CreateOrLoadProvisioningRunCommand) => {
+          if (
+            request.idempotencyKey === 'tenant-id:global-user-id' &&
+            runs === 0
+          ) {
+            runs += 1;
+            tenantRegistries += 1;
+          }
+          return Promise.resolve({
+            provisioningRunId: command.bootstrap.provisioningRunId,
+            tenantRegistryId: command.tenantId,
+            state: ProvisioningState.REGISTERED,
+          });
+        },
       ),
-      beginStep: jest.fn(() => Promise.resolve(true)),
-      completeStep: jest.fn(() => Promise.resolve(undefined)),
+      loadPersistedState: jest.fn(() =>
+        Promise.resolve({
+          nextStage:
+            (
+              [
+                'createSchema',
+                'migrateSchema',
+                'syncPermissions',
+                'seedProfiles',
+                'bootstrapTenant',
+                'validateTenant',
+                'activateTenant',
+              ] satisfies StageName[]
+            ).find((stage) => !completedStages.has(stage)) ??
+            ('activateTenant' as StageName),
+        }),
+      ),
+      beginStep: jest.fn((_runId: string, stage: StageName) =>
+        Promise.resolve(!completedStages.has(stage)),
+      ),
+      completeStep: jest.fn((_runId: string, stage: StageName) => {
+        completedStages.add(stage);
+        return Promise.resolve(undefined);
+      }),
       failStep: jest.fn(() => Promise.resolve(undefined)),
       completeRun: jest.fn(() => Promise.resolve(undefined)),
       snapshotCounts: jest.fn(() => Promise.resolve(finalCounts)),
