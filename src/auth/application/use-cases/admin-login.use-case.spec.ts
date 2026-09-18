@@ -1,97 +1,79 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
-import { AdminPrismaService } from '../../../admin/admin-prisma.service';
+import type {
+  AdminIdentityRepository,
+  AdminPasswordVerifier,
+  AdminTokenIssuer,
+} from '../ports/admin-login.ports';
 import { AdminLoginUseCase } from './admin-login.use-case';
 
-jest.mock('bcrypt', () => ({
-    compare: jest.fn(),
-}));
-
 describe('AdminLoginUseCase', () => {
-    let useCase: AdminLoginUseCase;
-    let adminPrisma: AdminPrismaService;
-    let jwtService: JwtService;
+  const identities: jest.Mocked<AdminIdentityRepository> = {
+    findByEmail: jest.fn(),
+  };
+  const passwords: jest.Mocked<AdminPasswordVerifier> = {
+    compare: jest.fn(),
+  };
+  const tokens: jest.Mocked<AdminTokenIssuer> = {
+    sign: jest.fn(),
+  };
+  const adminUser = {
+    id: 'uuid-123',
+    email: 'admin@gado.com',
+    passwordHash: 'hashed-password',
+    role: 'SUPERADMIN',
+    active: true,
+  };
 
-    const mockAdminPrisma = {
-        adminUser: {
-            findUnique: jest.fn(),
-        },
-    };
+  let useCase: AdminLoginUseCase;
 
-    const mockJwtService = {
-        sign: jest.fn(),
-    };
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useCase = new AdminLoginUseCase(identities, passwords, tokens);
+  });
 
-    beforeEach(async () => {
-        const module: TestingModule = await Test.createTestingModule({
-            providers: [
-                AdminLoginUseCase,
-                { provide: AdminPrismaService, useValue: mockAdminPrisma },
-                { provide: JwtService, useValue: mockJwtService },
-            ],
-        }).compile();
+  it('normalizes e-mail and rejects an unknown administrator', async () => {
+    identities.findByEmail.mockResolvedValue(null);
 
-        useCase = module.get<AdminLoginUseCase>(AdminLoginUseCase);
-        adminPrisma = module.get<AdminPrismaService>(AdminPrismaService);
-        jwtService = module.get<JwtService>(JwtService);
+    await expect(
+      useCase.execute({ email: ' ADMIN@GADO.COM ', password: 'secret' }),
+    ).rejects.toMatchObject({ code: 'unauthenticated' });
+    expect(identities.findByEmail).toHaveBeenCalledWith('admin@gado.com');
+    expect(passwords.compare).not.toHaveBeenCalled();
+    expect(tokens.sign).not.toHaveBeenCalled();
+  });
+
+  it('rejects an inactive administrator before checking the password', async () => {
+    identities.findByEmail.mockResolvedValue({ ...adminUser, active: false });
+
+    await expect(
+      useCase.execute({ email: adminUser.email, password: 'secret' }),
+    ).rejects.toMatchObject({ code: 'unauthenticated' });
+    expect(passwords.compare).not.toHaveBeenCalled();
+    expect(tokens.sign).not.toHaveBeenCalled();
+  });
+
+  it('rejects an invalid password without issuing a token', async () => {
+    identities.findByEmail.mockResolvedValue(adminUser);
+    passwords.compare.mockResolvedValue(false);
+
+    await expect(
+      useCase.execute({ email: adminUser.email, password: 'wrong' }),
+    ).rejects.toMatchObject({ code: 'unauthenticated' });
+    expect(tokens.sign).not.toHaveBeenCalled();
+  });
+
+  it('issues only a gado-admin audience token for valid credentials', async () => {
+    identities.findByEmail.mockResolvedValue(adminUser);
+    passwords.compare.mockResolvedValue(true);
+    tokens.sign.mockResolvedValue('mock-token');
+
+    await expect(
+      useCase.execute({ email: adminUser.email, password: 'secret' }),
+    ).resolves.toEqual({ token: 'mock-token' });
+    expect(tokens.sign).toHaveBeenCalledWith({
+      sub: adminUser.id,
+      email: adminUser.email,
+      role: adminUser.role,
+      aud: 'gado-admin',
     });
-
-    afterEach(() => {
-        jest.clearAllMocks();
-    });
-
-    it('should be defined', () => {
-        expect(useCase).toBeDefined();
-    });
-
-    describe('execute', () => {
-        const mockDto = { email: 'admin@gado.com', password: 'password123' };
-        const mockAdminUser = {
-            id: 'uuid-123',
-            email: 'admin@gado.com',
-            senhaHash: 'hashed_password',
-            role: 'SUPERADMIN',
-            ativo: true,
-        };
-
-        it('should throw UnauthorizedException if user not found', async () => {
-            mockAdminPrisma.adminUser.findUnique.mockResolvedValue(null);
-
-            await expect(useCase.execute(mockDto)).rejects.toThrow(UnauthorizedException);
-            expect(mockAdminPrisma.adminUser.findUnique).toHaveBeenCalledWith({
-                where: { email: mockDto.email.toLowerCase() },
-            });
-        });
-
-        it('should throw UnauthorizedException if user is inactive', async () => {
-            mockAdminPrisma.adminUser.findUnique.mockResolvedValue({ ...mockAdminUser, ativo: false });
-
-            await expect(useCase.execute(mockDto)).rejects.toThrow(UnauthorizedException);
-        });
-
-        it('should throw UnauthorizedException if password does not match', async () => {
-            mockAdminPrisma.adminUser.findUnique.mockResolvedValue(mockAdminUser);
-            (bcrypt.compare as jest.Mock).mockResolvedValue(false);
-
-            await expect(useCase.execute(mockDto)).rejects.toThrow(UnauthorizedException);
-        });
-
-        it('should return a token with aud: gado-admin on success', async () => {
-            mockAdminPrisma.adminUser.findUnique.mockResolvedValue(mockAdminUser);
-            (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-            mockJwtService.sign.mockReturnValue('mock_token');
-
-            const result = await useCase.execute(mockDto);
-
-            expect(result).toEqual({ token: 'mock_token' });
-            expect(mockJwtService.sign).toHaveBeenCalledWith({
-                sub: mockAdminUser.id,
-                email: mockAdminUser.email,
-                role: mockAdminUser.role,
-                aud: 'gado-admin',
-            });
-        });
-    });
+  });
 });
