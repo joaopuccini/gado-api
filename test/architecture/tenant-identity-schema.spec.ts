@@ -11,7 +11,9 @@ describe('tenant identity schema migration', () => {
       'prisma/tenant/migrations/202609140002_animal_ear_tag_lookup_index/migration.sql',
     );
 
-    expect(createHash('sha256').update(migration).digest('hex')).toBe(
+    const canonicalMigration = migration.replaceAll('\r\n', '\n');
+
+    expect(createHash('sha256').update(canonicalMigration).digest('hex')).toBe(
       'f1a05121e1ed27fcfe98685491a11e0068fd7db5517113e57b81375f8d72e693',
     );
   });
