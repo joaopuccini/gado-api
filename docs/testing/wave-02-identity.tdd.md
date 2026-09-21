@@ -175,6 +175,14 @@ REDs em `1a52c33` (controller ainda chamava o service legado) e `1935bdc`
 (audience JWT duplicada entre payload e opções). GREEN em `b3b6171`, com
 repository Prisma, verificador bcrypt e emissor JWT conectados em `AuthModule`.
 
+O Gate G1 completo foi iniciado em 2026-09-21 e parou no primeiro critério:
+`npm run lint` terminou com 62 erros preexistentes em cinco suites antigas
+(`admin-login.use-case.spec.ts`, `seed-profiles.spec.ts`,
+`provision-tenant.use-case.spec.ts` e os dois E2E de audience). As correções
+automáticas parciais do comando foram revertidas; a worktree voltou a ficar
+limpa. Os gates posteriores não foram executados, conforme o stop condition do
+plano.
+
 ## Task 2.3.16 — API assíncrona e status (checkpoint parcial)
 
 Jornada: como proprietário em onboarding, inicio o provisionamento por e-mail ou
