@@ -26,7 +26,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 
 ## Onda 02 — Identidade, RBAC e Provisionamento
 
-**Status: ⬜ NÃO INICIADA** | Repo: `gado-api` | Dependência: Onda 00 ✅
+**Status: ✅ CONCLUÍDA** | Repo: `gado-api` | Dependência: Onda 00 ✅
 
 > [!NOTE]
 > A Onda 02 é executada antes da Onda 01 porque o frontend precisa de contratos
@@ -90,7 +90,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 2.3.15 | **RED**: retornar `202` e endpoint de status até tenant `active` | `[x]` | 6370c63 | `provisioning-status.spec.ts` falha por `register`/status ausentes e Google legado |
 | 2.3.16 | **GREEN**: implementar endpoint de status | `[x]` | b005c65 | Teste focal 3/3, contrato 9/9 e integração descartável 2/2 |
 
-**Task 2.3 concluída?** `[ ]` | **Evidência:** |
+**Task 2.3 concluída?** `[x]` | **Evidência:** Gate G1 completo; lint `6a70099`, coverage `21b04a2`, tipos `7bde2d5` e schema validado na fronteira `b64802d` |
 
 ---
 
@@ -98,16 +98,16 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 
 | Critério | Status |
 |---|---|
-| Cadastro por e-mail produz estado final correto | `[ ]` |
-| Cadastro por Google produz mesmo estado final | `[ ]` |
-| Falhas são retomáveis (retry em cada etapa) | `[ ]` |
-| Token só é emitido para tenant ativo | `[ ]` |
-| Permissões sincronizadas do catálogo no provisioning | `[ ]` |
-| Perfis-base criados automaticamente | `[ ]` |
-| Testes unitários, integração, isolamento passam | `[ ]` |
-| Coverage da mudança ≥ 80% | `[ ]` |
+| Cadastro por e-mail produz estado final correto | `[x]` |
+| Cadastro por Google produz mesmo estado final | `[x]` |
+| Falhas são retomáveis (retry em cada etapa) | `[x]` |
+| Token só é emitido para tenant ativo | `[x]` |
+| Permissões sincronizadas do catálogo no provisioning | `[x]` |
+| Perfis-base criados automaticamente | `[x]` |
+| Testes unitários, integração, isolamento passam | `[x]` |
+| Coverage da mudança ≥ 80% | `[x]` |
 
-**Onda 02 concluída?** `[ ]` | **Handoff criado?** `[ ]` (`docs/handoffs/YYYY-MM-DD-wave-02-complete.md`)
+**Onda 02 concluída?** `[x]` | **Handoff criado?** `[x]` (`docs/handoffs/2026-09-21-wave-02-complete.md`)
 
 ---
 
@@ -264,6 +264,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 2026-09-18 01:09 | Codex GPT-5 | 02 | Onda 02 Task 2.3.15 | Onda 02 Task 2.3.16 | Checkpoint seguro após RED da API assíncrona; GREEN 2.3.16 ainda não iniciado |
 | 2026-09-20 22:25 | Codex GPT-5 | 02 | Onda 02 Task 2.3.15 | Onda 02 Task 2.3.16 | GREEN focal, build, contrato e arquitetura passaram; integração bloqueada com segurança porque `TEST_DATABASE_URL` descartável está ausente |
 | 2026-09-21 03:58 | Codex GPT-5 | 02 | Onda 02 Task 2.3.16 e Task 7A | Gate G1 lint | Integração descartável 2/2 e composição admin GREEN; gate global parou em 62 erros de lint preexistentes, sem deixar autofixes pendentes |
+| 2026-09-21 09:13 | Codex GPT-5 | 02 | Onda 02 completa (G1 pass) | Onda 01 Task 1.1 | Lint, build, 147 unitários, arquitetura 23, contrato 9, integração 2, migrations 3, isolamento 8, coverage ≥80%, no-skipped e tipos verdes em banco descartável |
 
 ---
 

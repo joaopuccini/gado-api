@@ -204,3 +204,59 @@ integração passou contra o banco local descartável
 `gado_wave00_test_36a054a7477c`, criado em cluster temporário isolado. Nenhum
 banco compartilhado foi usado e nenhum comando destrutivo de banco foi
 executado.
+
+## Task 7B–7C — fechamento do Gate G1
+
+O primeiro `npm run lint` do fechamento encontrou 62 erros em cinco specs e foi
+registrado em `ba724c9`. O GREEN `6a70099` substituiu referências de métodos
+desvinculados por mocks tipados, removeu `async` sem `await` e tipou Supertest,
+sem relaxar regras. O lint global passou com o heap do processo Node contido por
+`NODE_OPTIONS`; três autofixes legados fora do escopo foram restaurados.
+
+O primeiro coverage completo com banco descartável foi o RED: 83,39%
+statements, 71,42% branches, 78,39% functions e 84,82% lines. O GREEN
+`21b04a2` adicionou cobertura comportamental para os casos de uso de onboarding,
+o gateway SES e o repositório Prisma. O resultado final foi:
+
+| Métrica | Resultado | Mínimo |
+|---|---:|---:|
+| Statements | 90,12% | 80% |
+| Branches | 82,08% | 80% |
+| Functions | 84,92% | 80% |
+| Lines | 91,52% | 80% |
+
+`npx tsc --noEmit` expôs mocks com assinaturas incompletas em quatro specs. O
+GREEN `7bde2d5` alinhou esses dublês às portas e o gate passou sem erros. O scan
+de fronteira ainda encontrou `schemaName: string` em uma porta de aplicação; o
+teste arquitetural RED está em `a8d2f6c` e o GREEN `b64802d` usa
+`TenantSchemaName` validado nos dois contratos afetados.
+
+### Gates finais
+
+Executados em 2026-09-21:
+
+```text
+npm run lint                                 exit 0
+npm run build                                exit 0
+npm test -- --runInBand                      31 suites / 147 testes
+npm run test:architecture -- --runInBand      6 suites / 23 testes
+npm run test:contract -- --runInBand          2 suites / 9 testes
+npm run test:integration -- --runInBand       2 suites / 2 testes
+npm run test:migrations -- --runInBand        3 suites / 3 testes
+npm run test:isolation -- --runInBand         4 suites / 8 testes
+npm run test:cov -- --runInBand              40 suites / 167 testes
+npm run test:no-skipped                       exit 0
+npx tsc --noEmit                              exit 0
+git diff --check                              exit 0
+```
+
+Integração, migrations, isolamento e coverage usaram exclusivamente o banco
+local descartável `gado_wave00_test_506cc3cb8b84`, em um cluster PostgreSQL
+temporário. O servidor foi parado e o diretório foi enviado à Lixeira. Não foi
+executado `db push`, `migrate reset` nem comando contra banco compartilhado.
+
+O scan de marcadores encontrou apenas exceções de harness/teste e ocorrências
+legadas fora da mudança (`animais.service.ts` e comentários TODO em controllers
+administrativos). O scan exato por `\bany\b`, `@ts-ignore` e
+`@ts-expect-error` não encontrou escapes em `src/tenant-provisioning` ou
+`src/auth/application`.

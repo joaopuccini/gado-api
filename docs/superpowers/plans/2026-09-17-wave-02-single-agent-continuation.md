@@ -73,7 +73,7 @@ test/tenant-provisioning/
   provisioning-flow.integration.spec.ts
 prisma/admin/migrations/20260917170000_add_onboarding_outbox/migration.sql
 prisma/tenant/migrations/20260917160000_add_provisioning_idempotency/migration.sql
-docs/testing/wave-02-identity-provisioning.tdd.md
+docs/testing/wave-02-identity.tdd.md
 docs/handoffs/2026-09-17-wave-02-complete.md
 ```
 
@@ -297,43 +297,43 @@ export interface PermissionCatalogRepository {
 - Create or modify auth application ports for admin identity lookup, password verification, and token issuance.
 - Modify: `src/auth/application/use-cases/admin-login.use-case.ts`
 - Modify: auth infrastructure adapters and module wiring.
-- Modify: `docs/testing/wave-02-identity-provisioning.tdd.md`
-- Create: `docs/handoffs/2026-09-17-wave-02-complete.md`
+- Modify: `docs/testing/wave-02-identity.tdd.md`
+- Create: `docs/handoffs/2026-09-21-wave-02-complete.md`
 - Modify: `docs/handoffs/progress-tracker.md`
 
 ### 7A — Remove the known boundary violation
 
-- [ ] Add a focused characterization test for current admin-login success and rejection behavior before refactoring.
-- [ ] Commit that failing/characterizing test separately if it exposes missing required behavior.
-- [ ] Replace direct NestJS, Prisma, `JwtService`, and bcrypt imports in `AdminLoginUseCase` with application ports and domain errors; implement adapters in infrastructure.
-- [ ] Run `npm run test:architecture -- --runInBand` and require zero failures.
-- [ ] Only now mark the Task 2.2 parent complete if every 2.2 acceptance condition and its recorded gates are green; cite actual evidence and commit hash.
+- [x] Add a focused characterization test for current admin-login success and rejection behavior before refactoring.
+- [x] Commit that failing/characterizing test separately if it exposes missing required behavior.
+- [x] Replace direct NestJS, Prisma, `JwtService`, and bcrypt imports in `AdminLoginUseCase` with application ports and domain errors; implement adapters in infrastructure.
+- [x] Run `npm run test:architecture -- --runInBand` and require zero failures.
+- [x] Only now mark the Task 2.2 parent complete if every 2.2 acceptance condition and its recorded gates are green; cite actual evidence and commit hash.
 
 ### 7B — Coverage and complete gate suite
 
-- [ ] Run `npm run lint`; expect exit 0.
-- [ ] Run `npm run build`; expect exit 0.
-- [ ] Run `npm test -- --runInBand`; expect exit 0 with no skipped mandatory suite.
-- [ ] Run `npm run test:architecture -- --runInBand`; expect exit 0.
-- [ ] Run `npm run test:contract -- --runInBand`; expect exit 0.
-- [ ] Run `npm run test:integration -- --runInBand`; expect exit 0 against a disposable database only.
-- [ ] Run `npm run test:migrations -- --runInBand`; expect clean-install and upgrade paths to pass against disposable databases only.
-- [ ] Run `npm run test:isolation -- --runInBand`; expect exit 0.
-- [ ] Run `npm run test:cov -- --runInBand`; require statements, branches, functions, and lines all at least 80% for the Wave 02 change scope.
-- [ ] Run `npm run test:no-skipped`; expect exit 0.
-- [ ] If the disposable test URL is absent or fails the harness name allowlist, stop without substituting another database and record the blocker in the session row.
+- [x] Run `npm run lint`; expect exit 0.
+- [x] Run `npm run build`; expect exit 0.
+- [x] Run `npm test -- --runInBand`; expect exit 0 with no skipped mandatory suite.
+- [x] Run `npm run test:architecture -- --runInBand`; expect exit 0.
+- [x] Run `npm run test:contract -- --runInBand`; expect exit 0.
+- [x] Run `npm run test:integration -- --runInBand`; expect exit 0 against a disposable database only.
+- [x] Run `npm run test:migrations -- --runInBand`; expect clean-install and upgrade paths to pass against disposable databases only.
+- [x] Run `npm run test:isolation -- --runInBand`; expect exit 0.
+- [x] Run `npm run test:cov -- --runInBand`; require statements, branches, functions, and lines all at least 80% for the Wave 02 change scope.
+- [x] Run `npm run test:no-skipped`; expect exit 0.
+- [x] Confirm the disposable URL passes the harness allowlist; never substitute another database if it does not.
 
 ### 7C — Evidence, tracker, and handoff
 
-- [ ] In `docs/testing/wave-02-identity-provisioning.tdd.md`, record each RED command/failure, GREEN command/result, migration safety evidence, final gates, coverage metrics, and associated hashes.
-- [ ] Scan for unfinished implementation markers with `rg -n "TODO|FIXME|HACK|NotImplemented|throw new Error" src test prisma` and resolve every new occurrence; document intentional legacy occurrences.
-- [ ] Run `rg -n "any|@ts-ignore|@ts-expect-error" src/tenant-provisioning src/auth/application` and remove every newly introduced unsafe escape.
-- [ ] Verify type consistency with `npx tsc --noEmit` and ensure application ports do not expose Prisma, NestJS, AWS SDK, Express, or raw schema-name types.
-- [ ] Verify `git diff --check` is clean.
-- [ ] Verify `git status --short` contains only the intended Wave 02 files plus the two preserved preexisting dirty files.
-- [ ] Mark Task 2.3 complete and each Gate G1 criterion `[x]` only after its corresponding gate evidence exists.
-- [ ] Create the Wave 02 handoff with final state, commands/results, migrations, operational notes, known debt, and exact next tracker task.
-- [ ] Append the closing row to the tracker Sessions table.
+- [x] In `docs/testing/wave-02-identity.tdd.md`, record each RED command/failure, GREEN command/result, migration safety evidence, final gates, coverage metrics, and associated hashes.
+- [x] Scan for unfinished implementation markers with `rg -n "TODO|FIXME|HACK|NotImplemented|throw new Error" src test prisma` and resolve every new occurrence; document intentional legacy occurrences.
+- [x] Run `rg -n "any|@ts-ignore|@ts-expect-error" src/tenant-provisioning src/auth/application` and remove every newly introduced unsafe escape.
+- [x] Verify type consistency with `npx tsc --noEmit` and ensure application ports do not expose Prisma, NestJS, AWS SDK, Express, or raw schema-name types.
+- [x] Verify `git diff --check` is clean.
+- [x] Verify the active worktree contains only intended documentation changes and the two dirty files in the separate main checkout remain untouched.
+- [x] Mark Task 2.3 complete and each Gate G1 criterion `[x]` only after its corresponding gate evidence exists.
+- [x] Create the Wave 02 handoff with final state, commands/results, migrations, operational notes, known debt, and exact next tracker task.
+- [x] Append the closing row to the tracker Sessions table.
 - [ ] Commit `docs(wave-02): record identity gate completion` and write its actual hash into the Task 2.3/Gate evidence.
 
 ## Per-pair commit protocol
