@@ -29,6 +29,18 @@ import {
   type ProvisioningRunRepository,
 } from './application/ports/provisioning-run.repository';
 import {
+  PASSWORD_HASHER,
+  type PasswordHasher,
+} from './application/ports/password-hasher';
+import {
+  PROVISIONING_EXECUTOR,
+  type ProvisioningExecutor,
+} from './application/ports/provisioning-executor';
+import {
+  TENANT_ONBOARDING_REPOSITORY,
+  type TenantOnboardingRepository,
+} from './application/ports/tenant-onboarding.repository';
+import {
   TENANT_BOOTSTRAP_REPOSITORY,
   type TenantBootstrapRepository,
 } from './application/ports/tenant-bootstrap.repository';
@@ -51,6 +63,8 @@ import { MigrateTenantSchemaUseCase } from './application/use-cases/migrate-tena
 import { ProvisionSchemaUseCase } from './application/use-cases/provision-schema.use-case';
 import { ProvisionTenantOrchestratorUseCase } from './application/use-cases/provision-tenant-orchestrator.use-case';
 import { ProvisionTenantUseCase } from './application/use-cases/provision-tenant.use-case';
+import { GetProvisioningStatusUseCase } from './application/use-cases/get-provisioning-status.use-case';
+import { StartTenantOnboardingUseCase } from './application/use-cases/start-tenant-onboarding.use-case';
 import { SeedProfilesService } from './application/services/seed-profiles.service';
 import { SyncPermissionsService } from './application/services/sync-permissions.service';
 import { SesEmailGateway } from './infrastructure/email/ses-email.gateway';
@@ -59,6 +73,9 @@ import { PrismaOnboardingOutboxRepository } from './infrastructure/persistence/p
 import { PrismaPermissionCatalogRepository } from './infrastructure/persistence/prisma/prisma-permission-catalog.repository';
 import { PrismaProvisioningRunRepository } from './infrastructure/persistence/prisma/prisma-provisioning-run.repository';
 import { PrismaTenantBootstrapRepository } from './infrastructure/persistence/prisma/prisma-tenant-bootstrap.repository';
+import { PrismaTenantOnboardingRepository } from './infrastructure/persistence/prisma/prisma-tenant-onboarding.repository';
+import { BcryptPasswordHasher } from './infrastructure/security/bcrypt-password-hasher';
+import { InProcessProvisioningExecutor } from './infrastructure/in-process-provisioning.executor';
 import { PostgresTenantMigrationRepository } from './infrastructure/postgres-tenant-migration.repository';
 import { PostgresTenantSchemaLifecycleRepository } from './infrastructure/postgres-tenant-schema-lifecycle.repository';
 import { TenantMigrationLoader } from './infrastructure/tenant-migration.loader';
@@ -110,6 +127,16 @@ import { TenantMigrationLoader } from './infrastructure/tenant-migration.loader'
       useFactory: (database: AdminPrismaService): ProvisioningRunRepository =>
         new PrismaProvisioningRunRepository(database),
       inject: [AdminPrismaService],
+    },
+    {
+      provide: TENANT_ONBOARDING_REPOSITORY,
+      useFactory: (database: AdminPrismaService): TenantOnboardingRepository =>
+        new PrismaTenantOnboardingRepository(database),
+      inject: [AdminPrismaService],
+    },
+    {
+      provide: PASSWORD_HASHER,
+      useFactory: (): PasswordHasher => new BcryptPasswordHasher(),
     },
     {
       provide: EMAIL_GATEWAY,
@@ -247,12 +274,45 @@ import { TenantMigrationLoader } from './infrastructure/tenant-migration.loader'
         ONBOARDING_OUTBOX_REPOSITORY,
       ],
     },
+    {
+      provide: PROVISIONING_EXECUTOR,
+      useFactory: (
+        orchestrator: ProvisionTenantOrchestratorUseCase,
+        logger: StructuredLogger,
+      ): ProvisioningExecutor =>
+        new InProcessProvisioningExecutor(orchestrator, logger),
+      inject: [ProvisionTenantOrchestratorUseCase, StructuredLogger],
+    },
+    {
+      provide: StartTenantOnboardingUseCase,
+      useFactory: (
+        repository: TenantOnboardingRepository,
+        passwordHasher: PasswordHasher,
+        executor: ProvisioningExecutor,
+      ): StartTenantOnboardingUseCase =>
+        new StartTenantOnboardingUseCase(repository, passwordHasher, executor),
+      inject: [
+        TENANT_ONBOARDING_REPOSITORY,
+        PASSWORD_HASHER,
+        PROVISIONING_EXECUTOR,
+      ],
+    },
+    {
+      provide: GetProvisioningStatusUseCase,
+      useFactory: (
+        repository: TenantOnboardingRepository,
+      ): GetProvisioningStatusUseCase =>
+        new GetProvisioningStatusUseCase(repository),
+      inject: [TENANT_ONBOARDING_REPOSITORY],
+    },
   ],
   exports: [
     DispatchOnboardingOutboxUseCase,
     MigrateTenantSchemaUseCase,
     ProvisionTenantOrchestratorUseCase,
     ProvisionTenantUseCase,
+    GetProvisioningStatusUseCase,
+    StartTenantOnboardingUseCase,
     ProvisionSchemaUseCase,
     SeedProfilesService,
     SyncPermissionsService,

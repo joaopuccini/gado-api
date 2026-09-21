@@ -11,6 +11,8 @@ import { AdminModule } from '../admin/admin.module';
 import { TenantModule } from '../tenant/tenant.module';
 import { TenantProvisioningModule } from '../tenant-provisioning/tenant-provisioning.module';
 import { IdentityAccessModule } from '../identity-access/identity-access.module';
+import { ProvisioningCredentialService } from './services/provisioning-credential.service';
+import { ProvisioningJwtStrategy } from './strategies/provisioning-jwt.strategy';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { IdentityAccessModule } from '../identity-access/identity-access.module'
   providers: [
     AuthService,
     SocialProvisioningService,
+    ProvisioningCredentialService,
+    ProvisioningJwtStrategy,
     JwtStrategy,
     // Google OAuth é opcional — só registra quando as credenciais estão configuradas
     ...(process.env.GOOGLE_CLIENT_ID ? [GoogleStrategy] : []),

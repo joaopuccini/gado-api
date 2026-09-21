@@ -262,6 +262,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 2026-09-17 | Codex GPT-5 | 02 | Onda 02 Task 2.3.7 | Onda 02 Task 2.3.8 | Retomada auditada; `TEST_DATABASE_URL` segue ausente, `DATABASE_URL` não é descartável e não há PostgreSQL local disponível; nenhum gate ou código contornado |
 | 2026-09-17 | Codex GPT-5 | 02 | Onda 02 Task 2.3.7 | Onda 02 Task 2.3.8 | URL pooled do banco principal recusada para migrations; credencial não foi persistida e deve ser rotacionada; gate segue aguardando banco descartável direto |
 | 2026-09-18 01:09 | Codex GPT-5 | 02 | Onda 02 Task 2.3.15 | Onda 02 Task 2.3.16 | Checkpoint seguro após RED da API assíncrona; GREEN 2.3.16 ainda não iniciado |
+| 2026-09-20 22:25 | Codex GPT-5 | 02 | Onda 02 Task 2.3.15 | Onda 02 Task 2.3.16 | GREEN focal, build, contrato e arquitetura passaram; integração bloqueada com segurança porque `TEST_DATABASE_URL` descartável está ausente |
 
 ---
 

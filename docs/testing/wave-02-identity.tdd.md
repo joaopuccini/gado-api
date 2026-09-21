@@ -155,3 +155,24 @@ cobertura focada do novo UseCase ficou em 100% em todas as métricas. A primeira
 migration tenant já contém `CREATE SCHEMA IF NOT EXISTS`, portanto a criação e
 a evolução usam a mesma cadeia versionada; nenhum comando destrutivo ou
 `db push` foi executado.
+
+## Task 2.3.16 — API assíncrona e status (checkpoint parcial)
+
+Jornada: como proprietário em onboarding, inicio o provisionamento por e-mail ou
+Google sem receber token operacional e consulto somente o estado público da
+execução que pertence à minha identidade.
+
+| Garantia | Tipo | Resultado | Evidência |
+|---|---|---|---|
+| Cadastro e-mail retorna dados públicos sem token operacional | unitário | PASS | `provisioning-status.spec.ts` — 3/3 testes |
+| Callback Google usa o mesmo `StartTenantOnboardingUseCase` | unitário | PASS | `provisioning-status.spec.ts` |
+| Status exige credencial curta com audience/purpose próprios e ownership | unitário/arquitetura | PASS | `ProvisioningJwtStrategy`; `GetProvisioningStatusUseCase`; gate 22/22 |
+| Contratos OpenAPI e envelopes permanecem válidos | contrato | PASS | `npm run test:contract -- --runInBand` — 9/9 |
+| Aplicação compila | build | PASS | `npm run build` |
+| Fluxo compartilhado em banco descartável | integração | BLOCKED | `TEST_DATABASE_URL is required` |
+
+O RED permanece registrado em `6370c63` (3 falhas esperadas: endpoints ausentes
+e Google no fluxo legado). O código alcançou GREEN focal, contrato e arquitetura
+em 2026-09-20, mas a Task 2.3.16 continua aberta: o gate de integração recusou
+executar sem `TEST_DATABASE_URL`. Nenhum banco alternativo foi usado e nenhum
+comando destrutivo de banco foi executado.

@@ -1,16 +1,11 @@
-import { HttpStatus } from '@nestjs/common';
 import type { Response } from 'express';
 import { AuthController } from '../../../auth/auth.controller';
 import type { AuthService } from '../../../auth/auth.service';
 
 interface AcceptedOnboarding {
-  readonly statusCode: HttpStatus.ACCEPTED;
-  readonly data: {
-    readonly provisioningRunId: string;
-    readonly state: 'registered' | 'provisioning';
-    readonly statusUrl: string;
-  };
-  readonly meta: { readonly requestId: string };
+  readonly provisioningRunId: string;
+  readonly state: 'registered' | 'provisioning';
+  readonly statusUrl: string;
 }
 
 interface AsyncAuthController {
@@ -24,36 +19,44 @@ interface AsyncAuthController {
     runId: string,
     credential: { readonly sub: string; readonly purpose: 'provisioning' },
   ): Promise<{
-    readonly data: {
-      readonly provisioningRunId: string;
-      readonly state: 'registered' | 'provisioning' | 'active' | 'failed';
-    };
+    readonly provisioningRunId: string;
+    readonly state: 'registered' | 'provisioning' | 'active' | 'failed';
   }>;
 }
 
 describe('asynchronous onboarding API', () => {
   const accepted: AcceptedOnboarding = {
-    statusCode: HttpStatus.ACCEPTED,
-    data: {
-      provisioningRunId: '11111111-1111-4111-8111-111111111111',
-      state: 'registered',
-      statusUrl: '/auth/provisioning/11111111-1111-4111-8111-111111111111',
-    },
-    meta: { requestId: 'request-id' },
+    provisioningRunId: '11111111-1111-4111-8111-111111111111',
+    state: 'registered',
+    statusUrl: '/auth/provisioning/11111111-1111-4111-8111-111111111111',
   };
   const startTenantOnboarding = {
-    execute: jest.fn(() => Promise.resolve(accepted.data)),
-  };
-  const authService: Pick<AuthService, 'login' | 'googleLogin'> = {
-    login: jest.fn(),
-    googleLogin: jest.fn(() =>
-      Promise.resolve({
-        token: 'legacy-token',
-        user: { id: 'global-user-id' },
-      }),
+    execute: jest.fn(() =>
+      Promise.resolve({ ...accepted, globalUserId: 'global-user-id' }),
     ),
   };
-  const controller = new AuthController(authService as AuthService);
+  const getProvisioningStatus = {
+    execute: jest.fn((provisioningRunId: string) =>
+      Promise.resolve({ provisioningRunId, state: 'registered' as const }),
+    ),
+  };
+  const provisioningCredential = { issue: jest.fn(() => 'provisional') };
+  const googleLogin = jest.fn(() =>
+    Promise.resolve({
+      token: 'legacy-token',
+      user: { id: 'global-user-id' },
+    }),
+  );
+  const authService = {
+    login: jest.fn(),
+    googleLogin,
+  } as unknown as AuthService;
+  const controller = new AuthController(
+    authService,
+    startTenantOnboarding as never,
+    getProvisioningStatus as never,
+    provisioningCredential as never,
+  );
   const asyncController = controller as unknown as AsyncAuthController;
 
   beforeEach(() => {
@@ -97,11 +100,11 @@ describe('asynchronous onboarding API', () => {
           googleId: 'google-id',
           fotoUrl: 'https://example.test/avatar.png',
         },
-      },
+      } as never,
       response,
     );
 
-    expect(authService.googleLogin).not.toHaveBeenCalled();
+    expect(googleLogin).not.toHaveBeenCalled();
     expect(startTenantOnboarding.execute.mock.calls).toEqual([
       [
         {
@@ -112,23 +115,25 @@ describe('asynchronous onboarding API', () => {
         },
       ],
     ]);
-    expect(redirect.mock.calls[0]?.[0]).toContain(
-      '/auth/provisioning/11111111-1111-4111-8111-111111111111',
+    expect(redirect).toHaveBeenCalledWith(
+      expect.stringContaining(
+        '/auth/provisioning/11111111-1111-4111-8111-111111111111',
+      ),
     );
-    expect(redirect.mock.calls[0]?.[0]).not.toContain('token=');
+    expect(redirect).not.toHaveBeenCalledWith(
+      expect.stringContaining('token='),
+    );
   });
 
   it('returns only public provisioning status for the initiating identity', async () => {
     const status = await asyncController.provisioningStatus(
-      accepted.data.provisioningRunId,
+      accepted.provisioningRunId,
       { sub: 'global-user-id', purpose: 'provisioning' },
     );
 
     expect(status).toEqual({
-      data: {
-        provisioningRunId: accepted.data.provisioningRunId,
-        state: 'registered',
-      },
+      provisioningRunId: accepted.provisioningRunId,
+      state: 'registered',
     });
     expect(JSON.stringify(status)).not.toContain('schema');
     expect(JSON.stringify(status)).not.toContain('stack');
