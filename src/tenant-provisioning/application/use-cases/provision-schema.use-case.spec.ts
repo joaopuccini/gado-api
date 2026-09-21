@@ -30,7 +30,7 @@ describe('ProvisionSchemaUseCase', () => {
     };
     useCase = new ProvisionSchemaUseCase(
       context,
-      migrateTenantSchema as MigrateTenantSchemaUseCase,
+      migrateTenantSchema as unknown as MigrateTenantSchemaUseCase,
       () => 'provision-request-id',
       () => 123,
     );
@@ -56,7 +56,7 @@ describe('ProvisionSchemaUseCase', () => {
   it('uses server-generated request metadata by default', async () => {
     const defaultUseCase = new ProvisionSchemaUseCase(
       context,
-      migrateTenantSchema as MigrateTenantSchemaUseCase,
+      migrateTenantSchema as unknown as MigrateTenantSchemaUseCase,
     );
 
     await expect(

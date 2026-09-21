@@ -47,13 +47,16 @@ describe('PrismaPermissionCatalogRepository', () => {
           }) => Promise<unknown>),
     ) => {
       if (typeof operationsOrCallback === 'function') {
-        return operationsOrCallback(tenantClient);
+        return operationsOrCallback(transactionClient);
       }
       return Promise.all(operationsOrCallback);
     },
   );
-  const tenantClient = {
+  const transactionClient = {
     permissao: { upsert, deleteMany },
+  };
+  const tenantClient = {
+    ...transactionClient,
     $transaction: transaction,
   } as unknown as QueryObservablePrismaClient;
   const clientFactory: jest.Mocked<TenantPrismaClientFactoryPort> = {

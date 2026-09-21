@@ -283,7 +283,10 @@ describe('ProvisionTenantOrchestratorUseCase retries', () => {
           });
         },
       ),
-      loadPersistedState: jest.fn(() =>
+      loadPersistedState: jest.fn<
+        ReturnType<ProvisioningRunRepository['loadPersistedState']>,
+        Parameters<ProvisioningRunRepository['loadPersistedState']>
+      >(() =>
         Promise.resolve({
           nextStage:
             (
@@ -307,9 +310,18 @@ describe('ProvisionTenantOrchestratorUseCase retries', () => {
         completedStages.add(stage);
         return Promise.resolve(undefined);
       }),
-      failStep: jest.fn(() => Promise.resolve(undefined)),
-      completeRun: jest.fn(() => Promise.resolve(undefined)),
-      snapshotCounts: jest.fn(() => Promise.resolve(finalCounts)),
+      failStep: jest.fn<
+        ReturnType<ProvisioningRunRepository['failStep']>,
+        Parameters<ProvisioningRunRepository['failStep']>
+      >(() => Promise.resolve(undefined)),
+      completeRun: jest.fn<
+        ReturnType<ProvisioningRunRepository['completeRun']>,
+        Parameters<ProvisioningRunRepository['completeRun']>
+      >(() => Promise.resolve(undefined)),
+      snapshotCounts: jest.fn<
+        ReturnType<ProvisioningRunRepository['snapshotCounts']>,
+        Parameters<ProvisioningRunRepository['snapshotCounts']>
+      >(() => Promise.resolve(finalCounts)),
       createdRuns: () => runs,
       createdTenantRegistries: () => tenantRegistries,
     };
@@ -319,10 +331,22 @@ describe('ProvisionTenantOrchestratorUseCase retries', () => {
 
   function createOutboxRepository(): jest.Mocked<OnboardingOutboxRepository> {
     return {
-      activateAndEnqueue: jest.fn(() => Promise.resolve(undefined)),
-      claimNext: jest.fn(() => Promise.resolve(null)),
-      markSent: jest.fn(() => Promise.resolve(undefined)),
-      markFailed: jest.fn(() => Promise.resolve(undefined)),
+      activateAndEnqueue: jest.fn<
+        ReturnType<OnboardingOutboxRepository['activateAndEnqueue']>,
+        Parameters<OnboardingOutboxRepository['activateAndEnqueue']>
+      >(() => Promise.resolve(undefined)),
+      claimNext: jest.fn<
+        ReturnType<OnboardingOutboxRepository['claimNext']>,
+        Parameters<OnboardingOutboxRepository['claimNext']>
+      >(() => Promise.resolve(null)),
+      markSent: jest.fn<
+        ReturnType<OnboardingOutboxRepository['markSent']>,
+        Parameters<OnboardingOutboxRepository['markSent']>
+      >(() => Promise.resolve(undefined)),
+      markFailed: jest.fn<
+        ReturnType<OnboardingOutboxRepository['markFailed']>,
+        Parameters<OnboardingOutboxRepository['markFailed']>
+      >(() => Promise.resolve(undefined)),
     };
   }
 });

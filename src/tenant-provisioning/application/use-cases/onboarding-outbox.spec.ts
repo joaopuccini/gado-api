@@ -32,7 +32,7 @@ describe('onboarding outbox', () => {
       expect(transactionOpen).toBe(true);
       return Promise.resolve({ id: 'tenant-123' });
     });
-    const outboxUpsert = jest.fn(() => {
+    const outboxUpsert = jest.fn<Promise<{ id: string }>, [unknown]>(() => {
       expect(transactionOpen).toBe(true);
       return Promise.resolve({ id: 'outbox-123' });
     });
@@ -54,7 +54,7 @@ describe('onboarding outbox', () => {
     };
     const send = jest.fn();
     const repository = new PrismaOnboardingOutboxRepository(
-      database as ConstructorParameters<
+      database as unknown as ConstructorParameters<
         typeof PrismaOnboardingOutboxRepository
       >[0],
     );
@@ -97,7 +97,10 @@ describe('onboarding outbox', () => {
   it('claims, sends outside the claim transaction, and marks the event sent', async () => {
     let claimCommitted = false;
     const repository = createRepository({
-      claimNext: jest.fn(() => {
+      claimNext: jest.fn<
+        ReturnType<OnboardingOutboxRepository['claimNext']>,
+        Parameters<OnboardingOutboxRepository['claimNext']>
+      >(() => {
         claimCommitted = true;
         return Promise.resolve(event);
       }),
@@ -198,10 +201,22 @@ describe('onboarding outbox', () => {
     overrides: Partial<jest.Mocked<OnboardingOutboxRepository>> = {},
   ): jest.Mocked<OnboardingOutboxRepository> {
     return {
-      activateAndEnqueue: jest.fn(),
-      claimNext: jest.fn(() => Promise.resolve(event)),
-      markSent: jest.fn(),
-      markFailed: jest.fn(),
+      activateAndEnqueue: jest.fn<
+        ReturnType<OnboardingOutboxRepository['activateAndEnqueue']>,
+        Parameters<OnboardingOutboxRepository['activateAndEnqueue']>
+      >(),
+      claimNext: jest.fn<
+        ReturnType<OnboardingOutboxRepository['claimNext']>,
+        Parameters<OnboardingOutboxRepository['claimNext']>
+      >(() => Promise.resolve(event)),
+      markSent: jest.fn<
+        ReturnType<OnboardingOutboxRepository['markSent']>,
+        Parameters<OnboardingOutboxRepository['markSent']>
+      >(),
+      markFailed: jest.fn<
+        ReturnType<OnboardingOutboxRepository['markFailed']>,
+        Parameters<OnboardingOutboxRepository['markFailed']>
+      >(),
       ...overrides,
     };
   }
