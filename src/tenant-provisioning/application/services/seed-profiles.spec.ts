@@ -13,19 +13,24 @@ import { SeedProfilesService } from './seed-profiles.service';
 
 describe('SeedProfilesService', () => {
   it('sends all five roles with their exact stable permission IDs', async () => {
+    const seed = jest.fn<
+      ReturnType<DefaultProfileRepository['seed']>,
+      Parameters<DefaultProfileRepository['seed']>
+    >();
+    seed.mockResolvedValue(undefined);
     const repository: jest.Mocked<DefaultProfileRepository> = {
-      seed: jest.fn().mockResolvedValue(undefined),
+      seed,
     };
     const service = new SeedProfilesService(repository);
 
     await service.execute();
 
-    expect(repository.seed).toHaveBeenCalledTimes(1);
-    expect(repository.seed).toHaveBeenCalledWith(DEFAULT_PROFILE_PERMISSIONS);
-    expect(Object.keys(repository.seed.mock.calls[0][0]).sort()).toEqual(
+    expect(seed).toHaveBeenCalledTimes(1);
+    expect(seed).toHaveBeenCalledWith(DEFAULT_PROFILE_PERMISSIONS);
+    expect(Object.keys(seed.mock.calls[0][0]).sort()).toEqual(
       Object.values(FazendaRole).sort(),
     );
-    expect(repository.seed.mock.calls[0][0][FazendaRole.DONO]).toEqual(
+    expect(seed.mock.calls[0][0][FazendaRole.DONO]).toEqual(
       DEFAULT_PROFILE_PERMISSIONS[FazendaRole.DONO],
     );
   });
@@ -56,10 +61,7 @@ describe('PrismaDefaultProfileRepository', () => {
     dispose: jest.fn().mockResolvedValue(undefined),
   };
   const context = new ExecutionContextStore();
-  const repository = new PrismaDefaultProfileRepository(
-    context,
-    clientFactory,
-  );
+  const repository = new PrismaDefaultProfileRepository(context, clientFactory);
 
   const runInJobContext = <T>(callback: () => T): T =>
     context.run(
@@ -119,7 +121,9 @@ describe('PrismaDefaultProfileRepository', () => {
     await runInJobContext(() => repository.seed(DEFAULT_PROFILE_PERMISSIONS));
     await runInJobContext(() => repository.seed(DEFAULT_PROFILE_PERMISSIONS));
 
-    expect(profileUpsert).toHaveBeenCalledTimes(Object.values(FazendaRole).length * 2);
+    expect(profileUpsert).toHaveBeenCalledTimes(
+      Object.values(FazendaRole).length * 2,
+    );
     expect(profileDeleteMany).not.toHaveBeenCalled();
   });
 

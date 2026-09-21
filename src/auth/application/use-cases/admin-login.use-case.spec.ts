@@ -6,14 +6,26 @@ import type {
 import { AdminLoginUseCase } from './admin-login.use-case';
 
 describe('AdminLoginUseCase', () => {
+  const findByEmail = jest.fn<
+    ReturnType<AdminIdentityRepository['findByEmail']>,
+    Parameters<AdminIdentityRepository['findByEmail']>
+  >();
+  const compare = jest.fn<
+    ReturnType<AdminPasswordVerifier['compare']>,
+    Parameters<AdminPasswordVerifier['compare']>
+  >();
+  const sign = jest.fn<
+    ReturnType<AdminTokenIssuer['sign']>,
+    Parameters<AdminTokenIssuer['sign']>
+  >();
   const identities: jest.Mocked<AdminIdentityRepository> = {
-    findByEmail: jest.fn(),
+    findByEmail,
   };
   const passwords: jest.Mocked<AdminPasswordVerifier> = {
-    compare: jest.fn(),
+    compare,
   };
   const tokens: jest.Mocked<AdminTokenIssuer> = {
-    sign: jest.fn(),
+    sign,
   };
   const adminUser = {
     id: 'uuid-123',
@@ -31,45 +43,45 @@ describe('AdminLoginUseCase', () => {
   });
 
   it('normalizes e-mail and rejects an unknown administrator', async () => {
-    identities.findByEmail.mockResolvedValue(null);
+    findByEmail.mockResolvedValue(null);
 
     await expect(
       useCase.execute({ email: ' ADMIN@GADO.COM ', password: 'secret' }),
     ).rejects.toMatchObject({ code: 'unauthenticated' });
-    expect(identities.findByEmail).toHaveBeenCalledWith('admin@gado.com');
-    expect(passwords.compare).not.toHaveBeenCalled();
-    expect(tokens.sign).not.toHaveBeenCalled();
+    expect(findByEmail).toHaveBeenCalledWith('admin@gado.com');
+    expect(compare).not.toHaveBeenCalled();
+    expect(sign).not.toHaveBeenCalled();
   });
 
   it('rejects an inactive administrator before checking the password', async () => {
-    identities.findByEmail.mockResolvedValue({ ...adminUser, active: false });
+    findByEmail.mockResolvedValue({ ...adminUser, active: false });
 
     await expect(
       useCase.execute({ email: adminUser.email, password: 'secret' }),
     ).rejects.toMatchObject({ code: 'unauthenticated' });
-    expect(passwords.compare).not.toHaveBeenCalled();
-    expect(tokens.sign).not.toHaveBeenCalled();
+    expect(compare).not.toHaveBeenCalled();
+    expect(sign).not.toHaveBeenCalled();
   });
 
   it('rejects an invalid password without issuing a token', async () => {
-    identities.findByEmail.mockResolvedValue(adminUser);
-    passwords.compare.mockResolvedValue(false);
+    findByEmail.mockResolvedValue(adminUser);
+    compare.mockResolvedValue(false);
 
     await expect(
       useCase.execute({ email: adminUser.email, password: 'wrong' }),
     ).rejects.toMatchObject({ code: 'unauthenticated' });
-    expect(tokens.sign).not.toHaveBeenCalled();
+    expect(sign).not.toHaveBeenCalled();
   });
 
   it('issues only a gado-admin audience token for valid credentials', async () => {
-    identities.findByEmail.mockResolvedValue(adminUser);
-    passwords.compare.mockResolvedValue(true);
-    tokens.sign.mockResolvedValue('mock-token');
+    findByEmail.mockResolvedValue(adminUser);
+    compare.mockResolvedValue(true);
+    sign.mockResolvedValue('mock-token');
 
     await expect(
       useCase.execute({ email: adminUser.email, password: 'secret' }),
     ).resolves.toEqual({ token: 'mock-token' });
-    expect(tokens.sign).toHaveBeenCalledWith({
+    expect(sign).toHaveBeenCalledWith({
       sub: adminUser.id,
       email: adminUser.email,
       role: adminUser.role,

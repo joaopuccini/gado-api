@@ -1,6 +1,7 @@
+import type { Server } from 'node:http';
 import { Controller, Get, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-const request = require('supertest');
+import request from 'supertest';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { APP_GUARD } from '@nestjs/core';
@@ -21,20 +22,21 @@ class TestAdminController {
 
 // Dummy resolve context mock
 class MockResolveTenantContext {
-  async execute() {
-    return {
+  execute() {
+    return Promise.resolve({
       globalUserId: 'test-user',
       tenantId: 'tenant-1',
       organizationId: 1,
       localUserId: 1,
       farmId: 1,
       permissions: [],
-    };
+    });
   }
 }
 
 describe('Admin Audience Validation (e2e)', () => {
   let app: INestApplication;
+  let httpServer: Server;
   let jwtService: JwtService;
 
   beforeAll(async () => {
@@ -65,6 +67,7 @@ describe('Admin Audience Validation (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    httpServer = app.getHttpServer() as Server;
     jwtService = moduleFixture.get<JwtService>(JwtService);
     await app.init();
   });
@@ -92,7 +95,7 @@ describe('Admin Audience Validation (e2e)', () => {
     it('should REJECT token with tenant audience (gado-tenant)', () => {
       const token = generateTokenForAudience('gado-tenant');
 
-      return request(app.getHttpServer())
+      return request(httpServer)
         .get('/api/v1/admin/dashboard')
         .set('Authorization', `Bearer ${token}`)
         .expect(401); // Unauthorized because audience is wrong
@@ -101,7 +104,7 @@ describe('Admin Audience Validation (e2e)', () => {
     it('should ALLOW token with admin audience (gado-admin)', () => {
       const token = generateTokenForAudience('gado-admin');
 
-      return request(app.getHttpServer())
+      return request(httpServer)
         .get('/api/v1/admin/dashboard')
         .set('Authorization', `Bearer ${token}`)
         .expect(200);

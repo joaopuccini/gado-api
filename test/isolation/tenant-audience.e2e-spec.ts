@@ -1,6 +1,7 @@
+import type { Server } from 'node:http';
 import { Controller, Get, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-const request = require('supertest');
+import request from 'supertest';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { APP_GUARD } from '@nestjs/core';
@@ -18,20 +19,21 @@ class TestTenantController {
 }
 
 class MockResolveTenantContext {
-  async execute() {
-    return {
+  execute() {
+    return Promise.resolve({
       globalUserId: 'test-user',
       tenantId: 'tenant-1',
       organizationId: 1,
       localUserId: 1,
       farmId: 1,
       permissions: [],
-    };
+    });
   }
 }
 
 describe('Tenant Audience Validation (e2e)', () => {
   let app: INestApplication;
+  let httpServer: Server;
   let jwtService: JwtService;
 
   beforeAll(async () => {
@@ -62,6 +64,7 @@ describe('Tenant Audience Validation (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    httpServer = app.getHttpServer() as Server;
     jwtService = moduleFixture.get<JwtService>(JwtService);
     await app.init();
   });
@@ -89,7 +92,7 @@ describe('Tenant Audience Validation (e2e)', () => {
     it('should REJECT token with admin audience (gado-admin)', () => {
       const token = generateTokenForAudience('gado-admin');
 
-      return request(app.getHttpServer())
+      return request(httpServer)
         .get('/api/v1/animals')
         .set('Authorization', `Bearer ${token}`)
         .expect(401);
@@ -98,7 +101,7 @@ describe('Tenant Audience Validation (e2e)', () => {
     it('should ALLOW token with tenant audience (gado-tenant)', () => {
       const token = generateTokenForAudience('gado-tenant');
 
-      return request(app.getHttpServer())
+      return request(httpServer)
         .get('/api/v1/animals')
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
@@ -118,7 +121,7 @@ describe('Tenant Audience Validation (e2e)', () => {
         { audience: 'gado-tenant', expiresIn: -1 },
       );
 
-      return request(app.getHttpServer())
+      return request(httpServer)
         .get('/api/v1/animals')
         .set('Authorization', `Bearer ${token}`)
         .expect(401);

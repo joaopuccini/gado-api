@@ -15,46 +15,54 @@ describe('ProvisionTenantUseCase', () => {
     farmName: 'Fazenda Principal',
   };
   const resources = { localUserId: 41, farmId: 7, userFarmId: 91 };
+  const bootstrap = jest.fn<
+    ReturnType<TenantBootstrapRepository['bootstrap']>,
+    Parameters<TenantBootstrapRepository['bootstrap']>
+  >();
+  const smokeCheck = jest.fn<
+    ReturnType<TenantBootstrapRepository['smokeCheck']>,
+    Parameters<TenantBootstrapRepository['smokeCheck']>
+  >();
   const repository: jest.Mocked<TenantBootstrapRepository> = {
-    bootstrap: jest.fn(),
-    smokeCheck: jest.fn(),
+    bootstrap,
+    smokeCheck,
   };
   const useCase = new ProvisionTenantUseCase(repository);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    repository.bootstrap.mockResolvedValue(resources);
-    repository.smokeCheck.mockResolvedValue(true);
+    bootstrap.mockResolvedValue(resources);
+    smokeCheck.mockResolvedValue(true);
   });
 
   it('creates the owner, main farm and owner link before smoke validation', async () => {
     const order: string[] = [];
-    repository.bootstrap.mockImplementation(async () => {
+    bootstrap.mockImplementation(() => {
       order.push('bootstrap');
-      return resources;
+      return Promise.resolve(resources);
     });
-    repository.smokeCheck.mockImplementation(async () => {
+    smokeCheck.mockImplementation(() => {
       order.push('smokeCheck');
-      return true;
+      return Promise.resolve(true);
     });
 
     await expect(useCase.execute(command)).resolves.toEqual(resources);
 
     expect(order).toEqual(['bootstrap', 'smokeCheck']);
-    expect(repository.bootstrap).toHaveBeenCalledWith(command);
-    expect(repository.smokeCheck).toHaveBeenCalledWith(resources);
+    expect(bootstrap).toHaveBeenCalledWith(command);
+    expect(smokeCheck).toHaveBeenCalledWith(resources);
   });
 
   it('returns the same resource identities when the same run is retried', async () => {
     await expect(useCase.execute(command)).resolves.toEqual(resources);
     await expect(useCase.execute(command)).resolves.toEqual(resources);
 
-    expect(repository.bootstrap).toHaveBeenCalledTimes(2);
-    expect(repository.smokeCheck).toHaveBeenCalledTimes(2);
+    expect(bootstrap).toHaveBeenCalledTimes(2);
+    expect(smokeCheck).toHaveBeenCalledTimes(2);
   });
 
   it('fails closed when smoke validation cannot read the complete graph', async () => {
-    repository.smokeCheck.mockResolvedValue(false);
+    smokeCheck.mockResolvedValue(false);
 
     await expect(useCase.execute(command)).rejects.toMatchObject({
       code: 'tenantSmokeCheckFailed',
@@ -67,7 +75,7 @@ describe('ProvisionTenantOrchestratorUseCase', () => {
   const context = new ExecutionContextStore();
   const sequence: string[] = [];
   const stage = (name: string) => ({
-    execute: jest.fn().mockImplementation(async () => {
+    execute: jest.fn().mockImplementation(() => {
       expect(context.requireTenantIdentity()).toMatchObject({
         contextType: 'job',
         tenantId: 'tenant-id',
@@ -76,6 +84,7 @@ describe('ProvisionTenantOrchestratorUseCase', () => {
         globalUserId: 'global-user-id',
       });
       sequence.push(name);
+      return Promise.resolve();
     }),
   });
   const createSchema = stage('createSchema');
