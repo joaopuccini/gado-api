@@ -1,3 +1,5 @@
+import type { TenantSchemaName } from '../../../tenant/domain/tenant-schema-name';
+
 export interface OperationalIdentity {
   readonly id: string;
   readonly email: string;
@@ -8,7 +10,7 @@ export interface OperationalIdentity {
 export interface OperationalAccess {
   readonly organizationId: string;
   readonly tenantId: string;
-  readonly schemaName: string;
+  readonly schemaName: TenantSchemaName;
   readonly localUserId: number;
   readonly farmId: number;
   readonly farmName: string;
@@ -37,7 +39,7 @@ export interface TenantTokenClaims {
   readonly email: string;
   readonly organizationId: string;
   readonly tenantId: string;
-  readonly schemaName: string;
+  readonly schemaName: TenantSchemaName;
   readonly localUserId: number;
   readonly farmId: number;
   readonly accessibleFarmIds: readonly number[];

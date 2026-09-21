@@ -136,9 +136,7 @@ describe('hexagonal architecture boundaries', () => {
         normalizedRelativePath(file).includes('/application/ports/'),
       )
       .flatMap((file) =>
-        /readonly\s+schemaName\s*:\s*string\b/.test(
-          readFileSync(file, 'utf8'),
-        )
+        /readonly\s+schemaName\s*:\s*string\b/.test(readFileSync(file, 'utf8'))
           ? [normalizedRelativePath(file)]
           : [],
       );

@@ -1,3 +1,4 @@
+import { TenantSchemaName } from '../../../tenant/domain/tenant-schema-name';
 import { TenantLoginUseCase } from './tenant-login.use-case';
 
 describe('TenantLoginUseCase', () => {
@@ -23,7 +24,9 @@ describe('TenantLoginUseCase', () => {
   const operationalAccess = {
     organizationId: 'organization-id',
     tenantId: 'tenant-id',
-    schemaName: 'tenant_0123456789abcdef0123456789abcdef',
+    schemaName: TenantSchemaName.parse(
+      'tenant_0123456789abcdef0123456789abcdef',
+    ),
     localUserId: 41,
     farmId: 7,
     farmName: 'Fazenda Principal',
