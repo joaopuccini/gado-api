@@ -1,3 +1,7 @@
+export const ADMIN_IDENTITY_REPOSITORY = Symbol('ADMIN_IDENTITY_REPOSITORY');
+export const ADMIN_PASSWORD_VERIFIER = Symbol('ADMIN_PASSWORD_VERIFIER');
+export const ADMIN_TOKEN_ISSUER = Symbol('ADMIN_TOKEN_ISSUER');
+
 export interface AdminIdentity {
   readonly id: string;
   readonly email: string;

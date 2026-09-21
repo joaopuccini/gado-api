@@ -1,5 +1,5 @@
 import { Module, forwardRef } from '@nestjs/common';
-import { JwtModule, type JwtSignOptions } from '@nestjs/jwt';
+import { JwtModule, JwtService, type JwtSignOptions } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthController } from './auth.controller';
@@ -13,6 +13,19 @@ import { TenantProvisioningModule } from '../tenant-provisioning/tenant-provisio
 import { IdentityAccessModule } from '../identity-access/identity-access.module';
 import { ProvisioningCredentialService } from './services/provisioning-credential.service';
 import { ProvisioningJwtStrategy } from './strategies/provisioning-jwt.strategy';
+import {
+  ADMIN_IDENTITY_REPOSITORY,
+  ADMIN_PASSWORD_VERIFIER,
+  ADMIN_TOKEN_ISSUER,
+  type AdminIdentityRepository,
+  type AdminPasswordVerifier,
+  type AdminTokenIssuer,
+} from './application/ports/admin-login.ports';
+import { AdminLoginUseCase } from './application/use-cases/admin-login.use-case';
+import { BcryptAdminPasswordVerifier } from './infrastructure/bcrypt-admin-password.verifier';
+import { JwtAdminTokenIssuer } from './infrastructure/jwt-admin-token.issuer';
+import { PrismaAdminIdentityRepository } from './infrastructure/prisma-admin-identity.repository';
+import { AdminPrismaService } from '../admin/admin-prisma.service';
 
 @Module({
   imports: [
@@ -41,9 +54,40 @@ import { ProvisioningJwtStrategy } from './strategies/provisioning-jwt.strategy'
     ProvisioningCredentialService,
     ProvisioningJwtStrategy,
     JwtStrategy,
+    {
+      provide: ADMIN_IDENTITY_REPOSITORY,
+      useFactory: (database: AdminPrismaService): AdminIdentityRepository =>
+        new PrismaAdminIdentityRepository(database),
+      inject: [AdminPrismaService],
+    },
+    {
+      provide: ADMIN_PASSWORD_VERIFIER,
+      useFactory: (): AdminPasswordVerifier =>
+        new BcryptAdminPasswordVerifier(),
+    },
+    {
+      provide: ADMIN_TOKEN_ISSUER,
+      useFactory: (jwt: JwtService): AdminTokenIssuer =>
+        new JwtAdminTokenIssuer(jwt),
+      inject: [JwtService],
+    },
+    {
+      provide: AdminLoginUseCase,
+      useFactory: (
+        identities: AdminIdentityRepository,
+        passwords: AdminPasswordVerifier,
+        tokens: AdminTokenIssuer,
+      ): AdminLoginUseCase =>
+        new AdminLoginUseCase(identities, passwords, tokens),
+      inject: [
+        ADMIN_IDENTITY_REPOSITORY,
+        ADMIN_PASSWORD_VERIFIER,
+        ADMIN_TOKEN_ISSUER,
+      ],
+    },
     // Google OAuth é opcional — só registra quando as credenciais estão configuradas
     ...(process.env.GOOGLE_CLIENT_ID ? [GoogleStrategy] : []),
   ],
-  exports: [JwtModule, PassportModule],
+  exports: [JwtModule, PassportModule, AdminLoginUseCase],
 })
 export class AuthModule {}
