@@ -334,7 +334,7 @@ export interface PermissionCatalogRepository {
 - [x] Mark Task 2.3 complete and each Gate G1 criterion `[x]` only after its corresponding gate evidence exists.
 - [x] Create the Wave 02 handoff with final state, commands/results, migrations, operational notes, known debt, and exact next tracker task.
 - [x] Append the closing row to the tracker Sessions table.
-- [ ] Commit `docs(wave-02): record identity gate completion` and write its actual hash into the Task 2.3/Gate evidence.
+- [x] Commit `docs(wave-02): record identity gate completion` and write its actual hash (`40f3f4a`) into the Task 2.3/Gate evidence.
 
 ## Per-pair commit protocol
 

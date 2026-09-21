@@ -90,7 +90,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 2.3.15 | **RED**: retornar `202` e endpoint de status até tenant `active` | `[x]` | 6370c63 | `provisioning-status.spec.ts` falha por `register`/status ausentes e Google legado |
 | 2.3.16 | **GREEN**: implementar endpoint de status | `[x]` | b005c65 | Teste focal 3/3, contrato 9/9 e integração descartável 2/2 |
 
-**Task 2.3 concluída?** `[x]` | **Evidência:** Gate G1 completo; lint `6a70099`, coverage `21b04a2`, tipos `7bde2d5` e schema validado na fronteira `b64802d` |
+**Task 2.3 concluída?** `[x]` | **Evidência:** Gate G1 completo; lint `6a70099`, coverage `21b04a2`, tipos `7bde2d5`, schema validado na fronteira `b64802d` e fechamento `40f3f4a` |
 
 ---
 

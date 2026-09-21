@@ -65,6 +65,7 @@ temporário. O cluster foi parado e seu diretório foi enviado à Lixeira. Nenhu
 - `7bde2d5` — mocks alinhados às assinaturas das portas;
 - `a8d2f6c` — RED para schema cru em porta de aplicação;
 - `b64802d` — GREEN com `TenantSchemaName` validado.
+- `40f3f4a` — evidências, tracker, plano e handoff do Gate G1.
 
 ## Estado local a preservar
 
