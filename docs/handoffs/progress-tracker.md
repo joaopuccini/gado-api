@@ -65,7 +65,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 2.2.10 | **GREEN**: testes de audience passam | `[x]` | 2bd8308 | |
 | 2.2.11 | Aplicar @RequirePermissions por decorator/guard em todas as rotas migradas | `[x]` | 1a88887 | `permissions.controller.ts`, `permissions-catalog.spec.ts` |
 
-**Task 2.2 concluída?** `[ ]` | **Evidência:** |
+**Task 2.2 concluída?** `[x]` | **Evidência:** login admin composto por ports/adapters (`b3b6171`), testes focais 6/6 e arquitetura 22/22 |
 
 ---
 

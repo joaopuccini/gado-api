@@ -156,6 +156,25 @@ migration tenant já contém `CREATE SCHEMA IF NOT EXISTS`, portanto a criação
 a evolução usam a mesma cadeia versionada; nenhum comando destrutivo ou
 `db push` foi executado.
 
+## Task 7A — composição hexagonal do login administrativo
+
+Jornada: como administrador SaaS, autentico por um endpoint HTTP validado que
+delega ao caso de uso e recebe persistência, verificação de senha e emissão JWT
+somente por portas de aplicação.
+
+| Garantia | Tipo | Resultado | Evidência |
+|---|---|---|---|
+| Controller delega contrato camelCase ao `AdminLoginUseCase` | unitário | PASS | `admin-login.controller.spec.ts` |
+| Credenciais inválidas falham sem emitir token | unitário | PASS | `admin-login.use-case.spec.ts` |
+| JWT administrativo contém somente audience `gado-admin` | unitário | PASS | `jwt-admin-token.issuer.spec.ts` |
+| Composition root injeta adapters sem inverter módulos | arquitetura | PASS | `npm run test:architecture -- --runInBand` — 22/22 |
+| Contrato OpenAPI permanece válido | contrato | PASS | `npm run test:contract -- --runInBand` — 9/9 |
+| Aplicação compila | build | PASS | `npm run build` |
+
+REDs em `1a52c33` (controller ainda chamava o service legado) e `1935bdc`
+(audience JWT duplicada entre payload e opções). GREEN em `b3b6171`, com
+repository Prisma, verificador bcrypt e emissor JWT conectados em `AuthModule`.
+
 ## Task 2.3.16 — API assíncrona e status (checkpoint parcial)
 
 Jornada: como proprietário em onboarding, inicio o provisionamento por e-mail ou
