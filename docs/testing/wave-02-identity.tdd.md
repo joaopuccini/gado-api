@@ -169,10 +169,11 @@ execução que pertence à minha identidade.
 | Status exige credencial curta com audience/purpose próprios e ownership | unitário/arquitetura | PASS | `ProvisioningJwtStrategy`; `GetProvisioningStatusUseCase`; gate 22/22 |
 | Contratos OpenAPI e envelopes permanecem válidos | contrato | PASS | `npm run test:contract -- --runInBand` — 9/9 |
 | Aplicação compila | build | PASS | `npm run build` |
-| Fluxo compartilhado em banco descartável | integração | BLOCKED | `TEST_DATABASE_URL is required` |
+| Fluxo compartilhado em banco descartável | integração | PASS | `npm run test:integration -- --runInBand` — 2/2 |
 
 O RED permanece registrado em `6370c63` (3 falhas esperadas: endpoints ausentes
-e Google no fluxo legado). O código alcançou GREEN focal, contrato e arquitetura
-em 2026-09-20, mas a Task 2.3.16 continua aberta: o gate de integração recusou
-executar sem `TEST_DATABASE_URL`. Nenhum banco alternativo foi usado e nenhum
-comando destrutivo de banco foi executado.
+e Google no fluxo legado). O GREEN está em `b005c65`. Em 2026-09-21, o gate de
+integração passou contra o banco local descartável
+`gado_wave00_test_36a054a7477c`, criado em cluster temporário isolado. Nenhum
+banco compartilhado foi usado e nenhum comando destrutivo de banco foi
+executado.

@@ -88,7 +88,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 2.3.13 | **RED**: retry após falha em cada etapa sem duplicar recursos | `[x]` | b9fcb80 | `provisioning-retry.spec.ts` falha contra assinatura antiga do orquestrador |
 | 2.3.14 | **GREEN**: implementar retry idempotente | `[x]` | 60c2b5d | Retry unitário, compatibilidade do orquestrador, permissões, ESLint escopo, arquitetura, build e integração Neon descartável |
 | 2.3.15 | **RED**: retornar `202` e endpoint de status até tenant `active` | `[x]` | 6370c63 | `provisioning-status.spec.ts` falha por `register`/status ausentes e Google legado |
-| 2.3.16 | **GREEN**: implementar endpoint de status | `[ ]` | | |
+| 2.3.16 | **GREEN**: implementar endpoint de status | `[x]` | b005c65 | Teste focal 3/3, contrato 9/9 e integração descartável 2/2 |
 
 **Task 2.3 concluída?** `[ ]` | **Evidência:** |
 
