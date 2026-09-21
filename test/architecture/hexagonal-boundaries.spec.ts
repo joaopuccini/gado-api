@@ -130,6 +130,22 @@ describe('hexagonal architecture boundaries', () => {
     expect(violations).toEqual([]);
   });
 
+  it('requires application ports to use the validated tenant schema value object', () => {
+    const violations = files
+      .filter((file) =>
+        normalizedRelativePath(file).includes('/application/ports/'),
+      )
+      .flatMap((file) =>
+        /readonly\s+schemaName\s*:\s*string\b/.test(
+          readFileSync(file, 'utf8'),
+        )
+          ? [normalizedRelativePath(file)]
+          : [],
+      );
+
+    expect(violations).toEqual([]);
+  });
+
   it('keeps domain code free from frameworks and infrastructure', () => {
     const forbidden = ['@nestjs/', '@prisma/', 'express', 'pg'];
     const violations = files
