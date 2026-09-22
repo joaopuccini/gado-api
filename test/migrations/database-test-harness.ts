@@ -39,18 +39,22 @@ export const deployAdminMigrations = (databaseUrl: string): void => {
     process.cwd(),
     'node_modules/prisma/build/index.js',
   );
-  const result = spawnSync(
-    process.execPath,
-    [prismaCli, 'migrate', 'deploy', '--config', 'prisma.config.ts'],
-    {
-      cwd: process.cwd(),
-      env: { ...process.env, DATABASE_URL: databaseUrl },
-      encoding: 'utf8',
-      maxBuffer: 10 * 1024 * 1024,
-      timeout: 120_000,
-      windowsHide: true,
-    },
-  );
+  const deploy = () =>
+    spawnSync(
+      process.execPath,
+      [prismaCli, 'migrate', 'deploy', '--config', 'prisma.config.ts'],
+      {
+        cwd: process.cwd(),
+        env: { ...process.env, DATABASE_URL: databaseUrl },
+        encoding: 'utf8',
+        maxBuffer: 10 * 1024 * 1024,
+        timeout: 120_000,
+        windowsHide: true,
+      },
+    );
+
+  const firstAttempt = deploy();
+  const result = firstAttempt.status === 0 ? firstAttempt : deploy();
   if (result.status !== 0) {
     const detail = [result.error?.message, result.stderr, result.stdout]
       .filter(Boolean)

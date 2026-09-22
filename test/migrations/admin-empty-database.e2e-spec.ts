@@ -7,7 +7,9 @@ import {
   resetAdminDatabase,
 } from './database-test-harness';
 
-jest.setTimeout(60_000);
+// Prisma's deploy subprocess has a 120 s ceiling per attempt; leave time for
+// one safe retry plus assertions when remote database startup is variable.
+jest.setTimeout(270_000);
 
 describe('administrative migrations on an empty database', () => {
   const databaseUrl = requireTestDatabaseUrl();
