@@ -73,6 +73,71 @@ const toProfileView = (profile: {
 export class PrismaTeamRepository implements TeamRepository {
   constructor(private readonly tenant: TenantPrismaService) {}
 
+  async getSummary(farmIds: readonly number[]) {
+    const client = this.tenant.getClient();
+    const [farms, users, profiles, permissions] = await Promise.all([
+      client.fazenda.findMany({
+        where: { id: { in: [...farmIds] }, ativo: true },
+        orderBy: { nome: 'asc' },
+        select: { id: true, nome: true },
+      }),
+      client.usuario.findMany({
+        where: {
+          ativo: true,
+          fazendas: {
+            some: { fazendaId: { in: [...farmIds] }, ativo: true },
+          },
+        },
+        orderBy: { nome: 'asc' },
+        include: {
+          fazendas: {
+            where: { fazendaId: { in: [...farmIds] }, ativo: true },
+            orderBy: { fazendaId: 'asc' },
+          },
+        },
+      }),
+      client.perfil.findMany({
+        where: {
+          ativo: true,
+          OR: [{ fazendaId: { in: [...farmIds] } }, { fazendaId: null }],
+        },
+        orderBy: { nome: 'asc' },
+        include: { permissoes: true },
+      }),
+      client.permissao.findMany({
+        where: { ativo: true },
+        orderBy: [{ modulo: 'asc' }, { nome: 'asc' }],
+        select: { id: true, codigo: true, nome: true },
+      }),
+    ]);
+
+    return {
+      farms: farms.map(({ id, nome }) => ({ id, name: nome })),
+      members: users.flatMap((user) => {
+        const firstMembership = user.fazendas[0];
+        if (!firstMembership || !user.globalUserId) return [];
+        return [
+          {
+            localUserId: user.id,
+            globalUserId: user.globalUserId,
+            name: user.nome,
+            email: user.email,
+            farmIds: user.fazendas.map(({ fazendaId }) => fazendaId),
+            role: firstMembership.role,
+            profileId: user.perfilId,
+            active: user.ativo,
+          },
+        ];
+      }),
+      profiles: profiles.map(toProfileView),
+      permissions: permissions.map(({ id, codigo, nome }) => ({
+        id,
+        code: codigo,
+        name: nome,
+      })),
+    };
+  }
+
   async assignMembership(input: {
     user: AcceptedOrganizationUser;
     farmId: number;

@@ -234,9 +234,28 @@ model Convite {
 
   organizacao  Organizacao   @relation(fields: [organizacaoId], references: [id])
   convidadoPor UsuarioGlobal @relation("ConviteConvidadoPor", fields: [convidadoPorId], references: [id])
+  deliveryEvents ConviteOutbox[]
 
   @@index([organizacaoId, email, status], map: "convites_organizacao_email_status_idx")
   @@map("convites")
+  @@schema("gado_admin")
+}
+
+model ConviteOutbox {
+  id         String                 @id @default(uuid()) @db.Uuid
+  conviteId  String                 @map("convite_id") @db.Uuid
+  eventKey   String                 @map("event_key") @unique @db.VarChar(160)
+  recipient  String                 @db.VarChar(320)
+  payload    Json
+  status     OnboardingOutboxStatus @default(PENDING)
+  attempts   Int                    @default(0)
+  createdAt  DateTime               @map("created_at") @default(now()) @db.Timestamptz(6)
+  updatedAt  DateTime               @map("updated_at") @updatedAt @db.Timestamptz(6)
+
+  convite Convite @relation(fields: [conviteId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@map("convite_outbox")
   @@schema("gado_admin")
 }
 

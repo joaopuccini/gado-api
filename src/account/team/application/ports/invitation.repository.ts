@@ -14,6 +14,9 @@ export interface InvitationRecord {
 }
 
 export interface InvitationRepository {
+  listByOrganization(
+    organizationId: string,
+  ): Promise<readonly InvitationRecord[]>;
   findPending(
     organizationId: string,
     email: string,

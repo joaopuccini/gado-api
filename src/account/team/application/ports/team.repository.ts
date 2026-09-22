@@ -30,6 +30,26 @@ export interface ProfileView {
   readonly permissionIds: readonly number[];
 }
 
+export interface TeamSummaryRecord {
+  readonly farms: readonly { readonly id: number; readonly name: string }[];
+  readonly members: readonly {
+    readonly localUserId: number;
+    readonly globalUserId: string;
+    readonly name: string;
+    readonly email: string;
+    readonly farmIds: readonly number[];
+    readonly role: string;
+    readonly profileId: number | null;
+    readonly active: boolean;
+  }[];
+  readonly profiles: readonly ProfileView[];
+  readonly permissions: readonly {
+    readonly id: number;
+    readonly code: string;
+    readonly name: string;
+  }[];
+}
+
 export interface TeamMembershipRepository {
   assignMembership(input: {
     user: AcceptedOrganizationUser;
@@ -65,7 +85,9 @@ export interface ProfileRepository {
 }
 
 export interface TeamRepository
-  extends TeamMembershipRepository, ProfileRepository {}
+  extends TeamMembershipRepository, ProfileRepository {
+  getSummary(farmIds: readonly number[]): Promise<TeamSummaryRecord>;
+}
 
 export const TEAM_REPOSITORY = Symbol('TEAM_REPOSITORY');
 export const ORGANIZATION_MEMBER_DIRECTORY = Symbol(

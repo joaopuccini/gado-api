@@ -3,6 +3,7 @@ import {
   StatusConvite,
   type Convite,
 } from '@prisma/client-admin';
+import { Injectable } from '@nestjs/common';
 import { AdminPrismaService } from '../../../admin/admin-prisma.service';
 import type {
   InvitationRecord,
@@ -38,8 +39,19 @@ const createData = (input: Omit<InvitationRecord, 'id'>) => ({
   expiresAt: input.expiresAt,
 });
 
+@Injectable()
 export class PrismaInvitationRepository implements InvitationRepository {
   constructor(private readonly database: AdminPrismaService) {}
+
+  async listByOrganization(
+    organizationId: string,
+  ): Promise<readonly InvitationRecord[]> {
+    const rows = await this.database.convite.findMany({
+      where: { organizacaoId: organizationId },
+      orderBy: { createdAt: 'desc' },
+    });
+    return rows.map(toRecord);
+  }
 
   async findPending(
     organizationId: string,

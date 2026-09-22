@@ -6,16 +6,35 @@ import { PermissionsGuard } from '../../auth/guards/permissions.guard';
 import { ExecutionContextStore } from '../../common/context';
 import { TenantModule } from '../../tenant/tenant.module';
 import {
+  INVITATION_OUTBOX,
+  INVITATION_REPOSITORY,
+  type InvitationDependencies,
+  type InvitationOutbox,
+  type InvitationRepository,
+} from './application/ports/invitation.repository';
+import {
   ORGANIZATION_MEMBER_DIRECTORY,
   TEAM_REPOSITORY,
   type OrganizationMemberDirectory,
   type ProfileRepository,
+  type TeamRepository,
   type TeamMembershipRepository,
 } from './application/ports/team.repository';
 import { AssignMemberUseCase } from './application/use-cases/assign-member.use-case';
 import { CreateProfileUseCase } from './application/use-cases/create-profile.use-case';
 import { RemoveMemberUseCase } from './application/use-cases/remove-member.use-case';
 import { UpdateProfileUseCase } from './application/use-cases/update-profile.use-case';
+import { GetTeamSummaryUseCase } from './application/use-cases/get-team-summary.use-case';
+import { InviteInvitationUseCase } from './application/use-cases/invite-invitation.use-case';
+import { ResendInvitationUseCase } from './application/use-cases/resend-invitation.use-case';
+import { RevokeInvitationUseCase } from './application/use-cases/revoke-invitation.use-case';
+import { PrismaInvitationRepository } from './infrastructure/prisma-invitation.repository';
+import {
+  CryptoTokenGenerator,
+  PrismaInvitationOutbox,
+  Sha256TokenHasher,
+  SystemClock,
+} from './infrastructure/invitation-support';
 import {
   PrismaOrganizationMemberDirectory,
   PrismaTeamRepository,
@@ -30,11 +49,67 @@ import { TeamController } from './presentation/team.controller';
     PermissionsGuard,
     PrismaTeamRepository,
     PrismaOrganizationMemberDirectory,
+    PrismaInvitationRepository,
+    PrismaInvitationOutbox,
+    SystemClock,
+    CryptoTokenGenerator,
+    Sha256TokenHasher,
     { provide: TEAM_REPOSITORY, useExisting: PrismaTeamRepository },
     {
       provide: ORGANIZATION_MEMBER_DIRECTORY,
       useExisting: PrismaOrganizationMemberDirectory,
     },
+    {
+      provide: INVITATION_REPOSITORY,
+      useExisting: PrismaInvitationRepository,
+    },
+    { provide: INVITATION_OUTBOX, useExisting: PrismaInvitationOutbox },
+    {
+      provide: GetTeamSummaryUseCase,
+      useFactory: (
+        teams: TeamRepository,
+        invitations: InvitationRepository,
+        context: ExecutionContextStore,
+        clock: SystemClock,
+      ) => new GetTeamSummaryUseCase(teams, invitations, context, clock),
+      inject: [
+        TEAM_REPOSITORY,
+        INVITATION_REPOSITORY,
+        ExecutionContextStore,
+        SystemClock,
+      ],
+    },
+    ...[
+      InviteInvitationUseCase,
+      ResendInvitationUseCase,
+      RevokeInvitationUseCase,
+    ].map((useCase) => ({
+      provide: useCase,
+      useFactory: (
+        invitations: InvitationRepository,
+        outbox: InvitationOutbox,
+        context: ExecutionContextStore,
+        clock: SystemClock,
+        tokens: CryptoTokenGenerator,
+        hasher: Sha256TokenHasher,
+      ) =>
+        new useCase({
+          invitations,
+          outbox,
+          context,
+          clock,
+          tokens,
+          hasher,
+        } satisfies InvitationDependencies),
+      inject: [
+        INVITATION_REPOSITORY,
+        INVITATION_OUTBOX,
+        ExecutionContextStore,
+        SystemClock,
+        CryptoTokenGenerator,
+        Sha256TokenHasher,
+      ],
+    })),
     {
       provide: AssignMemberUseCase,
       useFactory: (
