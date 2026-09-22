@@ -46,7 +46,10 @@ export class UpdateFarmUseCase {
       });
     }
 
-    const { farmId: _farmId, ...input } = command;
+    const input: UpdateFarmRecord = {
+      ...(command.name === undefined ? {} : { name: command.name }),
+      ...(command.parentId === undefined ? {} : { parentId: command.parentId }),
+    };
     return this.farms.update(command.farmId, input);
   }
 }

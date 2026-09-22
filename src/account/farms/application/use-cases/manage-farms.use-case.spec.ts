@@ -47,31 +47,33 @@ class InMemoryFarmRepository implements FarmRepository {
     [INACTIVE_FARM.id, INACTIVE_FARM],
   ]);
 
-  async listHierarchy() {
-    return [...this.farms.values()].map(({ id, parentId, active }) => ({
-      id,
-      parentId,
-      active,
-    }));
+  listHierarchy() {
+    return Promise.resolve(
+      [...this.farms.values()].map(({ id, parentId, active }) => ({
+        id,
+        parentId,
+        active,
+      })),
+    );
   }
 
-  async listAccessible(
-    farmIds: readonly number[],
-  ): Promise<readonly FarmView[]> {
-    return farmIds
-      .map((id) => this.farms.get(id))
-      .filter((farm): farm is FarmView => farm !== undefined && farm.active);
+  listAccessible(farmIds: readonly number[]): Promise<readonly FarmView[]> {
+    return Promise.resolve(
+      farmIds
+        .map((id) => this.farms.get(id))
+        .filter((farm): farm is FarmView => farm !== undefined && farm.active),
+    );
   }
 
-  async findAccessible(
+  findAccessible(
     id: number,
     farmIds: readonly number[],
   ): Promise<FarmView | null> {
-    if (!farmIds.includes(id)) return null;
-    return this.farms.get(id) ?? null;
+    if (!farmIds.includes(id)) return Promise.resolve(null);
+    return Promise.resolve(this.farms.get(id) ?? null);
   }
 
-  async create(input: CreateFarmRecord): Promise<FarmView> {
+  create(input: CreateFarmRecord): Promise<FarmView> {
     this.createInputs.push(input);
     const created: FarmView = {
       id: 40,
@@ -80,25 +82,25 @@ class InMemoryFarmRepository implements FarmRepository {
       active: true,
     };
     this.farms.set(created.id, created);
-    return created;
+    return Promise.resolve(created);
   }
 
-  async update(id: number, input: UpdateFarmRecord): Promise<FarmView> {
+  update(id: number, input: UpdateFarmRecord): Promise<FarmView> {
     this.updateInputs.push({ id, input });
     const current = this.farms.get(id);
     if (!current) throw new Error('test fixture farm missing');
     const updated = { ...current, ...input };
     this.farms.set(id, updated);
-    return updated;
+    return Promise.resolve(updated);
   }
 
-  async deactivate(id: number): Promise<FarmView> {
+  deactivate(id: number): Promise<FarmView> {
     this.deactivatedIds.push(id);
     const current = this.farms.get(id);
     if (!current) throw new Error('test fixture farm missing');
     const deactivated = { ...current, active: false };
     this.farms.set(id, deactivated);
-    return deactivated;
+    return Promise.resolve(deactivated);
   }
 }
 
@@ -223,17 +225,21 @@ describe('farm management use cases', () => {
       useCase.execute({ farmId: 20 }),
     );
 
-    expect(accesses.findActiveAccess).toHaveBeenCalledWith(7, 20);
-    expect(sessions.sign).toHaveBeenCalledWith({
-      globalUserId: TENANT_CONTEXT.globalUserId,
-      tenantId: TENANT_CONTEXT.tenantId,
-      organizationId: TENANT_CONTEXT.organizationId,
-      schemaName: expect.objectContaining({ value: TENANT_CONTEXT.schemaName }),
-      localUserId: 7,
-      farmId: 20,
-      role: 'GESTOR',
-      permissions: ['farms:read'],
-    });
+    expect(accesses.findActiveAccess.mock.calls).toEqual([[7, 20]]);
+    expect(sessions.sign.mock.calls).toEqual([
+      [
+        {
+          globalUserId: TENANT_CONTEXT.globalUserId,
+          tenantId: TENANT_CONTEXT.tenantId,
+          organizationId: TENANT_CONTEXT.organizationId,
+          schemaName: { value: TENANT_CONTEXT.schemaName },
+          localUserId: 7,
+          farmId: 20,
+          role: 'GESTOR',
+          permissions: ['farms:read'],
+        },
+      ],
+    ]);
     expect(result).toEqual({
       accessToken: 'selected-farm-token',
       expiresIn: 3600,
@@ -247,7 +253,7 @@ describe('farm management use cases', () => {
     await expect(
       context.run(TENANT_CONTEXT, () => useCase.execute({ farmId: 20 })),
     ).rejects.toMatchObject({ code: 'farmAccessDenied' });
-    expect(sessions.sign).not.toHaveBeenCalled();
+    expect(sessions.sign.mock.calls).toHaveLength(0);
   });
 
   it('rejects selection of an inactive farm before issuing a session', async () => {
@@ -260,8 +266,8 @@ describe('farm management use cases', () => {
     await expect(
       context.run(inactiveContext, () => useCase.execute({ farmId: 30 })),
     ).rejects.toMatchObject({ code: 'farmInactive' });
-    expect(accesses.findActiveAccess).not.toHaveBeenCalled();
-    expect(sessions.sign).not.toHaveBeenCalled();
+    expect(accesses.findActiveAccess.mock.calls).toHaveLength(0);
+    expect(sessions.sign.mock.calls).toHaveLength(0);
   });
 
   it('soft-deactivates an accessible farm that is not currently selected', async () => {

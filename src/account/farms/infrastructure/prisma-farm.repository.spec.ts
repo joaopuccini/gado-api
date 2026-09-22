@@ -36,8 +36,8 @@ describe('PrismaFarmRepository', () => {
     const transaction = jest
       .fn()
       .mockImplementation(
-        async (work: (client: typeof transactionClient) => unknown) =>
-          work(transactionClient),
+        (work: (client: typeof transactionClient) => unknown) =>
+          Promise.resolve(work(transactionClient)),
       );
     const tenantPrisma = {
       getClient: () => ({ $transaction: transaction }),

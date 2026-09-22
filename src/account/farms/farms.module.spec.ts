@@ -59,10 +59,18 @@ describe('FarmsModule composition', () => {
     const providers = Reflect.getMetadata(
       MODULE_METADATA.PROVIDERS,
       FarmsModule,
-    ) as Array<Function | { provide?: unknown }>;
-    const tokens = providers.map((provider) =>
-      typeof provider === 'function' ? provider : provider.provide,
-    );
+    ) as unknown[];
+    const tokens = providers.map((provider) => {
+      if (typeof provider === 'function') return provider;
+      if (
+        typeof provider === 'object' &&
+        provider !== null &&
+        'provide' in provider
+      ) {
+        return provider.provide;
+      }
+      return provider;
+    });
 
     expect(controllers).toContain(FarmsController);
     expect(tokens).toEqual(

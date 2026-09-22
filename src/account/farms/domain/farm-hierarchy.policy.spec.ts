@@ -8,6 +8,17 @@ const FARMS = [
   { id: 50, parentId: null, active: true },
 ] as const;
 
+const expectErrorCode = (operation: () => unknown, code: string): void => {
+  try {
+    operation();
+  } catch (error: unknown) {
+    expect(error).toMatchObject({ code });
+    return;
+  }
+
+  throw new Error(`Expected operation to throw ${code}`);
+};
+
 describe('FarmHierarchyPolicy', () => {
   const policy = new FarmHierarchyPolicy();
 
@@ -48,22 +59,26 @@ describe('FarmHierarchyPolicy', () => {
   });
 
   it('fails closed when the selected farm is inactive or not linked', () => {
-    expect(() =>
-      policy.resolveAccessibleFarmIds({
-        selectedFarmId: 40,
-        selectedRole: 'DONO',
-        membershipFarmIds: [40],
-        farms: FARMS,
-      }),
-    ).toThrow(expect.objectContaining({ code: 'farmInactive' }));
-    expect(() =>
-      policy.resolveAccessibleFarmIds({
-        selectedFarmId: 50,
-        selectedRole: 'DONO',
-        membershipFarmIds: [10],
-        farms: FARMS,
-      }),
-    ).toThrow(expect.objectContaining({ code: 'farmAccessDenied' }));
+    expectErrorCode(
+      () =>
+        policy.resolveAccessibleFarmIds({
+          selectedFarmId: 40,
+          selectedRole: 'DONO',
+          membershipFarmIds: [40],
+          farms: FARMS,
+        }),
+      'farmInactive',
+    );
+    expectErrorCode(
+      () =>
+        policy.resolveAccessibleFarmIds({
+          selectedFarmId: 50,
+          selectedRole: 'DONO',
+          membershipFarmIds: [10],
+          farms: FARMS,
+        }),
+      'farmAccessDenied',
+    );
   });
 
   it('accepts only an active root as parent', () => {
@@ -74,29 +89,37 @@ describe('FarmHierarchyPolicy', () => {
         farms: FARMS,
       }),
     ).not.toThrow();
-    expect(() =>
-      policy.assertValidParent({
-        farmId: undefined,
-        parentId: 20,
-        farms: FARMS,
-      }),
-    ).toThrow(expect.objectContaining({ code: 'invalidFarmHierarchy' }));
-    expect(() =>
-      policy.assertValidParent({
-        farmId: undefined,
-        parentId: 40,
-        farms: FARMS,
-      }),
-    ).toThrow(expect.objectContaining({ code: 'invalidFarmHierarchy' }));
+    expectErrorCode(
+      () =>
+        policy.assertValidParent({
+          farmId: undefined,
+          parentId: 20,
+          farms: FARMS,
+        }),
+      'invalidFarmHierarchy',
+    );
+    expectErrorCode(
+      () =>
+        policy.assertValidParent({
+          farmId: undefined,
+          parentId: 40,
+          farms: FARMS,
+        }),
+      'invalidFarmHierarchy',
+    );
   });
 
   it('rejects self-parent and a cycle when editing hierarchy', () => {
-    expect(() =>
-      policy.assertValidParent({ farmId: 10, parentId: 10, farms: FARMS }),
-    ).toThrow(expect.objectContaining({ code: 'invalidFarmHierarchy' }));
-    expect(() =>
-      policy.assertValidParent({ farmId: 10, parentId: 20, farms: FARMS }),
-    ).toThrow(expect.objectContaining({ code: 'invalidFarmHierarchy' }));
+    expectErrorCode(
+      () =>
+        policy.assertValidParent({ farmId: 10, parentId: 10, farms: FARMS }),
+      'invalidFarmHierarchy',
+    );
+    expectErrorCode(
+      () =>
+        policy.assertValidParent({ farmId: 10, parentId: 20, farms: FARMS }),
+      'invalidFarmHierarchy',
+    );
   });
 
   it('returns an immutable access list', () => {
