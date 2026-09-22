@@ -164,7 +164,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 
 **Status: 🟡 EM ANDAMENTO** | Dependência: Onda 02 ✅
 
-**Plano ativo:** `docs/superpowers/plans/2026-09-22-wave-03-account.md` | Task 3.1 e Task 3.2.1–3.2.4 concluídas; seguir pela Task 3.2.5 RED.
+**Plano ativo:** `docs/superpowers/plans/2026-09-22-wave-03-account.md` | Tasks 3.1 e 3.2 concluídas; seguir pela Task 7, contrato de conta/assinatura.
 
 ### Task 3.1: Fazendas e hierarquia
 
@@ -189,14 +189,14 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 3.2.2 | **GREEN**: implementar fluxo de convites | `[x]` | f0cd00f | Hash-only, aceite único, expiração, revogação e reenvio transacional; migration admin limpa 1/1 |
 | 3.2.3 | **RED**: limites do plano (max usuários, max fazendas) | `[x]` | 2b007d1 | `plan-limit.policy.spec.ts` |
 | 3.2.4 | **GREEN**: implementar validação de limites | `[x]` | 9c5e18f | Contadores ativos, igualdade bloqueada e assinatura ausente/expirada fail-closed |
-| 3.2.5 | **RED**: atribuição de perfis e vínculo `UsuarioFazenda` | `[ ]` | | `perfil-assignment.spec.ts` |
-| 3.2.6 | **GREEN**: implementar atribuição | `[ ]` | | |
-| 3.2.7 | **RED**: perfil customizado — proprietário cria perfil, seleciona permissões do catálogo | `[ ]` | | `custom-profile.spec.ts` |
-| 3.2.8 | **GREEN**: implementar perfil customizado (ADR-0003) | `[ ]` | | |
-| 3.2.9 | **RED**: allow/deny para proprietário, gerente, operador, visualizador | `[ ]` | | `role-access.spec.ts` |
-| 3.2.10 | **GREEN**: implementar testes de acesso | `[ ]` | | |
+| 3.2.5 | **RED**: atribuição de perfis e vínculo `UsuarioFazenda` | `[x]` | 7c319f5 | `profile-assignment.use-case.spec.ts` |
+| 3.2.6 | **GREEN**: implementar atribuição | `[x]` | 4925021 | Usuário local por acesso aceito, vínculo idempotente, remoção lógica e escopo fail-closed |
+| 3.2.7 | **RED**: perfil customizado — proprietário cria perfil, seleciona permissões do catálogo | `[x]` | 8967292 | `custom-profile.use-case.spec.ts` |
+| 3.2.8 | **GREEN**: implementar perfil customizado (ADR-0003) | `[x]` | e3785ea | Perfis por fazenda, permissões ativas, DTO/controller e migration limpa/upgrade 2/2 |
+| 3.2.9 | **RED**: allow/deny para proprietário, gerente, operador, visualizador | `[x]` | c6e54e1 | `role-access.spec.ts` |
+| 3.2.10 | **GREEN**: implementar testes de acesso | `[x]` | b802230 | Matriz DONO/GESTOR/COLABORADOR/CONSULTOR para leitura, escrita e gestão de conta |
 
-**Task 3.2 concluída?** `[ ]` | **Evidência:** |
+**Task 3.2 concluída?** `[x]` | **Evidência:** focais 21/21, unitários 210/210, arquitetura 23/23, lint do escopo, build e migration tenant limpa/upgrade 2/2 verdes |
 
 ---
 
@@ -275,6 +275,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 2026-09-22 11:45 | Codex GPT-5 | 03 | Onda 03 Task 3.1.4 | Onda 03 Task 3.1.5 RED | Banco temporário criado no servidor autorizado e removido após gates; migration limpa/upgrade 2/2, unitários 175/175, arquitetura 23/23 e build verdes |
 | 2026-09-22 13:10 | Codex GPT-5 | 03 | Onda 03 Task 3.1 concluída | Onda 03 Task 3.2.1 RED | RED `5e704f5`, GREEN `2389b66`; isolamento 11/11, unitários 175/175, arquitetura 23/23 e build verdes; lint do escopo verde, lint global mantém 15 erros preexistentes da Task 3.1.4 |
 | 2026-09-22 15:30 | Codex GPT-5 | 03 | Onda 03 Task 3.2.1–3.2.4 | Onda 03 Task 3.2.5 RED | Convites RED `df26ae5`/GREEN `f0cd00f`; limites RED `2b007d1`/GREEN `9c5e18f`; focais 14/14, unitários 189/189, arquitetura 23/23, build e migration admin descartável 1/1 verdes |
+| 2026-09-22 18:00 | Codex GPT-5 | 03 | Onda 03 Task 3.2 concluída | Onda 03 Task 7 RED | Equipe/perfis RED `7c319f5`, `8967292`, `c6e54e1`; GREEN `4925021`, `e3785ea`, `b802230`; unitários 210/210, arquitetura 23/23, build e migration tenant descartável 2/2 verdes |
 
 ---
 
