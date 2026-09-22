@@ -164,7 +164,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 
 **Status: 🟡 EM ANDAMENTO** | Dependência: Onda 02 ✅
 
-**Plano ativo:** `docs/superpowers/plans/2026-09-22-wave-03-account.md` | Tasks 3.1, 3.2 e 7 concluídas; seguir pela Task 8, geração do cliente e gateway de conta.
+**Plano ativo:** `docs/superpowers/plans/2026-09-22-wave-03-account.md` | Tasks 3.1, 3.2, 7 e 8 concluídas; seguir pela Task 9, páginas de autosserviço.
 
 ### Task 3.1: Fazendas e hierarquia
 
@@ -208,6 +208,18 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 7.2 | **GREEN**: publicar leitura da organização e resumo da assinatura | `[x]` | 6f07d51 | Portas por `organizationId` verificado, DTOs públicos, contadores admin/tenant e decorators OpenAPI comuns |
 
 **Task 7 concluída?** `[x]` | **Evidência:** contrato 14/14, unitários 214/214, arquitetura 23/23, lint do escopo, `git diff --check` e build verdes; nenhum campo de schema, billing interno, senha, token ou Prisma publicado |
+
+---
+
+### Task 8: Cliente e gateway de conta
+
+| # | Sub-item | Status | Commit | Arquivo(s) |
+|---|---|---|---|---|
+| 8.1 | Gerar snapshot OpenAPI e tipos de forma determinística | `[x]` | 358a685, b4e3500 (`gado-web`) | Dois ciclos idênticos; `contracts:check` verde; snapshot final preserva configuração real sem prefixo global |
+| 8.2 | **RED**: cliente de conta, audiência, paths, erros e mapeamento | `[x]` | a178847 (`gado-web`) | `account-client.spec.ts` falha pela implementação ausente |
+| 8.3 | **GREEN**: cliente central e gateway `gadoApp` | `[x]` | b4e3500 (`gado-web`) | Sem `fetch`/Axios/storage direto; validação fail-closed de payloads e operações tenant-aware |
+
+**Task 8 concluída?** `[x]` | **Evidência:** spec focal 5/5, `contracts:check`, `check:network`, lint, typecheck completo e `build:app` verdes |
 
 ---
 
@@ -288,6 +300,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 2026-09-22 15:30 | Codex GPT-5 | 03 | Onda 03 Task 3.2.1–3.2.4 | Onda 03 Task 3.2.5 RED | Convites RED `df26ae5`/GREEN `f0cd00f`; limites RED `2b007d1`/GREEN `9c5e18f`; focais 14/14, unitários 189/189, arquitetura 23/23, build e migration admin descartável 1/1 verdes |
 | 2026-09-22 18:00 | Codex GPT-5 | 03 | Onda 03 Task 3.2 concluída | Onda 03 Task 7 RED | Equipe/perfis RED `7c319f5`, `8967292`, `c6e54e1`; GREEN `4925021`, `e3785ea`, `b802230`; unitários 210/210, arquitetura 23/23, build e migration tenant descartável 2/2 verdes |
 | 2026-09-22 | Codex GPT-5 | 03 | Onda 03 Task 7 concluída | Onda 03 Task 8 | Contrato RED `7dc7dae` e GREEN `6f07d51`; contrato 14/14, unitários 214/214, arquitetura 23/23, lint do escopo e build verdes |
+| 2026-09-22 | Codex GPT-5 | 03 | Onda 03 Task 8 concluída | Onda 03 Task 9 RED | OpenAPI determinístico `358a685`; cliente RED `a178847`/GREEN `b4e3500`; spec 5/5, contratos, rede, lint, tipos e build do app verdes |
 
 ---
 
