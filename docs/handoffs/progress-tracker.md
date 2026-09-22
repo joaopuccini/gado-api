@@ -164,7 +164,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 
 **Status: 🟡 EM ANDAMENTO** | Dependência: Onda 02 ✅
 
-**Plano ativo:** `docs/superpowers/plans/2026-09-22-wave-03-account.md` | Tasks 3.1 e 3.2 concluídas; seguir pela Task 7, contrato de conta/assinatura.
+**Plano ativo:** `docs/superpowers/plans/2026-09-22-wave-03-account.md` | Tasks 3.1, 3.2 e 7 concluídas; seguir pela Task 8, geração do cliente e gateway de conta.
 
 ### Task 3.1: Fazendas e hierarquia
 
@@ -197,6 +197,17 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 3.2.10 | **GREEN**: implementar testes de acesso | `[x]` | b802230 | Matriz DONO/GESTOR/COLABORADOR/CONSULTOR para leitura, escrita e gestão de conta |
 
 **Task 3.2 concluída?** `[x]` | **Evidência:** focais 21/21, unitários 210/210, arquitetura 23/23, lint do escopo, build e migration tenant limpa/upgrade 2/2 verdes |
+
+---
+
+### Task 7: Contratos de conta e assinatura
+
+| # | Sub-item | Status | Commit | Arquivo(s) |
+|---|---|---|---|---|
+| 7.1 | **RED**: contrato OpenAPI das operações `/api/v1/account/*` | `[x]` | 7dc7dae | `account-openapi.e2e-spec.ts` — rotas, auth, envelopes, erros e ausência de mutação admin |
+| 7.2 | **GREEN**: publicar leitura da organização e resumo da assinatura | `[x]` | 6f07d51 | Portas por `organizationId` verificado, DTOs públicos, contadores admin/tenant e decorators OpenAPI comuns |
+
+**Task 7 concluída?** `[x]` | **Evidência:** contrato 14/14, unitários 214/214, arquitetura 23/23, lint do escopo, `git diff --check` e build verdes; nenhum campo de schema, billing interno, senha, token ou Prisma publicado |
 
 ---
 
@@ -276,6 +287,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 2026-09-22 13:10 | Codex GPT-5 | 03 | Onda 03 Task 3.1 concluída | Onda 03 Task 3.2.1 RED | RED `5e704f5`, GREEN `2389b66`; isolamento 11/11, unitários 175/175, arquitetura 23/23 e build verdes; lint do escopo verde, lint global mantém 15 erros preexistentes da Task 3.1.4 |
 | 2026-09-22 15:30 | Codex GPT-5 | 03 | Onda 03 Task 3.2.1–3.2.4 | Onda 03 Task 3.2.5 RED | Convites RED `df26ae5`/GREEN `f0cd00f`; limites RED `2b007d1`/GREEN `9c5e18f`; focais 14/14, unitários 189/189, arquitetura 23/23, build e migration admin descartável 1/1 verdes |
 | 2026-09-22 18:00 | Codex GPT-5 | 03 | Onda 03 Task 3.2 concluída | Onda 03 Task 7 RED | Equipe/perfis RED `7c319f5`, `8967292`, `c6e54e1`; GREEN `4925021`, `e3785ea`, `b802230`; unitários 210/210, arquitetura 23/23, build e migration tenant descartável 2/2 verdes |
+| 2026-09-22 | Codex GPT-5 | 03 | Onda 03 Task 7 concluída | Onda 03 Task 8 | Contrato RED `7dc7dae` e GREEN `6f07d51`; contrato 14/14, unitários 214/214, arquitetura 23/23, lint do escopo e build verdes |
 
 ---
 
