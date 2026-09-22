@@ -164,7 +164,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 
 **Status: 🟡 EM ANDAMENTO** | Dependência: Onda 02 ✅
 
-**Plano ativo:** `docs/superpowers/plans/2026-09-22-wave-03-account.md` | Tasks 3.1, 3.2, 7, 8 e 9 concluídas; seguir pela Task 10, isolamento entre `gado-app` e `gado-admin`.
+**Plano ativo:** `docs/superpowers/plans/2026-09-22-wave-03-account.md` | Tasks 3.1, 3.2 e 7–10 concluídas; seguir pela Task 11, execução do Gate G2-account.
 
 ### Task 3.1: Fazendas e hierarquia
 
@@ -231,10 +231,10 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 3.3.2 | Tela de fazendas no `gado-app` | `[x]` | d843f86 / 18c45a0 (`gado-web`) | Hierarquia, criação validada, seleção com token renovado, desativação confirmada e controles por permissão |
 | 3.3.3 | Tela de equipe no `gado-app` | `[x]` | a083432, 97b3893 / c123166, ca7a4b0 (`gado-web`) | Resumo seguro, convites, vínculos, perfis customizados e controles por permissão |
 | 3.3.4 | Tela de resumo da assinatura e limites no `gado-app` | `[x]` | 95d2f7c / 09ec654 (`gado-web`) | Plano, datas, limites e consumo somente leitura |
-| 3.3.5 | **RED**: E2E — proprietário não tem rota/link/bundle/token aceito no `gado-admin` | `[ ]` | | `admin-isolation.e2e.spec.ts` |
-| 3.3.6 | **GREEN**: isolamento confirmado | `[ ]` | | |
+| 3.3.5 | **RED**: E2E — proprietário não tem rota/link/bundle/token aceito no `gado-admin` | `[x]` | eaf9956 (`gado-web`) | `admin-isolation.e2e.spec.ts`, router admin e rejeição fail-closed da sessão de proprietário |
+| 3.3.6 | **GREEN**: isolamento confirmado | `[x]` | c7615a4 (`gado-web`) | 7/7 testes web, 5/5 testes backend de audiência, builds separados, bundles, rede, lint e tipos verdes |
 
-**Task 3.3 concluída?** `[ ]` | **Evidência:** Task 9 verde com 16/16 testes de páginas/router/layout, lint, typecheck, `build:app`, `contracts:check` e `check:network`; isolamento 3.3.5–3.3.6 permanece para a Task 10 |
+**Task 3.3 concluída?** `[x]` | **Evidência:** Task 9 verde com 16/16 testes de páginas/router/layout; Task 10 RED `eaf9956`/GREEN `c7615a4`, 7/7 testes web e 5/5 testes backend de audiência; lint, typecheck, builds separados, contratos, rede e bundles verdes |
 
 ---
 
@@ -302,6 +302,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 2026-09-22 | Codex GPT-5 | 03 | Onda 03 Task 7 concluída | Onda 03 Task 8 | Contrato RED `7dc7dae` e GREEN `6f07d51`; contrato 14/14, unitários 214/214, arquitetura 23/23, lint do escopo e build verdes |
 | 2026-09-22 | Codex GPT-5 | 03 | Onda 03 Task 8 concluída | Onda 03 Task 9 RED | OpenAPI determinístico `358a685`; cliente RED `a178847`/GREEN `b4e3500`; spec 5/5, contratos, rede, lint, tipos e build do app verdes |
 | 2026-09-22 20:15 | Codex GPT-5 | 03 | Onda 03 Task 9 concluída | Onda 03 Task 10 RED | Correção backend RED `ed658bd`/GREEN `805c797`, migrations 3/3 em banco filho removido; páginas RED `95d2f7c`, `d843f86`, `a083432`; GREEN `09ec654`, `18c45a0`, `ca7a4b0`; cliente de equipe RED `97b3893`/GREEN `c123166`; 16/16, lint, tipos, build, contratos e rede verdes |
+| 2026-09-22 20:22 | Codex GPT-5 | 03 | Onda 03 Task 10 concluída | Onda 03 Task 11 / Gate G2-account | Isolamento RED `eaf9956`/GREEN `c7615a4`; 7/7 testes web, 5/5 testes backend de audiência, builds app/admin, bundles, rede, lint e tipos verdes |
 
 ---
 
