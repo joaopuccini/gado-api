@@ -170,8 +170,8 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 
 | # | Sub-item | Status | Commit | Arquivo(s) |
 |---|---|---|---|---|
-| 3.1.1 | **RED**: CRUD de fazenda (criação, edição, seleção, ativo/inativo) | `[ ]` | | `fazenda.use-case.spec.ts` |
-| 3.1.2 | **GREEN**: implementar UseCase de fazenda | `[ ]` | | |
+| 3.1.1 | **RED**: CRUD de fazenda (criação, edição, seleção, ativo/inativo) | `[x]` | b64cdf2 | `manage-farms.use-case.spec.ts` |
+| 3.1.2 | **GREEN**: implementar UseCase de fazenda | `[ ]` | ef38e7a | Núcleo dos UseCases verde; adapter Prisma, DTOs, controller e composição ainda pendentes |
 | 3.1.3 | **RED**: hierarquia matriz/filiais e escopo de acesso | `[ ]` | | `fazenda-hierarchy.spec.ts` |
 | 3.1.4 | **GREEN**: substituir `HierarchyInterceptor` por policy/UseCase | `[ ]` | | |
 | 3.1.5 | **RED**: pai autorizado vê filhas permitidas, nunca vê fazenda de outro tenant | `[ ]` | | `fazenda-isolation.spec.ts` |
@@ -269,6 +269,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 2026-09-21 09:13 | Codex GPT-5 | 02 | Onda 02 completa (G1 pass) | Onda 01 Task 1.1 | Lint, build, 147 unitários, arquitetura 23, contrato 9, integração 2, migrations 3, isolamento 8, coverage ≥80%, no-skipped e tipos verdes em banco descartável |
 | 2026-09-22 00:50 | Codex GPT-5 | 01 | Onda 01 completa (G1-frontend pass) | Onda 03 Task 3.1.1 | CI, contratos, lint, tipos, arquitetura 7/7, coverage 62/62 ≥80%, builds, rede e bundles verdes; handoff criado |
 | 2026-09-22 09:30 | Codex GPT-5 | 03 | Plano detalhado da Onda 03 criado | Onda 03 Task 3.1.1 RED | `main` de API e web enviadas ao remoto; implementação preservada como não iniciada; setup da worktree de plano bloqueado por `npm ci`/Windows e deve ser refeito antes do RED |
+| 2026-09-22 10:05 | Codex GPT-5 | 03 | Onda 03 Task 3.1.1 | Onda 03 Task 3.1.2 continuação | CRUD/seleção especificados em `b64cdf2`; núcleo dos UseCases GREEN em `ef38e7a`; adapter Prisma, DTOs, controller e composição ainda pendentes |
 
 ---
 
