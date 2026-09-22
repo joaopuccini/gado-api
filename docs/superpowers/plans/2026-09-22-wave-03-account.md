@@ -30,6 +30,7 @@
 
 - `src/account/farms/domain/farm.ts` — domain types and hierarchy invariants.
 - `src/account/farms/application/ports/farm.repository.ts` — tenant persistence contract and `FARM_REPOSITORY` token.
+- `src/account/farms/application/ports/farm-session.ports.ts` — verified per-farm access lookup and operational token issuer contracts used by selection.
 - `src/account/farms/application/use-cases/create-farm.use-case.ts`, `update-farm.use-case.ts`, `list-farms.use-case.ts`, `select-farm.use-case.ts`, and `deactivate-farm.use-case.ts` — farm actions.
 - `src/account/farms/infrastructure/prisma-farm.repository.ts` — Prisma tenant adapter obtained from the execution context.
 - `src/account/farms/presentation/dto/create-farm.dto.ts`, `update-farm.dto.ts`, `farm.response.ts`, and `src/account/farms/presentation/farms.controller.ts` — validated HTTP/OpenAPI contract under `/api/v1/account/farms`.
@@ -67,10 +68,8 @@
 
 **Files:**
 - Create: `src/account/farms/application/ports/farm.repository.ts`
+- Create: `src/account/farms/application/ports/farm-session.ports.ts`
 - Create: `src/account/farms/application/use-cases/manage-farms.use-case.spec.ts`
-- Create: `src/account/farms/presentation/dto/create-farm.dto.ts`
-- Create: `src/account/farms/presentation/dto/update-farm.dto.ts`
-- Create: `src/account/farms/presentation/dto/farm.response.ts`
 - Modify: `docs/handoffs/progress-tracker.md`
 
 - [ ] **Step 1: Define the inner contract in the RED spec**
@@ -94,7 +93,34 @@ export interface FarmRepository {
 export const FARM_REPOSITORY = Symbol('FARM_REPOSITORY');
 ```
 
-The spec must cover create, edit, accessible list, selecting an allowed active farm, rejection of an inaccessible/inactive farm, and soft deactivation. Instantiate use cases with fakes; do not bootstrap Nest or Prisma.
+Define selection contracts that return the verified role and permissions for the requested farm and reuse the operational token shape:
+
+```ts
+export interface VerifiedFarmAccess {
+  farmId: number;
+  role: string;
+  permissions: readonly string[];
+}
+
+export interface FarmAccessRepository {
+  findActiveAccess(localUserId: number, farmId: number): Promise<VerifiedFarmAccess | null>;
+}
+
+export interface FarmSessionIssuer {
+  sign(input: {
+    globalUserId: string;
+    tenantId: string;
+    organizationId: string;
+    schemaName: string;
+    localUserId: number;
+    farmId: number;
+    role: string;
+    permissions: readonly string[];
+  }): Promise<{ accessToken: string; expiresIn: number }>;
+}
+```
+
+The spec must cover create, edit, accessible list, selecting an allowed active farm, rejection of an inaccessible/inactive farm, soft deactivation, and issuance of a replacement operational token containing the newly selected farm's verified role and permissions. Instantiate use cases with fakes; do not bootstrap Nest or Prisma.
 
 - [ ] **Step 2: Prove RED and commit it**
 
@@ -104,11 +130,7 @@ Expected: FAIL because `CreateFarmUseCase`, `UpdateFarmUseCase`, `ListFarmsUseCa
 
 Commit: `test(wave-03): RED specify farm management use cases`
 
-- [ ] **Step 3: Add concrete validated DTOs without production handlers**
-
-`CreateFarmDto` requires `name` (trimmed string, 2–200 chars) and permits integer `parentId`; `UpdateFarmDto` makes those fields optional but rejects an empty object. `FarmResponseDto` exposes only `id`, `name`, `parentId`, and `active`, with `@ApiProperty` metadata and camelCase names.
-
-- [ ] **Step 4: Verify the RED failure is still the missing use cases**
+- [ ] **Step 3: Verify the RED failure is still the missing use cases**
 
 Run the focused command again. Expected: same intentional failure, with no TypeScript/DTO compilation error.
 
@@ -121,6 +143,10 @@ Run the focused command again. Expected: same intentional failure, with no TypeS
 - Create: `src/account/farms/application/use-cases/list-farms.use-case.ts`
 - Create: `src/account/farms/application/use-cases/select-farm.use-case.ts`
 - Create: `src/account/farms/application/use-cases/deactivate-farm.use-case.ts`
+- Create: `src/account/farms/presentation/dto/create-farm.dto.ts`
+- Create: `src/account/farms/presentation/dto/update-farm.dto.ts`
+- Create: `src/account/farms/presentation/dto/farm.response.ts`
+- Create: `src/account/farms/presentation/dto/select-farm.response.ts`
 - Create: `src/account/farms/infrastructure/prisma-farm.repository.ts`
 - Create: `src/account/farms/presentation/farms.controller.ts`
 - Create: `src/account/farms/farms.module.ts`
@@ -132,6 +158,8 @@ Run the focused command again. Expected: same intentional failure, with no TypeS
 
 Each use case calls `ExecutionContextStore.requireTenant()`. Create uses the verified `localUserId`; list/select/update/deactivate authorize against `accessibleFarmIds`. Throw typed `DomainError`s: `farmNotFound`, `farmAccessDenied`, `farmInactive`, `farmSelectedCannotDeactivate`, and `invalidFarmHierarchy` (add them to `src/common/errors/error-catalog.ts` and `error-http.mapper.ts`).
 
+`SelectFarmUseCase` must then reload the active `UsuarioFazenda` membership for the verified `localUserId`, derive permissions from persisted profile/user grants, and issue a replacement `gado-app` access token through `FarmSessionIssuer`. It must not mutate the current AsyncLocalStorage context or trust role/permissions from the old token.
+
 - [ ] **Step 2: Implement the Prisma adapter**
 
 Map `name <-> nome`, `parentId`, and `active <-> ativo` explicitly. Do not spread DTOs into Prisma. Create the farm and owner's `UsuarioFazenda` (`role: DONO`) through the same callback passed to `tenant.$transaction`; obtain the tenant client through the existing context-aware factory/service only.
@@ -139,6 +167,8 @@ Map `name <-> nome`, `parentId`, and `active <-> ativo` explicitly. Do not sprea
 - [ ] **Step 3: Publish the HTTP contract**
 
 Expose `GET/POST /account/farms`, `PATCH /account/farms/:id`, `POST /account/farms/:id/select`, and `DELETE /account/farms/:id`. Controllers translate DTOs to commands, use `@RequirePermissions`, `@ApiTags`, `@ApiOperation`, success/error response decorators, and return domain values for the global envelope interceptor.
+
+`CreateFarmDto` requires `name` (trimmed string, 2–200 chars) and permits integer `parentId`; `UpdateFarmDto` makes those fields optional but rejects an empty object. `FarmResponseDto` exposes only `id`, `name`, `parentId`, and `active`. `SelectFarmResponseDto` exposes only `accessToken` and `expiresIn`. All response fields have explicit `@ApiProperty` metadata and camelCase names.
 
 - [ ] **Step 4: Prove GREEN and commit**
 
