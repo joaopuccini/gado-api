@@ -17,6 +17,7 @@ export interface UpdateFarmRecord {
 }
 
 export interface FarmRepository {
+  listHierarchy(): Promise<readonly FarmHierarchyNode[]>;
   listAccessible(farmIds: readonly number[]): Promise<readonly FarmView[]>;
   findAccessible(
     id: number,
@@ -28,3 +29,4 @@ export interface FarmRepository {
 }
 
 export const FARM_REPOSITORY = Symbol('FARM_REPOSITORY');
+import type { FarmHierarchyNode } from '../../domain/farm-hierarchy.policy';

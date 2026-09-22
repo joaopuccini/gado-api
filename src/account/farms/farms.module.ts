@@ -20,6 +20,7 @@ import { DeactivateFarmUseCase } from './application/use-cases/deactivate-farm.u
 import { ListFarmsUseCase } from './application/use-cases/list-farms.use-case';
 import { SelectFarmUseCase } from './application/use-cases/select-farm.use-case';
 import { UpdateFarmUseCase } from './application/use-cases/update-farm.use-case';
+import { FarmHierarchyPolicy } from './domain/farm-hierarchy.policy';
 import { JwtFarmSessionIssuer } from './infrastructure/jwt-farm-session.issuer';
 import { PrismaFarmRepository } from './infrastructure/prisma-farm.repository';
 import { FarmsController } from './presentation/farms.controller';
@@ -30,6 +31,7 @@ import { FarmsController } from './presentation/farms.controller';
   providers: [
     JwtAuthGuard,
     PermissionsGuard,
+    FarmHierarchyPolicy,
     PrismaFarmRepository,
     { provide: FARM_REPOSITORY, useExisting: PrismaFarmRepository },
     { provide: FARM_ACCESS_REPOSITORY, useExisting: PrismaFarmRepository },
@@ -41,9 +43,12 @@ import { FarmsController } from './presentation/farms.controller';
     },
     {
       provide: CreateFarmUseCase,
-      useFactory: (farms: FarmRepository, context: ExecutionContextStore) =>
-        new CreateFarmUseCase(farms, context),
-      inject: [FARM_REPOSITORY, ExecutionContextStore],
+      useFactory: (
+        farms: FarmRepository,
+        hierarchy: FarmHierarchyPolicy,
+        context: ExecutionContextStore,
+      ) => new CreateFarmUseCase(farms, hierarchy, context),
+      inject: [FARM_REPOSITORY, FarmHierarchyPolicy, ExecutionContextStore],
     },
     {
       provide: ListFarmsUseCase,
@@ -53,9 +58,12 @@ import { FarmsController } from './presentation/farms.controller';
     },
     {
       provide: UpdateFarmUseCase,
-      useFactory: (farms: FarmRepository, context: ExecutionContextStore) =>
-        new UpdateFarmUseCase(farms, context),
-      inject: [FARM_REPOSITORY, ExecutionContextStore],
+      useFactory: (
+        farms: FarmRepository,
+        hierarchy: FarmHierarchyPolicy,
+        context: ExecutionContextStore,
+      ) => new UpdateFarmUseCase(farms, hierarchy, context),
+      inject: [FARM_REPOSITORY, FarmHierarchyPolicy, ExecutionContextStore],
     },
     {
       provide: SelectFarmUseCase,

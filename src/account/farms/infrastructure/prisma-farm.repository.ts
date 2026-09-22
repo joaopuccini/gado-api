@@ -42,6 +42,17 @@ export class PrismaFarmRepository
 {
   constructor(private readonly tenantPrisma: TenantPrismaService) {}
 
+  async listHierarchy() {
+    const farms = await this.tenantPrisma.getClient().fazenda.findMany({
+      select: { id: true, parentId: true, ativo: true },
+    });
+    return farms.map(({ id, parentId, ativo }) => ({
+      id,
+      parentId,
+      active: ativo,
+    }));
+  }
+
   async listAccessible(
     farmIds: readonly number[],
   ): Promise<readonly FarmView[]> {

@@ -1,5 +1,6 @@
 import { ExecutionContextStore } from '../../../../common/context';
 import { DomainError } from '../../../../common/errors/domain-error';
+import { FarmHierarchyPolicy } from '../../domain/farm-hierarchy.policy';
 import type {
   FarmRepository,
   FarmView,
@@ -13,6 +14,7 @@ export interface UpdateFarmCommand extends UpdateFarmRecord {
 export class UpdateFarmUseCase {
   constructor(
     private readonly farms: FarmRepository,
+    private readonly hierarchy: FarmHierarchyPolicy,
     private readonly context: ExecutionContextStore,
   ) {}
 
@@ -34,6 +36,14 @@ export class UpdateFarmUseCase {
     }
     if (!farm.active) {
       throw new DomainError('farmInactive', 'Fazenda inativa');
+    }
+
+    if (command.parentId !== undefined) {
+      this.hierarchy.assertValidParent({
+        farmId: command.farmId,
+        parentId: command.parentId,
+        farms: await this.farms.listHierarchy(),
+      });
     }
 
     const { farmId: _farmId, ...input } = command;
