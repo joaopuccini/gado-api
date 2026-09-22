@@ -30,4 +30,7 @@ export interface IssuedFarmSession {
 export interface FarmSessionIssuer {
   sign(input: FarmSessionClaims): Promise<IssuedFarmSession>;
 }
+
+export const FARM_ACCESS_REPOSITORY = Symbol('FARM_ACCESS_REPOSITORY');
+export const FARM_SESSION_ISSUER = Symbol('FARM_SESSION_ISSUER');
 import type { TenantSchemaName } from '../../../../tenant/domain/tenant-schema-name';

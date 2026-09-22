@@ -45,6 +45,7 @@ import { SafrasModule } from './frota/safras/safras.module';
 import { MaquinasModule } from './frota/maquinas/maquinas.module';
 import { AbastecimentosModule } from './frota/abastecimentos/abastecimentos.module';
 import { ManutencoesModule } from './frota/manutencoes/manutencoes.module';
+import { AccountModule } from './account/account.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { ManutencoesModule } from './frota/manutencoes/manutencoes.module';
     ContextModule,
     TenantModule,
     AuthModule,
+    AccountModule,
 
     // Domain Modules
     AnimaisModule,
