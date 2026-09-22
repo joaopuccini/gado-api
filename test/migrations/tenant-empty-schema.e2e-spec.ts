@@ -104,5 +104,29 @@ describe('tenant migrations on an empty schema', () => {
     expect([...applied.entries()]).toEqual(
       expectedMigrations.map(({ version, checksum }) => [version, checksum]),
     );
+
+    const hierarchyObjects = await pool.query<{ name: string }>(
+      `
+      SELECT indexname AS name
+      FROM pg_indexes
+      WHERE schemaname = $1
+        AND indexname IN (
+          'fazendas_parent_id_ativo_idx',
+          'usuario_fazenda_usuario_id_ativo_fazenda_id_idx'
+        )
+      UNION ALL
+      SELECT constraint_name AS name
+      FROM information_schema.table_constraints
+      WHERE constraint_schema = $1
+        AND constraint_name = 'fazendas_parent_not_self'
+      ORDER BY name
+      `,
+      [schemaName],
+    );
+    expect(hierarchyObjects.rows.map(({ name }) => name)).toEqual([
+      'fazendas_parent_id_ativo_idx',
+      'fazendas_parent_not_self',
+      'usuario_fazenda_usuario_id_ativo_fazenda_id_idx',
+    ]);
   });
 });

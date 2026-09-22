@@ -59,6 +59,7 @@ describe('tenant schema upgrade and retry', () => {
       '202609140002_animal_ear_tag_lookup_index',
       '202609170001_modelar_identidades_tenant',
       '202609171600_add_system_profile_role',
+      '202609171610_add_tenant_bootstrap_keys',
       TENANT_CURRENT_VERSION,
     ]);
     await repository.apply(schema, migrations[0]);
@@ -88,8 +89,8 @@ describe('tenant schema upgrade and retry', () => {
     `);
 
     expect(retry.rows).toEqual(firstApplication.rows);
-    expect(retry.rows).toHaveLength(5);
-    expect(logger.info.mock.calls).toHaveLength(5);
+    expect(retry.rows).toHaveLength(6);
+    expect(logger.info.mock.calls).toHaveLength(6);
 
     await expect(
       repository.apply(schema, {
