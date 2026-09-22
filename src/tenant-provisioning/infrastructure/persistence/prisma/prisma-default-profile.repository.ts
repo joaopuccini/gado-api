@@ -7,9 +7,7 @@ import type {
   DefaultProfileRepository,
 } from '../../../application/ports/default-profile.repository';
 
-export class PrismaDefaultProfileRepository
-  implements DefaultProfileRepository
-{
+export class PrismaDefaultProfileRepository implements DefaultProfileRepository {
   constructor(
     private readonly context: ExecutionContextStore,
     private readonly clientFactory: TenantPrismaClientFactoryPort,
@@ -17,7 +15,9 @@ export class PrismaDefaultProfileRepository
 
   async seed(profiles: DefaultProfilePermissions): Promise<void> {
     const { schemaName } = this.context.requireTenantIdentity();
-    const client = this.clientFactory.create(TenantSchemaName.parse(schemaName));
+    const client = this.clientFactory.create(
+      TenantSchemaName.parse(schemaName),
+    );
 
     for (const [rawRole, permissionIds] of Object.entries(profiles)) {
       const role = rawRole as FazendaRole;
