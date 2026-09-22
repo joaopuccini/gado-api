@@ -162,9 +162,9 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 
 ## Onda 03 — Conta, Fazendas, Equipe e Assinatura
 
-**Status: ⬜ NÃO INICIADA** | Dependência: Onda 02 ✅
+**Status: 🟡 EM ANDAMENTO** | Dependência: Onda 02 ✅
 
-**Plano ativo:** `docs/superpowers/plans/2026-09-22-wave-03-account.md` | Implementação ainda não iniciada; começar pela Task 3.1.1 RED.
+**Plano ativo:** `docs/superpowers/plans/2026-09-22-wave-03-account.md` | Task 3.1 concluída; seguir pela Task 3.2.1 RED.
 
 ### Task 3.1: Fazendas e hierarquia
 
@@ -174,10 +174,10 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 3.1.2 | **GREEN**: implementar UseCase de fazenda | `[x]` | ef38e7a, 6fcccdf, 94f4513, 2c08aa3 | 166/166 unitários, arquitetura 23/23 e build verdes |
 | 3.1.3 | **RED**: hierarquia matriz/filiais e escopo de acesso | `[x]` | 9e6d81f | `farm-hierarchy.policy.spec.ts` |
 | 3.1.4 | **GREEN**: substituir `HierarchyInterceptor` por policy/UseCase | `[x]` | fea521b, f2cbd07, 9237b10 | Policy integrada; migration limpa/upgrade 2/2; 175/175 unitários, arquitetura 23/23 e build verdes |
-| 3.1.5 | **RED**: pai autorizado vê filhas permitidas, nunca vê fazenda de outro tenant | `[ ]` | | `fazenda-isolation.spec.ts` |
-| 3.1.6 | **GREEN**: implementar isolamento | `[ ]` | | |
+| 3.1.5 | **RED**: pai autorizado vê filhas permitidas, nunca vê fazenda de outro tenant | `[x]` | 5e704f5 | `test/isolation/account-isolation.e2e-spec.ts` |
+| 3.1.6 | **GREEN**: implementar isolamento | `[x]` | 2389b66 | Teste focal concorrente 3/3 em três execuções, isolamento completo 11/11, unitários 175/175, arquitetura 23/23 e build verdes |
 
-**Task 3.1 concluída?** `[ ]` | **Evidência:** |
+**Task 3.1 concluída?** `[x]` | **Evidência:** hierarquia fail-closed por membership verificada; matriz vê somente filiais vinculadas, filial vê somente a si, outro tenant é negado e contexto ausente falha antes do repository |
 
 ---
 
@@ -273,6 +273,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 2026-09-22 10:35 | Codex GPT-5 | 03 | Onda 03 Task 3.1.2 | Onda 03 Task 3.1.3 RED | Adapter transacional, DTOs camelCase validados, controller protegido e módulo DI concluídos; 166/166 unitários, arquitetura 23/23 e build verdes |
 | 2026-09-22 11:00 | Codex GPT-5 | 03 | Onda 03 Task 3.1.3 | Onda 03 Task 3.1.4 continuação | Policy GREEN 8/8 em `fea521b`; `TEST_DATABASE_URL` descartável ausente, portanto migration/gate não foram iniciados nem contornados |
 | 2026-09-22 11:45 | Codex GPT-5 | 03 | Onda 03 Task 3.1.4 | Onda 03 Task 3.1.5 RED | Banco temporário criado no servidor autorizado e removido após gates; migration limpa/upgrade 2/2, unitários 175/175, arquitetura 23/23 e build verdes |
+| 2026-09-22 13:10 | Codex GPT-5 | 03 | Onda 03 Task 3.1 concluída | Onda 03 Task 3.2.1 RED | RED `5e704f5`, GREEN `2389b66`; isolamento 11/11, unitários 175/175, arquitetura 23/23 e build verdes; lint do escopo verde, lint global mantém 15 erros preexistentes da Task 3.1.4 |
 
 ---
 
