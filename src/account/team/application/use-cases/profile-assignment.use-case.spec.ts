@@ -196,17 +196,24 @@ describe('team membership assignment', () => {
   });
 
   it.each([
-    ['assignment', () => assign.execute({
-      globalUserId: 'member-a',
-      farmId: 99,
-      role: 'COLABORADOR',
-      profileId: null,
-    })],
+    [
+      'assignment',
+      () =>
+        assign.execute({
+          globalUserId: 'member-a',
+          farmId: 99,
+          role: 'COLABORADOR',
+          profileId: null,
+        }),
+    ],
     ['removal', () => remove.execute({ localUserId: 100, farmId: 99 })],
-  ])('denies %s outside accessibleFarmIds before persistence', async (_label, operation) => {
-    await expect(run(operation)).rejects.toMatchObject({
-      code: 'farmAccessDenied',
-    });
-    expect(teams.transactionCount).toBe(0);
-  });
+  ])(
+    'denies %s outside accessibleFarmIds before persistence',
+    async (_label, operation) => {
+      await expect(run(operation)).rejects.toMatchObject({
+        code: 'farmAccessDenied',
+      });
+      expect(teams.transactionCount).toBe(0);
+    },
+  );
 });
