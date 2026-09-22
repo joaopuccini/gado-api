@@ -164,6 +164,8 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 
 **Status: ⬜ NÃO INICIADA** | Dependência: Onda 02 ✅
 
+**Plano ativo:** `docs/superpowers/plans/2026-09-22-wave-03-account.md` | Implementação ainda não iniciada; começar pela Task 3.1.1 RED.
+
 ### Task 3.1: Fazendas e hierarquia
 
 | # | Sub-item | Status | Commit | Arquivo(s) |
@@ -266,6 +268,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 2026-09-21 03:58 | Codex GPT-5 | 02 | Onda 02 Task 2.3.16 e Task 7A | Gate G1 lint | Integração descartável 2/2 e composição admin GREEN; gate global parou em 62 erros de lint preexistentes, sem deixar autofixes pendentes |
 | 2026-09-21 09:13 | Codex GPT-5 | 02 | Onda 02 completa (G1 pass) | Onda 01 Task 1.1 | Lint, build, 147 unitários, arquitetura 23, contrato 9, integração 2, migrations 3, isolamento 8, coverage ≥80%, no-skipped e tipos verdes em banco descartável |
 | 2026-09-22 00:50 | Codex GPT-5 | 01 | Onda 01 completa (G1-frontend pass) | Onda 03 Task 3.1.1 | CI, contratos, lint, tipos, arquitetura 7/7, coverage 62/62 ≥80%, builds, rede e bundles verdes; handoff criado |
+| 2026-09-22 09:30 | Codex GPT-5 | 03 | Plano detalhado da Onda 03 criado | Onda 03 Task 3.1.1 RED | `main` de API e web enviadas ao remoto; implementação preservada como não iniciada; setup da worktree de plano bloqueado por `npm ci`/Windows e deve ser refeito antes do RED |
 
 ---
 
