@@ -30,6 +30,7 @@ const statusByCode: Readonly<Record<ErrorCode, number>> = {
   userLimitReached: HttpStatus.CONFLICT,
   farmLimitReached: HttpStatus.CONFLICT,
   subscriptionUnavailable: HttpStatus.SERVICE_UNAVAILABLE,
+  organizationUnavailable: HttpStatus.NOT_FOUND,
   organizationAccessRequired: HttpStatus.FORBIDDEN,
   teamMemberNotFound: HttpStatus.NOT_FOUND,
   profileOwnerRequired: HttpStatus.FORBIDDEN,

@@ -11,13 +11,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RequirePermissions } from '../../../auth/decorators/permissions.decorator';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../../auth/guards/permissions.guard';
@@ -30,8 +24,9 @@ import { CreateFarmDto } from './dto/create-farm.dto';
 import { FarmResponseDto } from './dto/farm.response';
 import { SelectFarmResponseDto } from './dto/select-farm.response';
 import { UpdateFarmDto } from './dto/update-farm.dto';
+import { ApiAccountResponse } from '../../presentation/account-api-response.decorator';
 
-@ApiTags('Account Farms')
+@ApiTags('Account')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('account/farms')
@@ -50,7 +45,7 @@ export class FarmsController {
     operationId: 'listAccountFarms',
     summary: 'Listar fazendas acessíveis',
   })
-  @ApiOkResponse({ type: FarmResponseDto, isArray: true })
+  @ApiAccountResponse({ type: FarmResponseDto, isArray: true })
   list() {
     return this.listFarms.execute();
   }
@@ -58,7 +53,11 @@ export class FarmsController {
   @Post()
   @RequirePermissions('configuracoes:gerenciar')
   @ApiOperation({ operationId: 'createAccountFarm', summary: 'Criar fazenda' })
-  @ApiCreatedResponse({ type: FarmResponseDto })
+  @ApiAccountResponse({
+    type: FarmResponseDto,
+    created: true,
+    acceptsInput: true,
+  })
   create(@Body() dto: CreateFarmDto) {
     return this.createFarm.execute({
       name: dto.name,
@@ -69,7 +68,7 @@ export class FarmsController {
   @Patch(':id')
   @RequirePermissions('configuracoes:gerenciar')
   @ApiOperation({ operationId: 'updateAccountFarm', summary: 'Editar fazenda' })
-  @ApiOkResponse({ type: FarmResponseDto })
+  @ApiAccountResponse({ type: FarmResponseDto, acceptsInput: true })
   update(
     @Param('id', ParseIntPipe) farmId: number,
     @Body() dto: UpdateFarmDto,
@@ -84,7 +83,7 @@ export class FarmsController {
     operationId: 'selectAccountFarm',
     summary: 'Selecionar fazenda',
   })
-  @ApiOkResponse({ type: SelectFarmResponseDto })
+  @ApiAccountResponse({ type: SelectFarmResponseDto, acceptsInput: true })
   select(@Param('id', ParseIntPipe) farmId: number) {
     return this.selectFarm.execute({ farmId });
   }
@@ -95,7 +94,7 @@ export class FarmsController {
     operationId: 'deactivateAccountFarm',
     summary: 'Desativar fazenda',
   })
-  @ApiOkResponse({ type: FarmResponseDto })
+  @ApiAccountResponse({ type: FarmResponseDto })
   deactivate(@Param('id', ParseIntPipe) farmId: number) {
     return this.deactivateFarm.execute({ farmId });
   }

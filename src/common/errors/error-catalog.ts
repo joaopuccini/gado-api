@@ -19,6 +19,7 @@ export type ErrorCode =
   | 'userLimitReached'
   | 'farmLimitReached'
   | 'subscriptionUnavailable'
+  | 'organizationUnavailable'
   | 'organizationAccessRequired'
   | 'teamMemberNotFound'
   | 'profileOwnerRequired'

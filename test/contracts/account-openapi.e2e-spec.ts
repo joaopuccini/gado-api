@@ -28,9 +28,7 @@ const accountOperationsOf = (document: OpenAPIObject) =>
     .filter(([path]) => path.startsWith('/api/v1/account/'))
     .flatMap(([path, pathItem]) =>
       ['get', 'post', 'put', 'patch', 'delete'].flatMap((method) => {
-        const operation = asRecord(
-          pathItem?.[method as keyof typeof pathItem],
-        );
+        const operation = asRecord(pathItem?.[method as keyof typeof pathItem]);
         return operation ? [{ path, method, operation }] : [];
       }),
     );
@@ -115,7 +113,9 @@ describe('Account OpenAPI contract', () => {
 
       const successSchema = JSON.stringify(responses['200']);
       expect(successSchema).toContain('ApiSuccessDto');
-      expect(successSchema).not.toMatch(/schemaName|senha|password|token|prisma/i);
+      expect(successSchema).not.toMatch(
+        /schemaName|senha|password|token|prisma/i,
+      );
     },
   );
 

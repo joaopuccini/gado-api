@@ -8,13 +8,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RequirePermissions } from '../../../auth/decorators/permissions.decorator';
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../../auth/guards/permissions.guard';
@@ -29,8 +23,9 @@ import {
   TeamProfileResponseDto,
 } from './dto/team.response';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ApiAccountResponse } from '../../presentation/account-api-response.decorator';
 
-@ApiTags('Account Team')
+@ApiTags('Account')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('account/team')
@@ -44,8 +39,15 @@ export class TeamController {
 
   @Post('members')
   @RequirePermissions('configuracoes:gerenciar')
-  @ApiOperation({ operationId: 'assignAccountTeamMember' })
-  @ApiCreatedResponse({ type: TeamMemberResponseDto })
+  @ApiOperation({
+    operationId: 'assignAccountTeamMember',
+    summary: 'Vincular membro a uma fazenda',
+  })
+  @ApiAccountResponse({
+    type: TeamMemberResponseDto,
+    created: true,
+    acceptsInput: true,
+  })
   assign(@Body() dto: AssignMemberDto) {
     return this.assignMember.execute({
       ...dto,
@@ -55,8 +57,11 @@ export class TeamController {
 
   @Delete('members/:localUserId/farms/:farmId')
   @RequirePermissions('configuracoes:gerenciar')
-  @ApiOperation({ operationId: 'removeAccountTeamMember' })
-  @ApiOkResponse({ type: TeamMemberResponseDto })
+  @ApiOperation({
+    operationId: 'removeAccountTeamMember',
+    summary: 'Remover membro de uma fazenda',
+  })
+  @ApiAccountResponse({ type: TeamMemberResponseDto })
   remove(
     @Param('localUserId', ParseIntPipe) localUserId: number,
     @Param('farmId', ParseIntPipe) farmId: number,
@@ -66,8 +71,15 @@ export class TeamController {
 
   @Post('profiles')
   @RequirePermissions('configuracoes:gerenciar')
-  @ApiOperation({ operationId: 'createAccountTeamProfile' })
-  @ApiCreatedResponse({ type: TeamProfileResponseDto })
+  @ApiOperation({
+    operationId: 'createAccountTeamProfile',
+    summary: 'Criar perfil personalizado',
+  })
+  @ApiAccountResponse({
+    type: TeamProfileResponseDto,
+    created: true,
+    acceptsInput: true,
+  })
   createCustomProfile(@Body() dto: CreateProfileDto) {
     return this.createProfile.execute({
       ...dto,
@@ -77,8 +89,11 @@ export class TeamController {
 
   @Patch('profiles/:profileId')
   @RequirePermissions('configuracoes:gerenciar')
-  @ApiOperation({ operationId: 'updateAccountTeamProfile' })
-  @ApiOkResponse({ type: TeamProfileResponseDto })
+  @ApiOperation({
+    operationId: 'updateAccountTeamProfile',
+    summary: 'Atualizar perfil personalizado',
+  })
+  @ApiAccountResponse({ type: TeamProfileResponseDto, acceptsInput: true })
   updateCustomProfile(
     @Param('profileId', ParseIntPipe) profileId: number,
     @Body() dto: UpdateProfileDto,
