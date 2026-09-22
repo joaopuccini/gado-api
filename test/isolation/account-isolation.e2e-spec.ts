@@ -69,7 +69,9 @@ describe('Account farm hierarchy isolation (e2e)', () => {
   ]);
 
   const registry: jest.Mocked<TenantRegistryRepository> = {
-    findById: jest.fn(async (tenantId) => tenants.get(tenantId) ?? null),
+    findById: jest.fn((tenantId) =>
+      Promise.resolve(tenants.get(tenantId) ?? null),
+    ),
     findMembership: jest.fn(async (tenant, globalUserId) => {
       await new Promise((resolve) =>
         setTimeout(resolve, tenant.tenantId === 'tenant-a' ? 20 : 5),
@@ -209,7 +211,7 @@ describe('Account farm hierarchy isolation (e2e)', () => {
       }),
     ).rejects.toMatchObject({ code: 'executionContextMissing' });
 
-    expect(registry.findById).not.toHaveBeenCalled();
-    expect(registry.findMembership).not.toHaveBeenCalled();
+    expect(registry.findById.mock.calls).toHaveLength(0);
+    expect(registry.findMembership.mock.calls).toHaveLength(0);
   });
 });

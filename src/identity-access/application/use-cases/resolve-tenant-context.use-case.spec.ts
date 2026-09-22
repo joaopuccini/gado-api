@@ -36,6 +36,9 @@ const membership = (
   farms: [
     {
       farmId: 10,
+      parentId: null,
+      active: true,
+      role: 'DONO',
       permissions: ['animals.read', 'animals.write'],
     },
   ],

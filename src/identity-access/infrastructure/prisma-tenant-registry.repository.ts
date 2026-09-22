@@ -115,8 +115,11 @@ export class PrismaTenantRegistryRepository implements TenantRegistryRepository 
       localUserId: localUser.id,
       farms: localUser.fazendas
         .filter(({ fazenda }) => fazenda.ativo)
-        .map(({ fazendaId, role }) => ({
+        .map(({ fazendaId, role, fazenda }) => ({
           farmId: fazendaId,
+          parentId: fazenda.parentId,
+          active: true,
+          role,
           permissions: [
             ...new Set([
               ...getPermissionsForRole(role as FazendaRole),

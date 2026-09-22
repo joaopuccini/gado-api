@@ -16,6 +16,9 @@ export interface TenantRegistryRecord {
 
 export interface TenantFarmMembership {
   farmId: number;
+  parentId: number | null;
+  active: boolean;
+  role: string;
   permissions: readonly string[];
 }
 
