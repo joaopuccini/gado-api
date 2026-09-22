@@ -9,6 +9,7 @@ import type {
   FarmAccessRepository,
   FarmSessionIssuer,
 } from '../ports/farm-session.ports';
+import { FarmHierarchyPolicy } from '../../domain/farm-hierarchy.policy';
 import { CreateFarmUseCase } from './create-farm.use-case';
 import { DeactivateFarmUseCase } from './deactivate-farm.use-case';
 import { ListFarmsUseCase } from './list-farms.use-case';
@@ -45,6 +46,14 @@ class InMemoryFarmRepository implements FarmRepository {
     [CHILD_FARM.id, CHILD_FARM],
     [INACTIVE_FARM.id, INACTIVE_FARM],
   ]);
+
+  async listHierarchy() {
+    return [...this.farms.values()].map(({ id, parentId, active }) => ({
+      id,
+      parentId,
+      active,
+    }));
+  }
 
   async listAccessible(
     farmIds: readonly number[],
@@ -122,7 +131,11 @@ describe('farm management use cases', () => {
   });
 
   it('creates an active farm for the verified local owner', async () => {
-    const useCase = new CreateFarmUseCase(farms, context);
+    const useCase = new CreateFarmUseCase(
+      farms,
+      new FarmHierarchyPolicy(),
+      context,
+    );
 
     const result = await context.run(TENANT_CONTEXT, () =>
       useCase.execute({ name: 'Fazenda Norte', parentId: 10 }),
@@ -139,6 +152,21 @@ describe('farm management use cases', () => {
     ]);
   });
 
+  it('rejects creating a farm below another child', async () => {
+    const useCase = new CreateFarmUseCase(
+      farms,
+      new FarmHierarchyPolicy(),
+      context,
+    );
+
+    await expect(
+      context.run(TENANT_CONTEXT, () =>
+        useCase.execute({ name: 'Neta inválida', parentId: 20 }),
+      ),
+    ).rejects.toMatchObject({ code: 'invalidFarmHierarchy' });
+    expect(farms.createInputs).toEqual([]);
+  });
+
   it('lists only active farms authorized by the current context', async () => {
     const useCase = new ListFarmsUseCase(farms, context);
 
@@ -148,7 +176,11 @@ describe('farm management use cases', () => {
   });
 
   it('updates an accessible active farm', async () => {
-    const useCase = new UpdateFarmUseCase(farms, context);
+    const useCase = new UpdateFarmUseCase(
+      farms,
+      new FarmHierarchyPolicy(),
+      context,
+    );
 
     const result = await context.run(TENANT_CONTEXT, () =>
       useCase.execute({ farmId: 20, name: 'Fazenda Sul Renovada' }),
@@ -161,7 +193,11 @@ describe('farm management use cases', () => {
   });
 
   it('rejects an update outside accessibleFarmIds', async () => {
-    const useCase = new UpdateFarmUseCase(farms, context);
+    const useCase = new UpdateFarmUseCase(
+      farms,
+      new FarmHierarchyPolicy(),
+      context,
+    );
 
     await expect(
       context.run(TENANT_CONTEXT, () =>
