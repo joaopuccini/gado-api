@@ -12,6 +12,13 @@ const accountReadPaths = [
   '/api/v1/account/subscription',
 ] as const;
 
+const teamSelfServiceOperations = [
+  ['get', '/api/v1/account/team'],
+  ['post', '/api/v1/account/team/invitations'],
+  ['post', '/api/v1/account/team/invitations/{invitationId}/resend'],
+  ['delete', '/api/v1/account/team/invitations/{invitationId}'],
+] as const;
+
 const asRecord = (value: unknown): Record<string, unknown> | undefined =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
     ? (value as Record<string, unknown>)
@@ -115,6 +122,19 @@ describe('Account OpenAPI contract', () => {
       expect(successSchema).toContain('ApiSuccessDto');
       expect(successSchema).not.toMatch(
         /schemaName|senha|password|token|prisma/i,
+      );
+    },
+  );
+
+  it.each(teamSelfServiceOperations)(
+    'publishes the safe team self-service operation %s %s',
+    (method, path) => {
+      const pathItem = document.paths[path];
+      expect(pathItem).toBeDefined();
+      const operation = asRecord(pathItem?.[method]);
+      expect(operation).toBeDefined();
+      expect(JSON.stringify(operation)).not.toMatch(
+        /tokenHash|plainToken|schemaName|senha|password|prisma/i,
       );
     },
   );
