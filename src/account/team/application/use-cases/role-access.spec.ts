@@ -57,9 +57,12 @@ describe('account role access matrix', () => {
 
     for (const capability of entry.denied) {
       expect(policy.can(entry.role, capability)).toBe(false);
-      expect(() => policy.assert(entry.role, capability)).toThrow(
-        expect.objectContaining({ code: 'forbidden' }),
-      );
+      try {
+        policy.assert(entry.role, capability);
+        throw new Error('expected access denial');
+      } catch (error) {
+        expect(error).toMatchObject({ code: 'forbidden' });
+      }
     }
   });
 
