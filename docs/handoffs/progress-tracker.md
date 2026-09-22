@@ -113,20 +113,20 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 
 ## Onda 01 — Dois Frontends e Plataforma Compartilhada
 
-**Status: ⬜ NÃO INICIADA** | Repo: `gado-web` | Dependência: Onda 00 ✅ + Contratos da Onda 02
+**Status: ✅ CONCLUÍDA** | Repo: `gado-web` | Dependência: Onda 00 ✅ + Contratos da Onda 02 ✅ | Evidência: `gado-web/docs/testing/wave-01-frontend-platform.tdd.md`
 
 ### Task 1.1: Criar workspace e builds independentes
 
 | # | Sub-item | Status | Commit | Arquivo(s) |
 |---|---|---|---|---|
-| 1.1.1 | **RED**: teste que falha quando imports de `gado-app` alcançam `gado-admin` | `[ ]` | | `import-boundaries.spec.ts` |
-| 1.1.2 | **RED**: smoke tests separados para `/login` do cliente e `/login` admin | `[ ]` | | `app-login.spec.ts`, `admin-login.spec.ts` |
-| 1.1.3 | Criar estrutura: `apps/gado-app`, `apps/gado-admin`, `packages/*` | `[ ]` | | `package.json`, `tsconfig.json` |
-| 1.1.4 | Mover shell para deixar testes verdes | `[ ]` | | |
-| 1.1.5 | **GREEN**: `npm run build:app` e `npm run build:admin` geram diretórios distintos | `[ ]` | | |
-| 1.1.6 | Registrar RED/GREEN em `docs/testing/wave-01-frontend-platform.tdd.md` | `[ ]` | | |
+| 1.1.1 | **RED**: teste que falha quando imports de `gado-app` alcançam `gado-admin` | `[x]` | 0ff4e05 | `workspace-boundaries.spec.ts` |
+| 1.1.2 | **RED**: smoke tests separados para `/login` do cliente e `/login` admin | `[x]` | 129501f | `app-router.spec.tsx`, `admin-router.spec.tsx` |
+| 1.1.3 | Criar estrutura: `apps/gado-app`, `apps/gado-admin`, `packages/*` | `[x]` | 0619ab2, 129501f | `package.json`, `tsconfig.json`, `apps/*`, `packages/*` |
+| 1.1.4 | Mover shell para deixar testes verdes | `[x]` | eb18724 | layouts, páginas e componentes isolados por app |
+| 1.1.5 | **GREEN**: `npm run build:app` e `npm run build:admin` geram diretórios distintos | `[x]` | 129501f, 80a13ff | `dist/gado-app`, `dist/gado-admin`, bundle gate |
+| 1.1.6 | Registrar RED/GREEN em `docs/testing/wave-01-frontend-platform.tdd.md` | `[x]` | 4b3e4f0 | relatório final com coverage e hashes |
 
-**Task 1.1 concluída?** `[ ]` | **Evidência:** |
+**Task 1.1 concluída?** `[x]` | **Evidência:** builds independentes, fronteiras 7/7 e isolamento de bundles verdes |
 
 ---
 
@@ -134,15 +134,15 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 
 | # | Sub-item | Status | Commit | Arquivo(s) |
 |---|---|---|---|---|
-| 1.2.1 | Gerar tipos a partir do OpenAPI aprovado | `[ ]` | | `packages/contracts` |
-| 1.2.2 | **RED**: testes do client HTTP (token, requestId, tenant, envelopes) | `[ ]` | | `api-client.spec.ts` |
-| 1.2.3 | **GREEN**: implementar client HTTP central | `[ ]` | | `packages/api-client` |
-| 1.2.4 | **RED**: testes de expiração, logout, 401, 403, 400, 500 | `[ ]` | | `error-handling.spec.ts` |
-| 1.2.5 | **GREEN**: implementar handling de erros | `[ ]` | | |
-| 1.2.6 | Implementar route guards visuais (autorização real no backend) | `[ ]` | | `packages/auth` |
-| 1.2.7 | Regra de lint: proibir `axios.create` fora de `packages/api-client` | `[ ]` | | `.eslintrc` |
+| 1.2.1 | Gerar tipos a partir do OpenAPI aprovado | `[x]` | 278d248 | `packages/contracts` |
+| 1.2.2 | **RED**: testes do client HTTP (token, requestId, tenant, envelopes) | `[x]` | 40e8873 | `api-client.spec.ts` |
+| 1.2.3 | **GREEN**: implementar client HTTP central | `[x]` | 40e8873 | `packages/api-client` |
+| 1.2.4 | **RED**: testes de expiração, logout, 401, 403, 400, 500 | `[x]` | 40e8873, 2f266f9 | client e sessão cobertos |
+| 1.2.5 | **GREEN**: implementar handling de erros | `[x]` | 40e8873 | `GadoApiError` e envelopes normalizados |
+| 1.2.6 | Implementar route guards visuais (autorização real no backend) | `[x]` | 2f266f9 | `packages/auth` |
+| 1.2.7 | Regra de lint: proibir `axios.create` fora de `packages/api-client` | `[x]` | 0ff4e05, eb18724 | gate arquitetural e `check:network` |
 
-**Task 1.2 concluída?** `[ ]` | **Evidência:** |
+**Task 1.2 concluída?** `[x]` | **Evidência:** contratos determinísticos, client central, sessões/audiences isoladas e rede sem callers avulsos |
 
 ---
 
@@ -150,13 +150,13 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 
 | Critério | Status |
 |---|---|
-| Dois apps fazem build independente | `[ ]` |
-| Admin não está no bundle do cliente | `[ ]` |
-| Nenhuma tela usa API mockada | `[ ]` |
-| Client HTTP central funciona com contratos gerados | `[ ]` |
-| Coverage da mudança ≥ 80% | `[ ]` |
+| Dois apps fazem build independente | `[x]` |
+| Admin não está no bundle do cliente | `[x]` |
+| Nenhuma tela usa API mockada | `[x]` |
+| Client HTTP central funciona com contratos gerados | `[x]` |
+| Coverage da mudança ≥ 80% | `[x]` |
 
-**Onda 01 concluída?** `[ ]` | **Handoff criado?** `[ ]` (`docs/handoffs/YYYY-MM-DD-wave-01-complete.md`)
+**Onda 01 concluída?** `[x]` | **Handoff criado?** `[x]` (`docs/handoffs/2026-09-22-wave-01-complete.md`)
 
 ---
 
@@ -265,6 +265,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 2026-09-20 22:25 | Codex GPT-5 | 02 | Onda 02 Task 2.3.15 | Onda 02 Task 2.3.16 | GREEN focal, build, contrato e arquitetura passaram; integração bloqueada com segurança porque `TEST_DATABASE_URL` descartável está ausente |
 | 2026-09-21 03:58 | Codex GPT-5 | 02 | Onda 02 Task 2.3.16 e Task 7A | Gate G1 lint | Integração descartável 2/2 e composição admin GREEN; gate global parou em 62 erros de lint preexistentes, sem deixar autofixes pendentes |
 | 2026-09-21 09:13 | Codex GPT-5 | 02 | Onda 02 completa (G1 pass) | Onda 01 Task 1.1 | Lint, build, 147 unitários, arquitetura 23, contrato 9, integração 2, migrations 3, isolamento 8, coverage ≥80%, no-skipped e tipos verdes em banco descartável |
+| 2026-09-22 00:50 | Codex GPT-5 | 01 | Onda 01 completa (G1-frontend pass) | Onda 03 Task 3.1.1 | CI, contratos, lint, tipos, arquitetura 7/7, coverage 62/62 ≥80%, builds, rede e bundles verdes; handoff criado |
 
 ---
 
