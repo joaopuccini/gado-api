@@ -223,15 +223,19 @@ model Convite {
   email           String        @db.VarChar(150)
   organizacaoId   String        @map("organizacao_id") @db.Uuid
   convidadoPorId  String        @map("convidado_por_id") @db.Uuid
-  token           String        @unique @db.VarChar(255)
+  tokenHash       String        @map("token_hash") @unique @db.VarChar(255)
   role            RoleOrganizacao @default(CONVIDADO)
   status          StatusConvite @default(PENDENTE)
   expiresAt       DateTime      @map("expires_at") @db.Timestamptz(6)
   createdAt       DateTime      @map("created_at") @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime      @map("updated_at") @updatedAt @db.Timestamptz(6)
+  acceptedAt      DateTime?     @map("accepted_at") @db.Timestamptz(6)
+  revokedAt       DateTime?     @map("revoked_at") @db.Timestamptz(6)
 
   organizacao  Organizacao   @relation(fields: [organizacaoId], references: [id])
   convidadoPor UsuarioGlobal @relation("ConviteConvidadoPor", fields: [convidadoPorId], references: [id])
 
+  @@index([organizacaoId, email, status], map: "convites_organizacao_email_status_idx")
   @@map("convites")
   @@schema("gado_admin")
 }

@@ -28,9 +28,15 @@ interface InvitationRepository {
     email: string,
   ): Promise<InvitationRecord | null>;
   findByTokenHash(tokenHash: string): Promise<InvitationRecord | null>;
+  findById(id: string): Promise<InvitationRecord | null>;
   create(input: Omit<InvitationRecord, 'id'>): Promise<InvitationRecord>;
   accept(id: string, acceptedAt: Date): Promise<InvitationRecord>;
   revoke(id: string, revokedAt: Date): Promise<InvitationRecord>;
+  replacePending(
+    currentId: string,
+    revokedAt: Date,
+    replacement: Omit<InvitationRecord, 'id'>,
+  ): Promise<InvitationRecord>;
 }
 
 interface InvitationOutbox {
@@ -45,38 +51,55 @@ interface InvitationOutbox {
 class MemoryInvitationRepository implements InvitationRepository {
   readonly records: InvitationRecord[] = [];
 
-  async findPending(
+  findPending(
     organizationId: string,
     email: string,
   ): Promise<InvitationRecord | null> {
-    return (
+    return Promise.resolve(
       this.records.find(
         (record) =>
           record.organizationId === organizationId &&
           record.email === email &&
           record.status === 'pending',
-      ) ?? null
+      ) ?? null,
     );
   }
 
-  async findByTokenHash(tokenHash: string): Promise<InvitationRecord | null> {
-    return this.records.find((record) => record.tokenHash === tokenHash) ?? null;
+  findByTokenHash(tokenHash: string): Promise<InvitationRecord | null> {
+    return Promise.resolve(
+      this.records.find((record) => record.tokenHash === tokenHash) ?? null,
+    );
   }
 
-  async create(
-    input: Omit<InvitationRecord, 'id'>,
-  ): Promise<InvitationRecord> {
+  findById(id: string): Promise<InvitationRecord | null> {
+    return Promise.resolve(
+      this.records.find((record) => record.id === id) ?? null,
+    );
+  }
+
+  create(input: Omit<InvitationRecord, 'id'>): Promise<InvitationRecord> {
     const record = { ...input, id: `invitation-${this.records.length + 1}` };
     this.records.push(record);
-    return record;
+    return Promise.resolve(record);
   }
 
-  async accept(id: string, acceptedAt: Date): Promise<InvitationRecord> {
-    return this.replace(id, { status: 'accepted', acceptedAt });
+  accept(id: string, acceptedAt: Date): Promise<InvitationRecord> {
+    return Promise.resolve(
+      this.replace(id, { status: 'accepted', acceptedAt }),
+    );
   }
 
-  async revoke(id: string, revokedAt: Date): Promise<InvitationRecord> {
-    return this.replace(id, { status: 'revoked', revokedAt });
+  revoke(id: string, revokedAt: Date): Promise<InvitationRecord> {
+    return Promise.resolve(this.replace(id, { status: 'revoked', revokedAt }));
+  }
+
+  async replacePending(
+    currentId: string,
+    revokedAt: Date,
+    replacement: Omit<InvitationRecord, 'id'>,
+  ): Promise<InvitationRecord> {
+    this.replace(currentId, { status: 'revoked', revokedAt });
+    return this.create(replacement);
   }
 
   private replace(
@@ -122,7 +145,9 @@ describe('Invitation lifecycle', () => {
     context,
     clock: { now: () => NOW },
     tokens: { generate: () => `plain-token-${++nextToken}` },
-    hasher: { hash: (token: string) => `hash:${token}` },
+    hasher: {
+      hash: (token: string) => Buffer.from(token).toString('base64'),
+    },
   });
 
   const run = <T>(callback: () => Promise<T>, organizationId?: string) =>
@@ -152,19 +177,23 @@ describe('Invitation lifecycle', () => {
       organizationId: 'organization-a',
       email: 'member@example.com',
       invitedByGlobalUserId: 'owner-a',
-      tokenHash: 'hash:plain-token-1',
+      tokenHash: 'cGxhaW4tdG9rZW4tMQ==',
       status: 'pending',
       expiresAt: EXPIRES_AT,
     });
     expect(JSON.stringify(invitations.records[0])).not.toContain(
       'plain-token-1',
     );
-    expect(outbox.enqueue).toHaveBeenCalledWith({
-      invitationId: 'invitation-1',
-      organizationId: 'organization-a',
-      email: 'member@example.com',
-      plainToken: 'plain-token-1',
-    });
+    expect(outbox.enqueue.mock.calls).toEqual([
+      [
+        {
+          invitationId: 'invitation-1',
+          organizationId: 'organization-a',
+          email: 'member@example.com',
+          plainToken: 'plain-token-1',
+        },
+      ],
+    ]);
   });
 
   it('rejects a duplicate pending email in the same organization', async () => {
@@ -201,7 +230,7 @@ describe('Invitation lifecycle', () => {
       email: 'member@example.com',
       invitedByGlobalUserId: 'owner-a',
       role: 'MEMBRO',
-      tokenHash: 'hash:expired-token',
+      tokenHash: 'ZXhwaXJlZC10b2tlbg==',
       status: 'pending',
       expiresAt: new Date('2026-09-22T14:59:59.000Z'),
       acceptedAt: null,
