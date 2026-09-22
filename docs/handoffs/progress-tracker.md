@@ -172,8 +172,8 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 |---|---|---|---|---|
 | 3.1.1 | **RED**: CRUD de fazenda (criação, edição, seleção, ativo/inativo) | `[x]` | b64cdf2, 87752e0, b8df121, 9217c34 | UseCases, adapter, HTTP e composição especificados antes da implementação |
 | 3.1.2 | **GREEN**: implementar UseCase de fazenda | `[x]` | ef38e7a, 6fcccdf, 94f4513, 2c08aa3 | 166/166 unitários, arquitetura 23/23 e build verdes |
-| 3.1.3 | **RED**: hierarquia matriz/filiais e escopo de acesso | `[ ]` | | `fazenda-hierarchy.spec.ts` |
-| 3.1.4 | **GREEN**: substituir `HierarchyInterceptor` por policy/UseCase | `[ ]` | | |
+| 3.1.3 | **RED**: hierarquia matriz/filiais e escopo de acesso | `[x]` | 9e6d81f | `farm-hierarchy.policy.spec.ts` |
+| 3.1.4 | **GREEN**: substituir `HierarchyInterceptor` por policy/UseCase | `[ ]` | fea521b | Policy pura 8/8 e arquitetura 23/23; integração, migration e gate descartável pendentes |
 | 3.1.5 | **RED**: pai autorizado vê filhas permitidas, nunca vê fazenda de outro tenant | `[ ]` | | `fazenda-isolation.spec.ts` |
 | 3.1.6 | **GREEN**: implementar isolamento | `[ ]` | | |
 
@@ -271,6 +271,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 2026-09-22 09:30 | Codex GPT-5 | 03 | Plano detalhado da Onda 03 criado | Onda 03 Task 3.1.1 RED | `main` de API e web enviadas ao remoto; implementação preservada como não iniciada; setup da worktree de plano bloqueado por `npm ci`/Windows e deve ser refeito antes do RED |
 | 2026-09-22 10:05 | Codex GPT-5 | 03 | Onda 03 Task 3.1.1 | Onda 03 Task 3.1.2 continuação | CRUD/seleção especificados em `b64cdf2`; núcleo dos UseCases GREEN em `ef38e7a`; adapter Prisma, DTOs, controller e composição ainda pendentes |
 | 2026-09-22 10:35 | Codex GPT-5 | 03 | Onda 03 Task 3.1.2 | Onda 03 Task 3.1.3 RED | Adapter transacional, DTOs camelCase validados, controller protegido e módulo DI concluídos; 166/166 unitários, arquitetura 23/23 e build verdes |
+| 2026-09-22 11:00 | Codex GPT-5 | 03 | Onda 03 Task 3.1.3 | Onda 03 Task 3.1.4 continuação | Policy GREEN 8/8 em `fea521b`; `TEST_DATABASE_URL` descartável ausente, portanto migration/gate não foram iniciados nem contornados |
 
 ---
 
