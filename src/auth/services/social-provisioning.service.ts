@@ -120,7 +120,7 @@ export class SocialProvisioningService {
     // 6. Criar dados iniciais no tenant (UsuarioLocal + Fazenda + Perfil)
     const tenantClient = this.tenantClientFactory.create(tenantSchema);
     const adminPerfil = await tenantClient.perfil.findUnique({
-      where: { nome: 'Administrador' },
+      where: { systemRole: FazendaRole.DONO },
     });
     if (!adminPerfil) {
       throw new DomainError(

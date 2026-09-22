@@ -76,7 +76,9 @@ class MemoryProfileRepository implements ProfileRepository {
   }
 
   findActivePermissionIds(ids: readonly number[]): Promise<readonly number[]> {
-    return Promise.resolve(ids.filter((id) => this.activePermissionIds.has(id)));
+    return Promise.resolve(
+      ids.filter((id) => this.activePermissionIds.has(id)),
+    );
   }
 
   create(input: {

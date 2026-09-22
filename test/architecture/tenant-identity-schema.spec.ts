@@ -22,7 +22,7 @@ describe('tenant identity schema migration', () => {
     const schema = readRepositoryFile('prisma/tenant/schema.prisma');
 
     expect(schema).toMatch(
-      /model Usuario \{[\s\S]*senhaHash\s+String\s+@map\("senha_hash"\)[\s\S]*perfilId\s+Int\?\s+@map\("perfil_id"\)[\s\S]*createdAt\s+DateTime\s+@default\(now\(\)\)\s+@map\("created_at"\)[\s\S]*updatedAt\s+DateTime\s+@updatedAt\s+@map\("updated_at"\)[\s\S]*@@map\("usuarios"\)/,
+      /model Usuario \{[\s\S]*senhaHash\s+String\?\s+@map\("senha_hash"\)[\s\S]*perfilId\s+Int\?\s+@map\("perfil_id"\)[\s\S]*createdAt\s+DateTime\s+@default\(now\(\)\)\s+@map\("created_at"\)[\s\S]*updatedAt\s+DateTime\s+@updatedAt\s+@map\("updated_at"\)[\s\S]*@@map\("usuarios"\)/,
     );
     expect(schema).toMatch(
       /model UsuarioFazenda \{[\s\S]*usuarioId\s+Int\s+@map\("usuario_id"\)[\s\S]*fazendaId\s+Int\s+@map\("fazenda_id"\)[\s\S]*createdAt\s+DateTime\s+@default\(now\(\)\)\s+@map\("created_at"\)[\s\S]*@@unique\(\[usuarioId, fazendaId\]\)[\s\S]*@@map\("usuario_fazenda"\)/,

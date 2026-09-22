@@ -32,7 +32,8 @@ model Permissao {
 
 model Perfil {
   id         Int          @id @default(autoincrement())
-  nome       String       @unique @db.VarChar(100)
+  fazendaId  Int?         @map("fazenda_id")
+  nome       String       @db.VarChar(100)
   descricao  String?
   systemRole RoleFazenda? @unique @map("system_role")
   ativo      Boolean      @default(true)
@@ -41,7 +42,9 @@ model Perfil {
 
   permissoes PerfilPermissao[]
   usuarios   Usuario[]
+  fazenda    Fazenda?            @relation(fields: [fazendaId], references: [id], onDelete: Cascade)
 
+  @@unique([fazendaId, nome], map: "perfis_fazenda_id_nome_key")
   @@map("perfis")
 }
 
@@ -79,7 +82,7 @@ model Usuario {
   globalUserId String?  @unique @map("global_user_id") @db.Uuid
   nome         String   @db.VarChar(200)
   email        String   @unique @db.VarChar(150)
-  senhaHash    String   @map("senha_hash") @db.VarChar(255)
+  senhaHash    String?  @map("senha_hash") @db.VarChar(255)
   celular      String?  @db.VarChar(20)
   perfilId     Int?     @map("perfil_id")
   ativo        Boolean  @default(true)
@@ -120,6 +123,7 @@ model Fazenda {
   updatedAt        DateTime @updatedAt @db.Timestamp(6)
 
   usuarios        UsuarioFazenda[]
+  perfis          Perfil[]
   animais         Animal[]
   pastos          Pasto[]
   lotes           Lote[]

@@ -60,6 +60,7 @@ describe('tenant schema upgrade and retry', () => {
       '202609170001_modelar_identidades_tenant',
       '202609171600_add_system_profile_role',
       '202609171610_add_tenant_bootstrap_keys',
+      '202609220001_harden_farm_hierarchy',
       TENANT_CURRENT_VERSION,
     ]);
     await repository.apply(schema, migrations[0]);
@@ -89,8 +90,8 @@ describe('tenant schema upgrade and retry', () => {
     `);
 
     expect(retry.rows).toEqual(firstApplication.rows);
-    expect(retry.rows).toHaveLength(6);
-    expect(logger.info.mock.calls).toHaveLength(6);
+    expect(retry.rows).toHaveLength(7);
+    expect(logger.info.mock.calls).toHaveLength(7);
 
     await expect(
       repository.apply(schema, {
