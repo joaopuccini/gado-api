@@ -192,7 +192,7 @@ describe('farm management use cases', () => {
       globalUserId: TENANT_CONTEXT.globalUserId,
       tenantId: TENANT_CONTEXT.tenantId,
       organizationId: TENANT_CONTEXT.organizationId,
-      schemaName: TENANT_CONTEXT.schemaName,
+      schemaName: expect.objectContaining({ value: TENANT_CONTEXT.schemaName }),
       localUserId: 7,
       farmId: 20,
       role: 'GESTOR',

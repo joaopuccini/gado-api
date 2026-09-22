@@ -15,7 +15,7 @@ export interface FarmSessionClaims {
   readonly globalUserId: string;
   readonly tenantId: string;
   readonly organizationId: string;
-  readonly schemaName: string;
+  readonly schemaName: TenantSchemaName;
   readonly localUserId: number;
   readonly farmId: number;
   readonly role: string;
@@ -30,3 +30,4 @@ export interface IssuedFarmSession {
 export interface FarmSessionIssuer {
   sign(input: FarmSessionClaims): Promise<IssuedFarmSession>;
 }
+import type { TenantSchemaName } from '../../../../tenant/domain/tenant-schema-name';
