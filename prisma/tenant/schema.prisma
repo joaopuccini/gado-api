@@ -153,6 +153,7 @@ model Fazenda {
   transferenciasOrigem  TransferenciaAnimal[] @relation("TransferenciaOrigem")
   transferenciasDestino TransferenciaAnimal[] @relation("TransferenciaDestino")
 
+  @@index([parentId, ativo], map: "fazendas_parent_id_ativo_idx")
   @@map("fazendas")
 }
 
@@ -168,6 +169,7 @@ model UsuarioFazenda {
   fazenda Fazenda @relation(fields: [fazendaId], references: [id], onDelete: Cascade)
 
   @@unique([usuarioId, fazendaId])
+  @@index([usuarioId, ativo, fazendaId], map: "usuario_fazenda_usuario_id_ativo_fazenda_id_idx")
   @@map("usuario_fazenda")
 }
 
