@@ -67,7 +67,10 @@ describe('PlanLimitPolicy', () => {
   it('allows the next user and farm while active counts are below limits', async () => {
     await expect(run(() => policy.assertCanAddUser())).resolves.toBeUndefined();
     await expect(run(() => policy.assertCanAddFarm())).resolves.toBeUndefined();
-    expect(subscriptions.findLimits).toHaveBeenCalledWith('organization-a');
+    expect(subscriptions.findLimits.mock.calls).toEqual([
+      ['organization-a'],
+      ['organization-a'],
+    ]);
   });
 
   it('rejects the next active user when count equals maxUsers', async () => {
