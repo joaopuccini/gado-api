@@ -41,8 +41,13 @@ const BATCH: BatchView = {
 class InMemoryHerdCatalogRepository implements HerdCatalogRepository {
   readonly breedCreates: string[] = [];
   readonly batchCreates: CreateBatchRecord[] = [];
-  readonly breedUpdates: Array<{ id: number; input: UpdateDescriptionRecord }> = [];
-  readonly batchUpdates: Array<{ id: number; farmId: number; input: UpdateDescriptionRecord }> = [];
+  readonly breedUpdates: Array<{ id: number; input: UpdateDescriptionRecord }> =
+    [];
+  readonly batchUpdates: Array<{
+    id: number;
+    farmId: number;
+    input: UpdateDescriptionRecord;
+  }> = [];
   readonly breedDeactivations: number[] = [];
   readonly batchDeactivations: Array<{ id: number; farmId: number }> = [];
   breedHasActiveAnimals = false;
@@ -76,11 +81,17 @@ class InMemoryHerdCatalogRepository implements HerdCatalogRepository {
   }
 
   listBatches(farmId: number, request: PageRequest): Promise<Page<BatchView>> {
-    return Promise.resolve({ data: [{ ...BATCH, farmId }], total: 1, ...request });
+    return Promise.resolve({
+      data: [{ ...BATCH, farmId }],
+      total: 1,
+      ...request,
+    });
   }
 
   findBatch(id: number, farmId: number): Promise<BatchView | null> {
-    return Promise.resolve(id === BATCH.id && farmId === BATCH.farmId ? BATCH : null);
+    return Promise.resolve(
+      id === BATCH.id && farmId === BATCH.farmId ? BATCH : null,
+    );
   }
 
   createBatch(input: CreateBatchRecord): Promise<BatchView> {
@@ -88,9 +99,18 @@ class InMemoryHerdCatalogRepository implements HerdCatalogRepository {
     return Promise.resolve({ ...BATCH, ...input });
   }
 
-  updateBatch(id: number, farmId: number, input: UpdateDescriptionRecord): Promise<BatchView> {
+  updateBatch(
+    id: number,
+    farmId: number,
+    input: UpdateDescriptionRecord,
+  ): Promise<BatchView> {
     this.batchUpdates.push({ id, farmId, input });
-    return Promise.resolve({ ...BATCH, id, farmId, description: input.description });
+    return Promise.resolve({
+      ...BATCH,
+      id,
+      farmId,
+      description: input.description,
+    });
   }
 
   hasActiveAnimalsForBatch(): Promise<boolean> {
@@ -115,26 +135,38 @@ describe('herd catalog management', () => {
   });
 
   it('normalizes required descriptions when creating breeds and batches', async () => {
-    await context.run(TENANT_CONTEXT, () => useCase.createBreed({ description: '  Nelore  ' }));
-    await context.run(TENANT_CONTEXT, () => useCase.createBatch({ description: '  Recria  ' }));
+    await context.run(TENANT_CONTEXT, () =>
+      useCase.createBreed({ description: '  Nelore  ' }),
+    );
+    await context.run(TENANT_CONTEXT, () =>
+      useCase.createBatch({ description: '  Recria  ' }),
+    );
 
     expect(repository.breedCreates).toEqual(['Nelore']);
-    expect(repository.batchCreates).toEqual([{ farmId: 10, description: 'Recria' }]);
+    expect(repository.batchCreates).toEqual([
+      { farmId: 10, description: 'Recria' },
+    ]);
   });
 
   it('rejects blank descriptions before persistence', async () => {
     await expect(
-      context.run(TENANT_CONTEXT, () => useCase.createBreed({ description: '   ' })),
+      context.run(TENANT_CONTEXT, () =>
+        useCase.createBreed({ description: '   ' }),
+      ),
     ).rejects.toMatchObject({ code: 'validationFailed' });
     expect(repository.breedCreates).toEqual([]);
   });
 
   it('returns deterministic paginated breed and selected-farm batch lists', async () => {
     await expect(
-      context.run(TENANT_CONTEXT, () => useCase.listBreeds({ page: 2, limit: 10 })),
+      context.run(TENANT_CONTEXT, () =>
+        useCase.listBreeds({ page: 2, limit: 10 }),
+      ),
     ).resolves.toEqual({ data: [BREED], page: 2, limit: 10, total: 1 });
     await expect(
-      context.run(TENANT_CONTEXT, () => useCase.listBatches({ page: 3, limit: 5 })),
+      context.run(TENANT_CONTEXT, () =>
+        useCase.listBatches({ page: 3, limit: 5 }),
+      ),
     ).resolves.toEqual({ data: [BATCH], page: 3, limit: 5, total: 1 });
   });
 
