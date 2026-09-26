@@ -82,12 +82,14 @@ export class PrismaHerdCatalogRepository implements HerdCatalogRepository {
     id: number,
     input: UpdateDescriptionRecord,
   ): Promise<BreedView> {
-    const value = await this.tenantPrisma.getClient().raca.update({
-      where: { id },
+    const result = await this.tenantPrisma.getClient().raca.updateMany({
+      where: { id, ativo: true },
       data: { descricao: input.description },
-      select: BREED_SELECT,
     });
-    return toBreed(value);
+    if (result.count !== 1) {
+      throw new DomainError('breedNotFound', 'Raça não encontrada.');
+    }
+    return await this.requireBreed(id);
   }
 
   async hasActiveAnimalsForBreed(id: number): Promise<boolean> {
@@ -99,12 +101,14 @@ export class PrismaHerdCatalogRepository implements HerdCatalogRepository {
   }
 
   async deactivateBreed(id: number): Promise<BreedView> {
-    const value = await this.tenantPrisma.getClient().raca.update({
-      where: { id },
+    const result = await this.tenantPrisma.getClient().raca.updateMany({
+      where: { id, ativo: true },
       data: { ativo: false },
-      select: BREED_SELECT,
     });
-    return toBreed(value);
+    if (result.count !== 1) {
+      throw new DomainError('breedNotFound', 'Raça não encontrada.');
+    }
+    return await this.requireBreed(id, false);
   }
 
   async listBatches(
@@ -189,5 +193,16 @@ export class PrismaHerdCatalogRepository implements HerdCatalogRepository {
       throw new DomainError('batchNotFound', 'Lote não encontrado.');
     }
     return toBatch(value);
+  }
+
+  private async requireBreed(id: number, active = true): Promise<BreedView> {
+    const value = await this.tenantPrisma.getClient().raca.findFirst({
+      where: { id, ativo: active },
+      select: BREED_SELECT,
+    });
+    if (!value) {
+      throw new DomainError('breedNotFound', 'Raça não encontrada.');
+    }
+    return toBreed(value);
   }
 }
