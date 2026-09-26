@@ -162,9 +162,9 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 
 ## Onda 03 — Conta, Fazendas, Equipe e Assinatura
 
-**Status: 🟡 EM ANDAMENTO** | Dependência: Onda 02 ✅
+**Status: 🟢 CONCLUÍDA** | Dependência: Onda 02 ✅
 
-**Plano ativo:** `docs/superpowers/plans/2026-09-22-wave-03-account.md` | Tasks 3.1, 3.2 e 7–10 concluídas; seguir pela Task 11, execução do Gate G2-account.
+**Plano executado:** `docs/superpowers/plans/2026-09-22-wave-03-account.md` | Tasks 3.1, 3.2 e 7–11 concluídas; seguir pelo planejamento da Onda 04.
 
 ### Task 3.1: Fazendas e hierarquia
 
@@ -242,12 +242,12 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 
 | Critério | Status |
 |---|---|
-| Proprietário administra organização pelo `gado-app` | `[ ]` |
-| Suporte usa somente `gado-admin` | `[ ]` |
-| Perfis customizados funcionam (ADR-0003) | `[ ]` |
-| Convites e limites de plano validados | `[ ]` |
+| Proprietário administra organização pelo `gado-app` | `[x]` |
+| Suporte usa somente `gado-admin` | `[x]` |
+| Perfis customizados funcionam (ADR-0003) | `[x]` |
+| Convites e limites de plano validados | `[x]` |
 
-**Onda 03 concluída?** `[ ]` | **Handoff criado?** `[ ]`
+**Onda 03 concluída?** `[x]` | **Handoff criado?** `[x]` (`docs/handoffs/2026-09-22-wave-03-complete.md`)
 
 ---
 
@@ -303,6 +303,7 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 | 2026-09-22 | Codex GPT-5 | 03 | Onda 03 Task 8 concluída | Onda 03 Task 9 RED | OpenAPI determinístico `358a685`; cliente RED `a178847`/GREEN `b4e3500`; spec 5/5, contratos, rede, lint, tipos e build do app verdes |
 | 2026-09-22 20:15 | Codex GPT-5 | 03 | Onda 03 Task 9 concluída | Onda 03 Task 10 RED | Correção backend RED `ed658bd`/GREEN `805c797`, migrations 3/3 em banco filho removido; páginas RED `95d2f7c`, `d843f86`, `a083432`; GREEN `09ec654`, `18c45a0`, `ca7a4b0`; cliente de equipe RED `97b3893`/GREEN `c123166`; 16/16, lint, tipos, build, contratos e rede verdes |
 | 2026-09-22 20:22 | Codex GPT-5 | 03 | Onda 03 Task 10 concluída | Onda 03 Task 11 / Gate G2-account | Isolamento RED `eaf9956`/GREEN `c7615a4`; 7/7 testes web, 5/5 testes backend de audiência, builds app/admin, bundles, rede, lint e tipos verdes |
+| 2026-09-22 21:01 | Codex GPT-5 | 03 | Onda 03 completa (G2-account pass) | Planejar Onda 04 — Rebanho básico | Backend: 214 unitários, 23 arquitetura, 18 contrato, 2 integração, 11 isolamento, 3 migrations, coverage 246; frontend: 7 arquitetura, coverage 101, builds/rede/bundles verdes; todos os bancos filhos removidos |
 
 ---
 
