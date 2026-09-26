@@ -259,8 +259,8 @@ Plano ativo: `docs/superpowers/plans/2026-09-26-wave-04-herd.md`
 |---|---|---|---|
 | 4.1 | Paridade de raças e lotes especificada | `[x]` | RED `2d2651b`; GREEN `5a30abd`; 7/7 focal, arquitetura 23/23 e lint verdes |
 | 4.2 | Catálogos persistidos, protegidos e documentados | `[x]` | RED `3f0845b`; GREEN `dbeccf1`; focal 16/16, arquitetura 23/23, contrato 18/18, lint e build verdes |
-| 4.3 | Dependências e isolamento dos catálogos | `[ ]` | Próximo RED |
-| 4.4 | Domínio e contrato camelCase de animais | `[ ]` | — |
+| 4.3 | Dependências e isolamento dos catálogos | `[x]` | RED `e202477`; GREEN `c4c82f5`; adapter focal 4/4, concorrência 1/1 e arquitetura 23/23 verdes |
+| 4.4 | Domínio e contrato camelCase de animais | `[ ]` | Próximo RED |
 | 4.5 | Unicidade de brinco e compra transacional | `[ ]` | — |
 | 4.6 | API autenticada do ciclo de animais | `[ ]` | — |
 | 4.7 | Contrato gerado e cliente web | `[ ]` | — |
@@ -268,7 +268,7 @@ Plano ativo: `docs/superpowers/plans/2026-09-26-wave-04-herd.md`
 | 4.9 | Jornada de animais no `gado-app` | `[ ]` | — |
 | 4.10 | Isolamento concorrente e Gate G3-herd | `[ ]` | — |
 
-**Onda 04 concluída?** `[ ]` | **Próxima task:** 4.3 RED — dependências e isolamento concorrente
+**Onda 04 concluída?** `[ ]` | **Próxima task:** 4.4 RED — domínio e ciclo de animais
 
 ---
 
