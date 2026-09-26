@@ -16,18 +16,18 @@ fail-closed e usam apenas contexto verificado.
 
 ## Sequência RED/GREEN
 
-| Entrega | RED | GREEN | Evidência principal |
-|---|---|---|---|
-| CRUD e seleção de fazendas | `b64cdf2`, `87752e0`, `b8df121`, `9217c34` | `ef38e7a`, `6fcccdf`, `94f4513`, `2c08aa3` | UseCases, Prisma, HTTP e composição |
-| Hierarquia matriz/filial | `9e6d81f` | `fea521b`, `f2cbd07`, `9237b10` | policy antes do repository e migration aditiva |
-| Isolamento entre tenants/fazendas | `5e704f5` | `2389b66` | outro tenant e contexto ausente negados |
-| Convites | `df26ae5`, `ed658bd` | `f0cd00f`, `805c797` | token hash-only, aceite único, retry e outbox |
-| Limites de plano | `2b007d1` | `9c5e18f` | usuários/fazendas ativos e assinatura fail-closed |
-| Vínculos, perfis e papéis | `7c319f5`, `8967292`, `c6e54e1` | `4925021`, `e3785ea`, `b802230` | perfis customizados e matriz allow/deny |
-| Contrato público de conta | `7dc7dae` | `6f07d51` | DTOs seguros e OpenAPI `/account/*` |
-| Cliente web de conta | `a178847`, `97b3893` | `b4e3500`, `c123166` | transporte central e validação fail-closed |
-| Páginas de autosserviço | `95d2f7c`, `d843f86`, `a083432` | `09ec654`, `18c45a0`, `ca7a4b0` | conta, assinatura, fazendas e equipe |
-| Separação admin/cliente | `eaf9956` | `c7615a4` | rota, link, sessão, audience e bundle separados |
+| Entrega                           | RED                                        | GREEN                                      | Evidência principal                               |
+| --------------------------------- | ------------------------------------------ | ------------------------------------------ | ------------------------------------------------- |
+| CRUD e seleção de fazendas        | `b64cdf2`, `87752e0`, `b8df121`, `9217c34` | `ef38e7a`, `6fcccdf`, `94f4513`, `2c08aa3` | UseCases, Prisma, HTTP e composição               |
+| Hierarquia matriz/filial          | `9e6d81f`                                  | `fea521b`, `f2cbd07`, `9237b10`            | policy antes do repository e migration aditiva    |
+| Isolamento entre tenants/fazendas | `5e704f5`                                  | `2389b66`                                  | outro tenant e contexto ausente negados           |
+| Convites                          | `df26ae5`, `ed658bd`                       | `f0cd00f`, `805c797`                       | token hash-only, aceite único, retry e outbox     |
+| Limites de plano                  | `2b007d1`                                  | `9c5e18f`                                  | usuários/fazendas ativos e assinatura fail-closed |
+| Vínculos, perfis e papéis         | `7c319f5`, `8967292`, `c6e54e1`            | `4925021`, `e3785ea`, `b802230`            | perfis customizados e matriz allow/deny           |
+| Contrato público de conta         | `7dc7dae`                                  | `6f07d51`                                  | DTOs seguros e OpenAPI `/account/*`               |
+| Cliente web de conta              | `a178847`, `97b3893`                       | `b4e3500`, `c123166`                       | transporte central e validação fail-closed        |
+| Páginas de autosserviço           | `95d2f7c`, `d843f86`, `a083432`            | `09ec654`, `18c45a0`, `ca7a4b0`            | conta, assinatura, fazendas e equipe              |
+| Separação admin/cliente           | `eaf9956`                                  | `c7615a4`                                  | rota, link, sessão, audience e bundle separados   |
 
 O fechamento também removeu a dívida de lint do escopo em `d483d24`,
 estabilizou o harness remoto de migrations em `eba81ec` e elevou a cobertura
@@ -61,12 +61,12 @@ npm run test:no-skipped                          exit 0
 
 Coverage backend:
 
-| Métrica | Resultado | Mínimo |
-|---|---:|---:|
-| Statements | 90,20% | 80% |
-| Branches | 82,38% | 80% |
-| Functions | 85,07% | 80% |
-| Lines | 91,59% | 80% |
+| Métrica    | Resultado | Mínimo |
+| ---------- | --------: | -----: |
+| Statements |    90,20% |    80% |
+| Branches   |    82,38% |    80% |
+| Functions  |    85,07% |    80% |
+| Lines      |    91,59% |    80% |
 
 ## Gate frontend
 
@@ -84,12 +84,12 @@ npm run check:bundles                           exit 0
 
 Coverage frontend:
 
-| Métrica | Resultado | Mínimo |
-|---|---:|---:|
-| Statements | 89,15% | 80% |
-| Branches | 82,83% | 80% |
-| Functions | 91,04% | 80% |
-| Lines | 90,98% | 80% |
+| Métrica    | Resultado | Mínimo |
+| ---------- | --------: | -----: |
+| Statements |    89,15% |    80% |
+| Branches   |    82,83% |    80% |
+| Functions  |    91,04% |    80% |
+| Lines      |    90,98% |    80% |
 
 O comando `--runInBand` descrito no plano não é aceito pelo Vitest 4.1.11;
 os dois gates Vitest foram executados pelos scripts canônicos, sem essa opção.
@@ -120,4 +120,3 @@ validação.
   o isolamento de bundles passam. Code splitting fica como otimização futura.
 - `pg` avisa sobre a futura mudança semântica de `sslmode=require`; a conexão
   atual permaneceu verificada e todos os gates passaram.
-

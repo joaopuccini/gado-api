@@ -1,9 +1,12 @@
 # Handoff — Onda 03 concluída
 
-Data: 2026-09-22  
-Workspace: `C:\Users\Joao Puccini\Desktop\repositorios-git\gado`  
-API worktree: `gado-api\.worktrees\wave-03-account-plan`  
-Web worktree: `gado-web\.worktrees\wave-03-account`  
+Data: 2026-09-22
+
+Workspace: `C:\Users\Joao Puccini\Desktop\repositorios-git\gado`
+
+API worktree: `gado-api\.worktrees\wave-03-account-plan`
+
+Web worktree: `gado-web\.worktrees\wave-03-account`
 Branch nos dois repositórios: `feat/wave-03-account`
 
 ## Estado autoritativo
@@ -103,4 +106,3 @@ Confirmar o destino da branch com o fluxo de finalização, sincronizar o remoto
 e criar o plano detalhado da Onda 04. A Onda 04 deve iniciar por especificações
 RED de raças, lotes e animais, preservando paridade com o legado e isolamento
 tenant antes de qualquer implementação GREEN.
-
