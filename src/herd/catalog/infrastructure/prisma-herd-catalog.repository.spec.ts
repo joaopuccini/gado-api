@@ -84,4 +84,28 @@ describe('PrismaHerdCatalogRepository', () => {
       data: { ativo: false },
     });
   });
+
+  it('never updates or deactivates an already inactive breed', async () => {
+    const updateMany = jest.fn().mockResolvedValue({ count: 0 });
+    const tenantPrisma = {
+      getClient: () => ({ raca: { updateMany } }),
+    } as unknown as TenantPrismaService;
+    const repository = new PrismaHerdCatalogRepository(tenantPrisma);
+
+    await expect(
+      repository.updateBreed(9, { description: 'Indisponível' }),
+    ).rejects.toMatchObject({ code: 'breedNotFound' });
+    await expect(repository.deactivateBreed(9)).rejects.toMatchObject({
+      code: 'breedNotFound',
+    });
+
+    expect(updateMany).toHaveBeenNthCalledWith(1, {
+      where: { id: 9, ativo: true },
+      data: { descricao: 'Indisponível' },
+    });
+    expect(updateMany).toHaveBeenNthCalledWith(2, {
+      where: { id: 9, ativo: true },
+      data: { ativo: false },
+    });
+  });
 });
