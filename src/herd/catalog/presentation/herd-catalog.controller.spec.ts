@@ -5,10 +5,7 @@ import { PERMISSIONS_KEY } from '../../../auth/decorators/permissions.decorator'
 import { JwtAuthGuard } from '../../../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../../auth/guards/permissions.guard';
 import type { ManageHerdCatalogUseCase } from '../application/use-cases/manage-herd-catalog.use-case';
-import {
-  BatchesController,
-  BreedsController,
-} from './herd-catalog.controller';
+import { BatchesController, BreedsController } from './herd-catalog.controller';
 import { CatalogDescriptionDto } from './dto/herd-catalog.dto';
 
 describe('herd catalog HTTP boundary', () => {
@@ -28,24 +25,31 @@ describe('herd catalog HTTP boundary', () => {
     [BreedsController, 'create', ['racas:gerenciar']],
     [BatchesController, 'list', ['lotes:ler']],
     [BatchesController, 'deactivate', ['lotes:gerenciar']],
-  ] as const)('%s.%s declares its canonical permission', (controller, method, expected) => {
-    expect(Reflect.getMetadata(PERMISSIONS_KEY, controller.prototype[method])).toEqual(
-      expected,
-    );
-    expect(Reflect.getMetadata(GUARDS_METADATA, controller)).toEqual([
-      JwtAuthGuard,
-      PermissionsGuard,
-    ]);
-  });
+  ] as const)(
+    '%s.%s declares its canonical permission',
+    (controller, method, expected) => {
+      expect(
+        Reflect.getMetadata(PERMISSIONS_KEY, controller.prototype[method]),
+      ).toEqual(expected);
+      expect(Reflect.getMetadata(GUARDS_METADATA, controller)).toEqual([
+        JwtAuthGuard,
+        PermissionsGuard,
+      ]);
+    },
+  );
 
   it('delegates pagination and protocol values to the catalog use case', async () => {
     const useCase = {
-      listBreeds: jest.fn().mockResolvedValue({ data: [], page: 2, limit: 5, total: 0 }),
+      listBreeds: jest
+        .fn()
+        .mockResolvedValue({ data: [], page: 2, limit: 5, total: 0 }),
       createBreed: jest.fn().mockResolvedValue({ id: 1 }),
       getBreed: jest.fn(),
       updateBreed: jest.fn(),
       deactivateBreed: jest.fn(),
-      listBatches: jest.fn().mockResolvedValue({ data: [], page: 1, limit: 20, total: 0 }),
+      listBatches: jest
+        .fn()
+        .mockResolvedValue({ data: [], page: 1, limit: 20, total: 0 }),
       createBatch: jest.fn(),
       getBatch: jest.fn(),
       updateBatch: jest.fn(),
