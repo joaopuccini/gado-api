@@ -251,7 +251,28 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 
 ---
 
-## Ondas 04–11
+## Onda 04 — Rebanho básico
+
+Plano ativo: `docs/superpowers/plans/2026-09-26-wave-04-herd.md`
+
+| Task | Entrega | Status | Evidência |
+|---|---|---|---|
+| 4.1 | Paridade de raças e lotes especificada | `[ ]` | Próximo RED |
+| 4.2 | Catálogos persistidos, protegidos e documentados | `[ ]` | — |
+| 4.3 | Dependências e isolamento dos catálogos | `[ ]` | — |
+| 4.4 | Domínio e contrato camelCase de animais | `[ ]` | — |
+| 4.5 | Unicidade de brinco e compra transacional | `[ ]` | — |
+| 4.6 | API autenticada do ciclo de animais | `[ ]` | — |
+| 4.7 | Contrato gerado e cliente web | `[ ]` | — |
+| 4.8 | Páginas de raças e lotes | `[ ]` | — |
+| 4.9 | Jornada de animais no `gado-app` | `[ ]` | — |
+| 4.10 | Isolamento concorrente e Gate G3-herd | `[ ]` | — |
+
+**Onda 04 concluída?** `[ ]` | **Próxima task:** 4.1 RED — paridade de raças e lotes
+
+---
+
+## Ondas 05–11
 
 > As tasks detalhadas das Ondas 04–11 serão decompostas no plano detalhado de cada onda,
 > seguindo o mesmo padrão. Isso será feito quando a onda anterior estiver verde.
@@ -259,7 +280,6 @@ Tasks 1–12 concluídas. Commits `e9a2887` até `da482a8`. Coverage: 96.35% stm
 
 | Onda | Resumo | Status |
 |---|---|---|
-| 04 — Rebanho básico | Raças, lotes, animais com paridade | `⬜` |
 | 05 — Pesagens e dashboard | Indicadores reais sem mocks | `⬜` |
 | 06 — Manejo, sanidade, fotos | Movimentações, vacinação, storage | `⬜` |
 | 07 — Comercial e financeiro | Ledger, vendas, custos, caixa | `⬜` |
