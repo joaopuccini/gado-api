@@ -2,6 +2,7 @@ import { ExecutionContextStore } from '../../src/common/context';
 import type {
   BatchView,
   HerdCatalogRepository,
+  PageRequest,
 } from '../../src/herd/catalog/application/ports/herd-catalog.repository';
 import { ManageHerdCatalogUseCase } from '../../src/herd/catalog/application/use-cases/manage-herd-catalog.use-case';
 
@@ -31,7 +32,7 @@ describe('herd catalog concurrent isolation', () => {
   it('keeps selected-farm batch queries isolated across interleaved contexts', async () => {
     const observedFarmIds: number[] = [];
     const repository = {
-      listBatches: jest.fn(async (farmId: number, request) => {
+      listBatches: jest.fn(async (farmId: number, request: PageRequest) => {
         await new Promise((resolve) =>
           setTimeout(resolve, farmId === 10 ? 20 : 5),
         );

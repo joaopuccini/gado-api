@@ -43,6 +43,7 @@ const statusByCode: Readonly<Record<ErrorCode, number>> = {
   batchNotFound: HttpStatus.NOT_FOUND,
   resourceInUse: HttpStatus.CONFLICT,
   animalNotFound: HttpStatus.NOT_FOUND,
+  animalRelationUnavailable: HttpStatus.UNPROCESSABLE_ENTITY,
   internalServerError: HttpStatus.INTERNAL_SERVER_ERROR,
   invalidTenantSchemaName: HttpStatus.INTERNAL_SERVER_ERROR,
   migrationChecksumMismatch: HttpStatus.INTERNAL_SERVER_ERROR,

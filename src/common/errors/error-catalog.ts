@@ -32,6 +32,7 @@ export type ErrorCode =
   | 'batchNotFound'
   | 'resourceInUse'
   | 'animalNotFound'
+  | 'animalRelationUnavailable'
   | 'internalServerError'
   | 'invalidTenantSchemaName'
   | 'migrationChecksumMismatch'

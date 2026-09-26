@@ -25,41 +25,52 @@ const TENANT_CONTEXT = {
 
 const ANIMAL: AnimalView = {
   id: 1,
-  farmId: 10,
-  batchId: 2,
-  breedId: 3,
-  pastureId: 4,
-  clientId: null,
-  name: 'Estrela',
-  earTag: 'BR-001',
-  sex: 'FEMEA',
+  fazendaId: 10,
+  loteId: 2,
+  racaId: 3,
+  pastoId: 4,
+  clienteId: null,
+  nome: 'Estrela',
+  numeroBrinco: 'BR-001',
+  sexo: 'FEMEA',
   status: 'ATIVO',
-  entryType: 'NASCIMENTO',
-  birthDate: '2025-09-01',
-  entryDate: '2025-09-01',
-  entryWeight: 32.5,
-  currentWeight: 32.5,
-  pricePerKilo: null,
-  purchaseValue: null,
-  totalCost: 0,
-  breedingStock: true,
-  castrated: false,
-  notes: null,
-  active: true,
+  tipoEntrada: 'NASCIMENTO',
+  nascimento: '2025-09-01',
+  dataEntrada: '2025-09-01',
+  pesoEntrada: 32.5,
+  pesoAtual: 32.5,
+  precoKilo: null,
+  valorCompra: null,
+  valorCustoTotal: 0,
+  matriz: true,
+  castrado: false,
+  observacao: null,
+  ativo: true,
 };
 
 class InMemoryAnimalRepository implements AnimalRepository {
   readonly creates: CreateAnimalRecord[] = [];
-  readonly updates: Array<{ id: number; farmId: number; input: UpdateAnimalRecord }> = [];
-  readonly deactivations: Array<{ id: number; farmId: number }> = [];
+  readonly updates: Array<{
+    id: number;
+    fazendaId: number;
+    input: UpdateAnimalRecord;
+  }> = [];
+  readonly deactivations: Array<{ id: number; fazendaId: number }> = [];
   relationsValid = true;
 
-  list(farmId: number, page: number, limit: number): Promise<AnimalPage> {
-    return Promise.resolve({ data: [{ ...ANIMAL, farmId }], page, limit, total: 1 });
+  list(fazendaId: number, page: number, limit: number): Promise<AnimalPage> {
+    return Promise.resolve({
+      data: [{ ...ANIMAL, fazendaId }],
+      page,
+      limit,
+      total: 1,
+    });
   }
 
-  find(id: number, farmId: number): Promise<AnimalView | null> {
-    return Promise.resolve(id === ANIMAL.id && farmId === ANIMAL.farmId ? ANIMAL : null);
+  find(id: number, fazendaId: number): Promise<AnimalView | null> {
+    return Promise.resolve(
+      id === ANIMAL.id && fazendaId === ANIMAL.fazendaId ? ANIMAL : null,
+    );
   }
 
   validateRelations(): Promise<boolean> {
@@ -68,17 +79,21 @@ class InMemoryAnimalRepository implements AnimalRepository {
 
   create(input: CreateAnimalRecord): Promise<AnimalView> {
     this.creates.push(input);
-    return Promise.resolve({ ...ANIMAL, ...input, id: 1, active: true });
+    return Promise.resolve({ ...ANIMAL, ...input, id: 1, ativo: true });
   }
 
-  update(id: number, farmId: number, input: UpdateAnimalRecord): Promise<AnimalView> {
-    this.updates.push({ id, farmId, input });
+  update(
+    id: number,
+    fazendaId: number,
+    input: UpdateAnimalRecord,
+  ): Promise<AnimalView> {
+    this.updates.push({ id, fazendaId, input });
     return Promise.resolve({ ...ANIMAL, ...input });
   }
 
-  deactivate(id: number, farmId: number): Promise<AnimalView> {
-    this.deactivations.push({ id, farmId });
-    return Promise.resolve({ ...ANIMAL, active: false });
+  deactivate(id: number, fazendaId: number): Promise<AnimalView> {
+    this.deactivations.push({ id, fazendaId });
+    return Promise.resolve({ ...ANIMAL, ativo: false });
   }
 }
 
@@ -96,28 +111,28 @@ describe('animal lifecycle use cases', () => {
   it('creates a normalized birth record under the selected farm', async () => {
     await context.run(TENANT_CONTEXT, () =>
       useCase.create({
-        batchId: 2,
-        breedId: 3,
-        pastureId: 4,
-        name: '  Estrela  ',
-        earTag: ' br-001 ',
-        sex: 'FEMEA',
-        entryType: 'NASCIMENTO',
-        birthDate: '2025-09-01',
-        entryDate: '2025-09-01',
-        entryWeight: 32.5,
-        breedingStock: true,
+        loteId: 2,
+        racaId: 3,
+        pastoId: 4,
+        nome: '  Estrela  ',
+        numeroBrinco: ' br-001 ',
+        sexo: 'FEMEA',
+        tipoEntrada: 'NASCIMENTO',
+        nascimento: '2025-09-01',
+        dataEntrada: '2025-09-01',
+        pesoEntrada: 32.5,
+        matriz: true,
       }),
     );
 
     expect(repository.creates).toEqual([
       expect.objectContaining({
-        farmId: 10,
-        registeredById: 7,
-        name: 'Estrela',
-        earTag: 'BR-001',
+        fazendaId: 10,
+        registradoPorId: 7,
+        nome: 'Estrela',
+        numeroBrinco: 'BR-001',
         status: 'ATIVO',
-        currentWeight: 32.5,
+        pesoAtual: 32.5,
       }),
     ]);
   });
@@ -126,12 +141,12 @@ describe('animal lifecycle use cases', () => {
     await expect(
       context.run(TENANT_CONTEXT, () =>
         useCase.create({
-          batchId: 2,
-          breedId: 3,
-          pastureId: 4,
-          sex: 'INVALIDO' as 'MACHO',
-          entryType: 'NASCIMENTO',
-          entryDate: '2025-09-01',
+          loteId: 2,
+          racaId: 3,
+          pastoId: 4,
+          sexo: 'INVALIDO' as 'MACHO',
+          tipoEntrada: 'NASCIMENTO',
+          dataEntrada: '2025-09-01',
         }),
       ),
     ).rejects.toMatchObject({ code: 'validationFailed' });
@@ -143,13 +158,13 @@ describe('animal lifecycle use cases', () => {
     await expect(
       context.run(TENANT_CONTEXT, () =>
         useCase.create({
-          batchId: 22,
-          breedId: 3,
-          pastureId: 4,
-          sex: 'MACHO',
-          entryType: 'COMPRA_OLHO',
-          entryDate: '2025-09-01',
-          purchaseValue: 2500,
+          loteId: 22,
+          racaId: 3,
+          pastoId: 4,
+          sexo: 'MACHO',
+          tipoEntrada: 'COMPRA_OLHO',
+          dataEntrada: '2025-09-01',
+          valorCompra: 2500,
         }),
       ),
     ).rejects.toMatchObject({ code: 'animalRelationUnavailable' });
@@ -163,19 +178,30 @@ describe('animal lifecycle use cases', () => {
       context.run(TENANT_CONTEXT, () => useCase.get({ id: 1 })),
     ).resolves.toEqual(ANIMAL);
     await expect(
-      context.run({ ...TENANT_CONTEXT, farmId: 20 }, () => useCase.get({ id: 1 })),
+      context.run({ ...TENANT_CONTEXT, farmId: 20 }, () =>
+        useCase.get({ id: 1 }),
+      ),
     ).rejects.toMatchObject({ code: 'animalNotFound' });
   });
 
   it('updates camelCase fields and deactivates within the selected farm', async () => {
     await context.run(TENANT_CONTEXT, () =>
-      useCase.update({ id: 1, name: '  Lua  ', currentWeight: 410.25, status: 'ATIVO' }),
+      useCase.update({
+        id: 1,
+        nome: '  Lua  ',
+        pesoAtual: 410.25,
+        status: 'ATIVO',
+      }),
     );
     await context.run(TENANT_CONTEXT, () => useCase.deactivate({ id: 1 }));
 
     expect(repository.updates).toEqual([
-      { id: 1, farmId: 10, input: { name: 'Lua', currentWeight: 410.25, status: 'ATIVO' } },
+      {
+        id: 1,
+        fazendaId: 10,
+        input: { nome: 'Lua', pesoAtual: 410.25, status: 'ATIVO' },
+      },
     ]);
-    expect(repository.deactivations).toEqual([{ id: 1, farmId: 10 }]);
+    expect(repository.deactivations).toEqual([{ id: 1, fazendaId: 10 }]);
   });
 });
