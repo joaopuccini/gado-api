@@ -194,18 +194,20 @@ describe('persisted metrics reconciliation', () => {
       { id: pastureOne.id, name: 'Norte', animalCount: 1, averageWeight: 440 },
       { id: pastureTwo.id, name: 'Sul', animalCount: 2, averageWeight: 300 },
     ]);
-    expect(result.alerts).toEqual([
-      {
-        type: 'STALE_WEIGHT',
-        animalId: gaining.id,
-        lastMeasuredAt: '2026-02-10',
-      },
-      {
-        type: 'WEIGHT_LOSS',
-        animalId: losing.id,
-        lastMeasuredAt: '2026-09-21',
-      },
-      { type: 'NO_WEIGHT', animalId: unweighed.id, lastMeasuredAt: null },
-    ]);
+    expect(result.alerts).toEqual(
+      [
+        {
+          type: 'STALE_WEIGHT',
+          animalId: gaining.id,
+          lastMeasuredAt: '2026-02-10',
+        },
+        {
+          type: 'WEIGHT_LOSS',
+          animalId: losing.id,
+          lastMeasuredAt: '2026-09-21',
+        },
+        { type: 'NO_WEIGHT', animalId: unweighed.id, lastMeasuredAt: null },
+      ].sort((left, right) => left.animalId - right.animalId),
+    );
   });
 });
