@@ -134,13 +134,15 @@ em milissegundos para caches; esta onda mantém essas decisões atrás de ports.
 - Create: `src/metrics/dashboard/infrastructure/prisma-dashboard.repository.ts`
 - Create: `src/metrics/dashboard/infrastructure/prisma-dashboard.repository.spec.ts`
 
-- [ ] RED para contagens, peso médio, GMD, evolução mensal, distribuições por
+- [x] RED para contagens, peso médio, GMD, evolução mensal, distribuições por
   lote/pasto e três classes de alerta usando fixture conhecida.
-- [ ] Commit RED `test(metrics): specify persisted dashboard indicators`.
-- [ ] Implementar agregações com escopo de fazenda e aritmética decimal
+- [x] Commit RED `test(metrics): specify persisted dashboard indicators`
+  (`e19ba5e`).
+- [x] Implementar agregações com escopo de fazenda e aritmética decimal
   explícita; nenhuma query usa dados de outra fazenda.
-- [ ] Executar focais, reconciliação e arquitetura.
-- [ ] Commit GREEN `feat(metrics): derive dashboard from persisted data`.
+- [x] Executar focais e arquitetura; reconciliação final permanece na Task 5.10.
+- [x] Commit GREEN `feat(metrics): derive dashboard from persisted data`
+  (`50baf5c`).
 
 ## Task 7: Integrar CEPEA com timeout e fallback durável
 
