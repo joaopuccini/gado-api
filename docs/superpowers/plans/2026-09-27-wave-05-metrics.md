@@ -106,12 +106,12 @@ em milissegundos para caches; esta onda mantém essas decisões atrás de ports.
 - Create: `src/metrics/weights/weights.module.ts`
 - Modify: `src/app.module.ts`
 
-- [ ] RED do contrato `/pesagens` para paginação, detalhe, criação e correção,
+- [x] RED do contrato `/pesagens` para paginação, detalhe, criação e correção,
   DTOs camelCase, envelopes e allow/deny por permissão.
-- [ ] Commit RED `test(metrics): specify secured weight api`.
-- [ ] Implementar controller fino, Swagger completo e composição DI.
-- [ ] Executar focal, contrato, arquitetura, lint e build.
-- [ ] Commit GREEN `feat(metrics): expose secured weight api`.
+- [x] Commit RED `test(metrics): specify secured weight api` (`2c795f2`).
+- [x] Implementar controller fino, Swagger completo e composição DI.
+- [x] Executar focal, contrato, arquitetura, lint e build.
+- [x] Commit GREEN `feat(metrics): expose secured weight api` (`7ee2df1`).
 
 ## Task 5: Provar isolamento concorrente de pesagens
 
