@@ -22,17 +22,70 @@ const CONTEXT = {
 
 const SNAPSHOT: DashboardSnapshot = {
   animals: [
-    { id: 1, batchId: 11, batchName: 'Lote A', pastureId: 21, pastureName: 'Pasto X', currentWeight: 420 },
-    { id: 2, batchId: 11, batchName: 'Lote A', pastureId: 22, pastureName: 'Pasto Y', currentWeight: 480 },
-    { id: 3, batchId: 12, batchName: 'Lote B', pastureId: 21, pastureName: 'Pasto X', currentWeight: null },
-    { id: 4, batchId: 12, batchName: 'Lote B', pastureId: 21, pastureName: 'Pasto X', currentWeight: 300 },
+    {
+      id: 1,
+      batchId: 11,
+      batchName: 'Lote A',
+      pastureId: 21,
+      pastureName: 'Pasto X',
+      currentWeight: 420,
+    },
+    {
+      id: 2,
+      batchId: 11,
+      batchName: 'Lote A',
+      pastureId: 22,
+      pastureName: 'Pasto Y',
+      currentWeight: 480,
+    },
+    {
+      id: 3,
+      batchId: 12,
+      batchName: 'Lote B',
+      pastureId: 21,
+      pastureName: 'Pasto X',
+      currentWeight: null,
+    },
+    {
+      id: 4,
+      batchId: 12,
+      batchName: 'Lote B',
+      pastureId: 21,
+      pastureName: 'Pasto X',
+      currentWeight: 300,
+    },
   ],
   measurements: [
-    { id: 1, animalId: 1, weight: 400, measuredAt: new Date('2026-01-01T00:00:00.000Z') },
-    { id: 2, animalId: 1, weight: 420, measuredAt: new Date('2026-01-11T00:00:00.000Z') },
-    { id: 3, animalId: 2, weight: 500, measuredAt: new Date('2026-09-01T00:00:00.000Z') },
-    { id: 4, animalId: 2, weight: 480, measuredAt: new Date('2026-09-21T00:00:00.000Z') },
-    { id: 5, animalId: 4, weight: 300, measuredAt: new Date('2026-08-01T00:00:00.000Z') },
+    {
+      id: 1,
+      animalId: 1,
+      weight: 400,
+      measuredAt: new Date('2026-01-01T00:00:00.000Z'),
+    },
+    {
+      id: 2,
+      animalId: 1,
+      weight: 420,
+      measuredAt: new Date('2026-01-11T00:00:00.000Z'),
+    },
+    {
+      id: 3,
+      animalId: 2,
+      weight: 500,
+      measuredAt: new Date('2026-09-01T00:00:00.000Z'),
+    },
+    {
+      id: 4,
+      animalId: 2,
+      weight: 480,
+      measuredAt: new Date('2026-09-21T00:00:00.000Z'),
+    },
+    {
+      id: 5,
+      animalId: 4,
+      weight: 300,
+      measuredAt: new Date('2026-08-01T00:00:00.000Z'),
+    },
   ],
 };
 
