@@ -296,7 +296,7 @@ Plano ativo: `docs/superpowers/plans/2026-09-27-wave-05-metrics.md`
 |---|---|---|---|
 | 5.1 | Domínio e cálculos de pesagem | `[x]` | RED `8377344`; GREEN `4c2091a`; focais 22/22, arquitetura 23/23 e lint verdes |
 | 5.2 | Casos de uso auditáveis | `[x]` | RED `08a6b75`; GREEN `f147f4f`; focal 8/8, arquitetura 23/23, lint e build verdes |
-| 5.3 | Persistência e atomicidade | `[ ]` | — |
+| 5.3 | Persistência e atomicidade | `[x]` | RED `1f8882a`; GREEN `d89f167`; focais 34/34, migrations 3/3 em banco filho removido, arquitetura 23/23, Prisma validate, lint e build verdes |
 | 5.4 | API autenticada de pesagens | `[ ]` | — |
 | 5.5 | Isolamento concorrente | `[ ]` | — |
 | 5.6 | Read model zootécnico | `[ ]` | — |
@@ -305,7 +305,7 @@ Plano ativo: `docs/superpowers/plans/2026-09-27-wave-05-metrics.md`
 | 5.9 | Cliente e jornadas web | `[ ]` | — |
 | 5.10 | Reconciliação e Gate G4-metrics | `[ ]` | — |
 
-**Onda 05 concluída?** `[ ]` | **Próxima task:** 5.3 RED — persistência e atomicidade
+**Onda 05 concluída?** `[ ]` | **Próxima task:** 5.4 RED — API autenticada de pesagens
 
 ---
 

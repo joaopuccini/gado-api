@@ -87,14 +87,15 @@ em milissegundos para caches; esta onda mantém essas decisões atrás de ports.
 - Modify: `test/migrations/tenant-empty-schema.e2e-spec.ts`
 - Modify: `test/migrations/tenant-upgrade.e2e-spec.ts`
 
-- [ ] RED do adapter para revisão imutável, recálculo do peso atual e rollback
+- [x] RED do adapter para revisão imutável, recálculo do peso atual e rollback
   completo quando qualquer escrita falhar.
-- [ ] Commit RED `test(metrics): specify atomic weight persistence`.
-- [ ] Adicionar colunas/constraints/índices sem editar migrations publicadas e
+- [x] Commit RED `test(metrics): specify atomic weight persistence` (`1f8882a`).
+- [x] Adicionar colunas/constraints/índices sem editar migrations publicadas e
   implementar transações Prisma tenant-aware.
-- [ ] Executar focal, build, arquitetura e migrations limpa/upgrade em banco
+- [x] Executar focal, build, arquitetura e migrations limpa/upgrade em banco
   filho descartável.
-- [ ] Commit GREEN `feat(metrics): persist auditable weights atomically`.
+- [x] Commit GREEN `feat(metrics): persist auditable weights atomically`
+  (`d89f167`).
 
 ## Task 4: Expor API autenticada de pesagens
 
