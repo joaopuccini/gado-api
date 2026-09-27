@@ -7,22 +7,36 @@ import {
 const today = new Date('2026-09-27T12:00:00.000Z');
 const animalEntryDate = new Date('2026-01-10T00:00:00.000Z');
 
+const expectDomainError = (
+  action: () => unknown,
+  expected: Partial<DomainError>,
+): void => {
+  try {
+    action();
+  } catch (error: unknown) {
+    expect(error).toBeInstanceOf(DomainError);
+    expect(error).toMatchObject(expected);
+    return;
+  }
+  throw new Error('Expected a DomainError');
+};
+
 describe('weight measurement domain', () => {
   it.each([0, -1, 3000.001, Number.NaN, Number.POSITIVE_INFINITY])(
     'rejects invalid weight %s',
     (weight) => {
-      expect(() =>
-        normalizeWeightMeasurement({
-          weight,
-          measuredAt: new Date('2026-09-20T00:00:00.000Z'),
-          animalEntryDate,
-          today,
-        }),
-      ).toThrow(
-        expect.objectContaining<Partial<DomainError>>({
+      expectDomainError(
+        () =>
+          normalizeWeightMeasurement({
+            weight,
+            measuredAt: new Date('2026-09-20T00:00:00.000Z'),
+            animalEntryDate,
+            today,
+          }),
+        {
           code: 'validationFailed',
           details: [{ field: 'weight', reason: 'outOfRange' }],
-        }),
+        },
       );
     },
   );
@@ -39,50 +53,50 @@ describe('weight measurement domain', () => {
   });
 
   it('rejects a future measurement date', () => {
-    expect(() =>
-      normalizeWeightMeasurement({
-        weight: 450,
-        measuredAt: new Date('2026-09-28T00:00:00.000Z'),
-        animalEntryDate,
-        today,
-      }),
-    ).toThrow(
-      expect.objectContaining<Partial<DomainError>>({
+    expectDomainError(
+      () =>
+        normalizeWeightMeasurement({
+          weight: 450,
+          measuredAt: new Date('2026-09-28T00:00:00.000Z'),
+          animalEntryDate,
+          today,
+        }),
+      {
         code: 'validationFailed',
         details: [{ field: 'measuredAt', reason: 'futureDate' }],
-      }),
+      },
     );
   });
 
   it('rejects a measurement before the animal entry date', () => {
-    expect(() =>
-      normalizeWeightMeasurement({
-        weight: 450,
-        measuredAt: new Date('2026-01-09T23:59:59.999Z'),
-        animalEntryDate,
-        today,
-      }),
-    ).toThrow(
-      expect.objectContaining<Partial<DomainError>>({
+    expectDomainError(
+      () =>
+        normalizeWeightMeasurement({
+          weight: 450,
+          measuredAt: new Date('2026-01-09T23:59:59.999Z'),
+          animalEntryDate,
+          today,
+        }),
+      {
         code: 'validationFailed',
         details: [{ field: 'measuredAt', reason: 'beforeAnimalEntry' }],
-      }),
+      },
     );
   });
 
   it('rejects invalid dates and trims an optional note', () => {
-    expect(() =>
-      normalizeWeightMeasurement({
-        weight: 450,
-        measuredAt: new Date('invalid'),
-        animalEntryDate,
-        today,
-      }),
-    ).toThrow(
-      expect.objectContaining<Partial<DomainError>>({
+    expectDomainError(
+      () =>
+        normalizeWeightMeasurement({
+          weight: 450,
+          measuredAt: new Date('invalid'),
+          animalEntryDate,
+          today,
+        }),
+      {
         code: 'validationFailed',
         details: [{ field: 'measuredAt', reason: 'invalidDate' }],
-      }),
+      },
     );
 
     expect(
@@ -124,14 +138,16 @@ describe('weight measurement domain', () => {
     { correctsMeasurementId: '', correctionReason: 'motivo' },
     { correctsMeasurementId: 'weight-1', correctionReason: '   ' },
   ])('requires correction link and reason: %o', (correction) => {
-    expect(() =>
-      normalizeWeightCorrection({
-        ...correction,
-        weight: 451.25,
-        measuredAt: new Date('2026-09-20T00:00:00.000Z'),
-        animalEntryDate,
-        today,
-      }),
-    ).toThrow(expect.objectContaining({ code: 'validationFailed' }));
+    expectDomainError(
+      () =>
+        normalizeWeightCorrection({
+          ...correction,
+          weight: 451.25,
+          measuredAt: new Date('2026-09-20T00:00:00.000Z'),
+          animalEntryDate,
+          today,
+        }),
+      { code: 'validationFailed' },
+    );
   });
 });

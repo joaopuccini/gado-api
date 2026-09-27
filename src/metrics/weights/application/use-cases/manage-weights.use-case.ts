@@ -82,9 +82,7 @@ export class ManageWeightsUseCase {
     });
   }
 
-  async correct(
-    command: CorrectWeightCommand,
-  ): Promise<WeightMeasurementView> {
+  async correct(command: CorrectWeightCommand): Promise<WeightMeasurementView> {
     const { farmId, localUserId } = this.context.requireTenant();
     const previous = await this.repository.find(command.id, farmId);
     if (!previous) {

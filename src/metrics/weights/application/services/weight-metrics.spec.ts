@@ -20,16 +20,11 @@ describe('weight metrics', () => {
   it.each([
     { measurements: [] },
     {
-      measurements: [
-        point('w1', 'a1', 400, '2026-09-01T00:00:00.000Z'),
-      ],
+      measurements: [point('w1', 'a1', 400, '2026-09-01T00:00:00.000Z')],
     },
-  ])(
-    'returns null without a positive interval: %o',
-    ({ measurements }) => {
-      expect(calculateAnimalDailyGain(measurements)).toBeNull();
-    },
-  );
+  ])('returns null without a positive interval: %o', ({ measurements }) => {
+    expect(calculateAnimalDailyGain(measurements)).toBeNull();
+  });
 
   it('sorts measurements and calculates gain from the first to the last', () => {
     expect(

@@ -128,5 +128,25 @@ describe('tenant migrations on an empty schema', () => {
       'fazendas_parent_not_self',
       'usuario_fazenda_usuario_id_ativo_fazenda_id_idx',
     ]);
+
+    const weightAuditColumns = await pool.query<{ columnName: string }>(
+      `
+      SELECT column_name AS "columnName"
+      FROM information_schema.columns
+      WHERE table_schema = $1
+        AND table_name = 'pesagens'
+        AND column_name IN (
+          'ativa',
+          'corrige_pesagem_id',
+          'motivo_correcao',
+          'registrado_por_id'
+        )
+      ORDER BY column_name
+      `,
+      [schemaName],
+    );
+    expect(weightAuditColumns.rows.map(({ columnName }) => columnName)).toEqual(
+      ['ativa', 'corrige_pesagem_id', 'motivo_correcao', 'registrado_por_id'],
+    );
   });
 });

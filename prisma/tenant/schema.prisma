@@ -97,6 +97,7 @@ model Usuario {
   caixas         Caixa[]               @relation("UsuarioCaixa")
   pedidosCompra  PedidoCompra[]        @relation("UsuarioPedido")
   transferencias TransferenciaAnimal[] @relation("UsuarioTransferencia")
+  pesagens       Pesagem[]             @relation("UsuarioPesagem")
 
   @@map("usuarios")
 }
@@ -427,18 +428,25 @@ model Caixa {
 // ─── DOMÍNIO: PESAGENS ──────────────────────────────────────────
 
 model Pesagem {
-  id          Int      @id @default(autoincrement())
-  fazendaId   Int      @map("fazenda_id")
-  animalId    Int      @map("animal_id")
-  peso        Decimal  @db.Decimal(10, 3)
-  dataPesagem DateTime @default(now()) @map("data_pesagem") @db.Date
-  observacao  String?
-  createdAt   DateTime @default(now()) @db.Timestamp(6)
+  id               Int      @id @default(autoincrement())
+  fazendaId        Int      @map("fazenda_id")
+  animalId         Int      @map("animal_id")
+  registradoPorId  Int?     @map("registrado_por_id")
+  corrigePesagemId Int?     @unique @map("corrige_pesagem_id")
+  peso             Decimal  @db.Decimal(10, 3)
+  dataPesagem      DateTime @default(now()) @map("data_pesagem") @db.Date
+  observacao       String?
+  motivoCorrecao   String?  @map("motivo_correcao") @db.VarChar(500)
+  ativa            Boolean  @default(true)
+  createdAt        DateTime @default(now()) @db.Timestamp(6)
 
-  fazenda Fazenda @relation(fields: [fazendaId], references: [id])
-  animal  Animal  @relation(fields: [animalId], references: [id])
+  fazenda        Fazenda  @relation(fields: [fazendaId], references: [id])
+  animal         Animal   @relation(fields: [animalId], references: [id])
+  registradoPor  Usuario? @relation("UsuarioPesagem", fields: [registradoPorId], references: [id], onDelete: SetNull)
+  corrigePesagem Pesagem? @relation("CorrecaoPesagem", fields: [corrigePesagemId], references: [id], onDelete: Restrict)
+  corrigidaPor   Pesagem? @relation("CorrecaoPesagem")
 
-  @@index([fazendaId])
+  @@index([fazendaId, animalId, ativa, dataPesagem, id], map: "pesagens_fazenda_animal_ativa_data_id_idx")
   @@index([animalId, dataPesagem])
   @@map("pesagens")
 }

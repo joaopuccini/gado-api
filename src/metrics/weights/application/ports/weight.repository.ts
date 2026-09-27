@@ -15,7 +15,7 @@ export interface WeightMeasurementView {
   readonly active: boolean;
   readonly correctsMeasurementId: number | null;
   readonly correctionReason: string | null;
-  readonly registeredById: number;
+  readonly registeredById: number | null;
   readonly createdAt: string;
 }
 
@@ -47,10 +47,7 @@ export interface CorrectWeightRecord extends CreateWeightRecord {
 }
 
 export interface WeightRepository {
-  list(
-    farmId: number,
-    input: WeightListInput,
-  ): Promise<WeightMeasurementPage>;
+  list(farmId: number, input: WeightListInput): Promise<WeightMeasurementPage>;
   find(id: number, farmId: number): Promise<WeightMeasurementView | null>;
   findAnimal(
     animalId: number,

@@ -17,14 +17,12 @@ export interface NormalizedWeightMeasurement {
   note: string | null;
 }
 
-export interface NormalizeWeightCorrectionInput
-  extends NormalizeWeightMeasurementInput {
+export interface NormalizeWeightCorrectionInput extends NormalizeWeightMeasurementInput {
   correctsMeasurementId: string;
   correctionReason: string;
 }
 
-export interface NormalizedWeightCorrection
-  extends NormalizedWeightMeasurement {
+export interface NormalizedWeightCorrection extends NormalizedWeightMeasurement {
   correctsMeasurementId: string;
   correctionReason: string;
 }
@@ -100,8 +98,5 @@ export const normalizeWeightCorrection = (
     'correctsMeasurementId',
     input.correctsMeasurementId,
   ),
-  correctionReason: requiredTrimmed(
-    'correctionReason',
-    input.correctionReason,
-  ),
+  correctionReason: requiredTrimmed('correctionReason', input.correctionReason),
 });
