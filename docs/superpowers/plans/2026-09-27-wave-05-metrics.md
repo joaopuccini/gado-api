@@ -178,13 +178,13 @@ em milissegundos para caches; esta onda mantém essas decisões atrás de ports.
 - Modify: `test/fixtures/legacy-route-quarantine.json`
 - Modify: `test/contract/openapi-contract.e2e-spec.ts`
 
-- [ ] RED para `GET /dashboard/summary`, autenticação, `dashboard:ler`, tipos,
+- [x] RED para `GET /dashboard/summary`, autenticação, `dashboard:ler`, tipos,
   preço fresh/stale/null e ausência dos endpoints legados.
-- [ ] Commit RED `test(metrics): specify real dashboard contract`.
-- [ ] Compor read model + indicador, remover controller quarantined e publicar
+- [x] Commit RED `test(metrics): specify real dashboard contract` (`5275685`).
+- [x] Compor read model + indicador, remover controller quarantined e publicar
   somente o contrato novo.
-- [ ] Executar focais, contrato, arquitetura, lint e build.
-- [ ] Commit GREEN `feat(metrics): replace legacy dashboard api`.
+- [x] Executar focais, contrato, arquitetura, lint e build.
+- [x] Commit GREEN `feat(metrics): replace legacy dashboard api` (`e625035`).
 
 ## Task 9: Gerar cliente e entregar jornadas web
 
