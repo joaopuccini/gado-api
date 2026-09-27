@@ -52,12 +52,13 @@ em milissegundos para caches; esta onda mantém essas decisões atrás de ports.
 - Create: `src/metrics/weights/application/services/weight-metrics.ts`
 - Create: `src/metrics/weights/application/services/weight-metrics.spec.ts`
 
-- [ ] RED para limites de peso/data, normalização, correção e GMD com zero/um/
+- [x] RED para limites de peso/data, normalização, correção e GMD com zero/um/
   múltiplos registros, mesma data, perda e arredondamento.
-- [ ] Commit RED `test(metrics): specify weight measurement rules`.
-- [ ] Implementar funções puras sem Nest/Prisma.
-- [ ] Executar focais, arquitetura e lint.
-- [ ] Commit GREEN `feat(metrics): implement weight measurement domain`.
+- [x] Commit RED `test(metrics): specify weight measurement rules` (`8377344`).
+- [x] Implementar funções puras sem Nest/Prisma.
+- [x] Executar focais, arquitetura e lint.
+- [x] Commit GREEN `feat(metrics): implement weight measurement domain`
+  (`4c2091a`).
 
 ## Task 2: Implementar casos de uso e ports
 

@@ -294,7 +294,7 @@ Plano ativo: `docs/superpowers/plans/2026-09-27-wave-05-metrics.md`
 
 | Task | Entrega | Status | Evidência |
 |---|---|---|---|
-| 5.1 | Domínio e cálculos de pesagem | `[ ]` | Próximo RED |
+| 5.1 | Domínio e cálculos de pesagem | `[x]` | RED `8377344`; GREEN `4c2091a`; focais 22/22, arquitetura 23/23 e lint verdes |
 | 5.2 | Casos de uso auditáveis | `[ ]` | — |
 | 5.3 | Persistência e atomicidade | `[ ]` | — |
 | 5.4 | API autenticada de pesagens | `[ ]` | — |
@@ -305,7 +305,7 @@ Plano ativo: `docs/superpowers/plans/2026-09-27-wave-05-metrics.md`
 | 5.9 | Cliente e jornadas web | `[ ]` | — |
 | 5.10 | Reconciliação e Gate G4-metrics | `[ ]` | — |
 
-**Onda 05 concluída?** `[ ]` | **Próxima task:** 5.1 RED — domínio e cálculos de pesagem
+**Onda 05 concluída?** `[ ]` | **Próxima task:** 5.2 RED — casos de uso auditáveis
 
 ---
 
