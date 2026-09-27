@@ -48,18 +48,18 @@ export class CreateAnimalDto {
   @ApiProperty({ minimum: 1 }) @IsInt() @Min(1) loteId!: number;
   @ApiProperty({ minimum: 1 }) @IsInt() @Min(1) racaId!: number;
   @ApiProperty({ minimum: 1 }) @IsInt() @Min(1) pastoId!: number;
-  @ApiPropertyOptional({ minimum: 1, nullable: true })
+  @ApiPropertyOptional({ type: Number, minimum: 1, nullable: true })
   @IsOptional()
   @IsInt()
   @Min(1)
   clienteId?: number | null;
-  @ApiPropertyOptional({ maxLength: 100, nullable: true })
+  @ApiPropertyOptional({ type: String, maxLength: 100, nullable: true })
   @IsOptional()
   @Transform(({ value }) => trimString(value))
   @IsString()
   @MaxLength(100)
   nome?: string | null;
-  @ApiPropertyOptional({ maxLength: 50, nullable: true })
+  @ApiPropertyOptional({ type: String, maxLength: 50, nullable: true })
   @IsOptional()
   @Transform(({ value }) => trimString(value))
   @IsString()
@@ -73,24 +73,24 @@ export class CreateAnimalDto {
   @ApiProperty({ enum: ANIMAL_ENTRY_TYPES })
   @IsEnum(ANIMAL_ENTRY_TYPES)
   tipoEntrada!: AnimalEntryType;
-  @ApiPropertyOptional({ format: 'date', nullable: true })
+  @ApiPropertyOptional({ type: String, format: 'date', nullable: true })
   @IsOptional()
   @IsDateString({ strict: true })
   nascimento?: string | null;
   @ApiProperty({ format: 'date' })
   @IsDateString({ strict: true })
   dataEntrada!: string;
-  @ApiPropertyOptional({ minimum: 0, nullable: true })
+  @ApiPropertyOptional({ type: Number, minimum: 0, nullable: true })
   @IsOptional()
   @IsNumber({ maxDecimalPlaces: 3 })
   @Min(0)
   pesoEntrada?: number | null;
-  @ApiPropertyOptional({ minimum: 0, nullable: true })
+  @ApiPropertyOptional({ type: Number, minimum: 0, nullable: true })
   @IsOptional()
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   precoKilo?: number | null;
-  @ApiPropertyOptional({ minimum: 0, nullable: true })
+  @ApiPropertyOptional({ type: Number, minimum: 0, nullable: true })
   @IsOptional()
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
@@ -108,7 +108,7 @@ export class CreateAnimalDto {
   @IsOptional()
   @IsBoolean()
   castrado?: boolean;
-  @ApiPropertyOptional({ nullable: true })
+  @ApiPropertyOptional({ type: String, nullable: true })
   @IsOptional()
   @Transform(({ value }) => trimString(value))
   @IsString()
@@ -116,7 +116,7 @@ export class CreateAnimalDto {
 }
 
 export class UpdateAnimalDto {
-  @ApiPropertyOptional({ maxLength: 100, nullable: true })
+  @ApiPropertyOptional({ type: String, maxLength: 100, nullable: true })
   @ValidateIf((value: UpdateAnimalDto) =>
     Object.values(value).every((entry) => entry === undefined),
   )
@@ -140,12 +140,12 @@ export class UpdateAnimalDto {
   @IsInt()
   @Min(1)
   pastoId?: number;
-  @ApiPropertyOptional({ minimum: 1, nullable: true })
+  @ApiPropertyOptional({ type: Number, minimum: 1, nullable: true })
   @IsOptional()
   @IsInt()
   @Min(1)
   clienteId?: number | null;
-  @ApiPropertyOptional({ maxLength: 50, nullable: true })
+  @ApiPropertyOptional({ type: String, maxLength: 50, nullable: true })
   @IsOptional()
   @Transform(({ value }) => trimString(value))
   @IsString()
@@ -172,25 +172,27 @@ export class AnimalResponseDto {
   @ApiProperty() loteId!: number;
   @ApiProperty() racaId!: number;
   @ApiProperty() pastoId!: number;
-  @ApiPropertyOptional({ nullable: true }) clienteId!: number | null;
-  @ApiPropertyOptional({ nullable: true }) nome!: string | null;
-  @ApiPropertyOptional({ nullable: true }) numeroBrinco!: string | null;
+  @ApiProperty({ type: Number, nullable: true }) clienteId!: number | null;
+  @ApiProperty({ type: String, nullable: true }) nome!: string | null;
+  @ApiProperty({ type: String, nullable: true }) numeroBrinco!: string | null;
   @ApiPropertyOptional({ enum: ANIMAL_SEXES, nullable: true })
   sexo!: AnimalSex | null;
   @ApiProperty({ enum: ANIMAL_STATUSES }) status!: AnimalStatus;
   @ApiProperty({ enum: ANIMAL_ENTRY_TYPES }) tipoEntrada!: AnimalEntryType;
-  @ApiPropertyOptional({ format: 'date', nullable: true }) nascimento!:
+  @ApiProperty({ type: String, format: 'date', nullable: true }) nascimento!:
     | string
     | null;
   @ApiProperty({ format: 'date' }) dataEntrada!: string;
-  @ApiPropertyOptional({ nullable: true }) pesoEntrada!: number | null;
-  @ApiPropertyOptional({ nullable: true }) pesoAtual!: number | null;
-  @ApiPropertyOptional({ nullable: true }) precoKilo!: number | null;
-  @ApiPropertyOptional({ nullable: true }) valorCompra!: number | null;
-  @ApiPropertyOptional({ nullable: true }) valorCustoTotal!: number | null;
+  @ApiProperty({ type: Number, nullable: true }) pesoEntrada!: number | null;
+  @ApiProperty({ type: Number, nullable: true }) pesoAtual!: number | null;
+  @ApiProperty({ type: Number, nullable: true }) precoKilo!: number | null;
+  @ApiProperty({ type: Number, nullable: true }) valorCompra!: number | null;
+  @ApiProperty({ type: Number, nullable: true }) valorCustoTotal!:
+    | number
+    | null;
   @ApiProperty() matriz!: boolean;
   @ApiProperty() castrado!: boolean;
-  @ApiPropertyOptional({ nullable: true }) observacao!: string | null;
+  @ApiProperty({ type: String, nullable: true }) observacao!: string | null;
   @ApiProperty() ativo!: boolean;
 }
 
