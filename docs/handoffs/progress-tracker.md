@@ -298,14 +298,14 @@ Plano ativo: `docs/superpowers/plans/2026-09-27-wave-05-metrics.md`
 | 5.2 | Casos de uso auditáveis | `[x]` | RED `08a6b75`; GREEN `f147f4f`; focal 8/8, arquitetura 23/23, lint e build verdes |
 | 5.3 | Persistência e atomicidade | `[x]` | RED `1f8882a`; GREEN `d89f167`; focais 34/34, migrations 3/3 em banco filho removido, arquitetura 23/23, Prisma validate, lint e build verdes |
 | 5.4 | API autenticada de pesagens | `[x]` | RED `2c795f2`; GREEN `7ee2df1`; focal 7/7, contrato 18/18, arquitetura 23/23, lint e build verdes |
-| 5.5 | Isolamento concorrente | `[ ]` | — |
+| 5.5 | Isolamento concorrente | `[x]` | Prova `372e9bb`; 2/2 em banco filho removido; retry confirmou timeout transitório inicial sem lacuna de produção; lint verde |
 | 5.6 | Read model zootécnico | `[ ]` | — |
 | 5.7 | Indicador CEPEA resiliente | `[ ]` | — |
 | 5.8 | Dashboard real e OpenAPI | `[ ]` | — |
 | 5.9 | Cliente e jornadas web | `[ ]` | — |
 | 5.10 | Reconciliação e Gate G4-metrics | `[ ]` | — |
 
-**Onda 05 concluída?** `[ ]` | **Próxima task:** 5.5 RED — isolamento concorrente de pesagens
+**Onda 05 concluída?** `[ ]` | **Próxima task:** 5.6 RED — read model zootécnico
 
 ---
 

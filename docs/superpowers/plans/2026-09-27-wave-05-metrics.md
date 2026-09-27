@@ -118,10 +118,11 @@ em milissegundos para caches; esta onda mantém essas decisões atrás de ports.
 **API files:**
 - Create: `test/isolation/weight-isolation.e2e-spec.ts`
 
-- [ ] RED com duas fazendas registrando/corrigindo simultaneamente; leitura,
+- [x] RED/aceite com duas fazendas registrando/corrigindo simultaneamente; leitura,
   detalhe e revisão nunca cruzam escopo e `pesoAtual` permanece coerente.
-- [ ] Commit RED `test(metrics): prove concurrent weight isolation`.
-- [ ] Corrigir somente lacunas observadas e repetir em banco filho descartável;
+- [x] Commit de prova `test(metrics): prove concurrent weight isolation`
+  (`372e9bb`).
+- [x] Corrigir somente lacunas observadas e repetir em banco filho descartável;
   commit GREEN apenas se produção mudar.
 
 ## Task 6: Implementar read model zootécnico
