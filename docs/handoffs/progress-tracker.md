@@ -280,13 +280,32 @@ Plano ativo: `docs/superpowers/plans/2026-09-26-wave-04-herd.md`
 
 | Onda | Resumo | Status |
 |---|---|---|
-| 05 — Pesagens e dashboard | Indicadores reais sem mocks | `⬜` |
+| 05 — Pesagens e dashboard | Indicadores reais sem mocks | `🟨 plano ativo` |
 | 06 — Manejo, sanidade, fotos | Movimentações, vacinação, storage | `⬜` |
 | 07 — Comercial e financeiro | Ledger, vendas, custos, caixa | `⬜` |
 | 08 — Admin e billing | gado-admin interno + dashboard SaaS | `⬜` |
 | 09 — ETL e reconciliação | Migração repetível por tenant | `⬜` |
 | 10 — Cutover | Desligamento dos legados | `⬜` |
 | 11 — Expansão | Suprimentos, frota, financeiro avançado | `⬜` |
+
+### Onda 05 — Pesagens e dashboard real
+
+Plano ativo: `docs/superpowers/plans/2026-09-27-wave-05-metrics.md`
+
+| Task | Entrega | Status | Evidência |
+|---|---|---|---|
+| 5.1 | Domínio e cálculos de pesagem | `[ ]` | Próximo RED |
+| 5.2 | Casos de uso auditáveis | `[ ]` | — |
+| 5.3 | Persistência e atomicidade | `[ ]` | — |
+| 5.4 | API autenticada de pesagens | `[ ]` | — |
+| 5.5 | Isolamento concorrente | `[ ]` | — |
+| 5.6 | Read model zootécnico | `[ ]` | — |
+| 5.7 | Indicador CEPEA resiliente | `[ ]` | — |
+| 5.8 | Dashboard real e OpenAPI | `[ ]` | — |
+| 5.9 | Cliente e jornadas web | `[ ]` | — |
+| 5.10 | Reconciliação e Gate G4-metrics | `[ ]` | — |
+
+**Onda 05 concluída?** `[ ]` | **Próxima task:** 5.1 RED — domínio e cálculos de pesagem
 
 ---
 
