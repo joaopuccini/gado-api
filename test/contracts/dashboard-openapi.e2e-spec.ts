@@ -9,7 +9,9 @@ describe('real dashboard OpenAPI contract', () => {
 
   beforeAll(async () => {
     process.env.JWT_SECRET = 'dashboard-contract-secret';
-    const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
+    const moduleRef = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
     app = moduleRef.createNestApplication();
     paths = SwaggerModule.createDocument(
       app,
@@ -23,11 +25,13 @@ describe('real dashboard OpenAPI contract', () => {
     expect(paths).toHaveProperty('/dashboard/summary');
     expect(paths).not.toHaveProperty('/dashboard/stats');
     expect(paths).not.toHaveProperty('/dashboard/evolucao_peso');
-    const summary = paths['/dashboard/summary'] as { get?: Record<string, unknown> };
+    const summary = paths['/dashboard/summary'] as {
+      get?: Record<string, unknown>;
+    };
     expect(summary.get?.operationId).toBe('getFarmDashboard');
     expect(summary.get?.security).toEqual(expect.any(Array));
-    expect(summary.get?.responses).toEqual(
-      expect.objectContaining({ '200': expect.any(Object), '401': expect.any(Object), '403': expect.any(Object) }),
-    );
+    expect(summary.get?.responses).toHaveProperty('200');
+    expect(summary.get?.responses).toHaveProperty('401');
+    expect(summary.get?.responses).toHaveProperty('403');
   });
 });

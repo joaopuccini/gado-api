@@ -30,7 +30,7 @@ import { VacinacaoModule } from './vacinacao/vacinacao.module';
 import { ManejoModule } from './manejo/manejo.module';
 import { MovimentacoesModule } from './movimentacoes/movimentacoes.module';
 import { FotosModule } from './fotos/fotos.module';
-import { DashboardModule } from './dashboard/dashboard.module';
+import { DashboardModule } from './metrics/dashboard/dashboard.module';
 import { AdminModule } from './admin/admin.module';
 import { AlmoxarifadosModule } from './suprimentos/almoxarifados/almoxarifados.module';
 import { ProdutosModule } from './suprimentos/produtos/produtos.module';
