@@ -34,7 +34,9 @@ describe('CepeaMarketPriceGateway', () => {
     const fetcher = jest.fn(
       (_url: string, init: { signal: AbortSignal }) =>
         new Promise((_resolve, reject) => {
-          init.signal.addEventListener('abort', () => reject(init.signal.reason));
+          init.signal.addEventListener('abort', () =>
+            reject(new Error('aborted')),
+          );
         }),
     );
     const gateway = new CepeaMarketPriceGateway(fetcher, 5);

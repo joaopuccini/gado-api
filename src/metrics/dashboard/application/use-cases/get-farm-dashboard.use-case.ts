@@ -13,6 +13,12 @@ const average = (values: readonly number[]): number | null =>
     ? round(values.reduce((sum, value) => sum + value, 0) / values.length)
     : null;
 
+interface DashboardAlert {
+  readonly type: 'NO_WEIGHT' | 'STALE_WEIGHT' | 'WEIGHT_LOSS';
+  readonly animalId: number;
+  readonly lastMeasuredAt: string | null;
+}
+
 const distributions = (
   animals: readonly DashboardAnimal[],
   kind: 'batch' | 'pasture',
@@ -56,6 +62,7 @@ export class GetFarmDashboardUseCase {
       averageDailyGain: calculateAverageDailyGain(
         snapshot.measurements.map((measurement) => ({
           ...measurement,
+          id: String(measurement.id),
           animalId: String(measurement.animalId),
         })),
       ),
@@ -84,7 +91,7 @@ export class GetFarmDashboardUseCase {
     const now = this.now().getTime();
     return [...animals]
       .sort((left, right) => left.id - right.id)
-      .flatMap((animal) => {
+      .flatMap<DashboardAlert>((animal) => {
         const history = measurements
           .filter(({ animalId }) => animalId === animal.id)
           .sort((left, right) =>
@@ -94,11 +101,7 @@ export class GetFarmDashboardUseCase {
           );
         if (!history.length) {
           return [
-            {
-              type: 'NO_WEIGHT' as const,
-              animalId: animal.id,
-              lastMeasuredAt: null,
-            },
+            { type: 'NO_WEIGHT', animalId: animal.id, lastMeasuredAt: null },
           ];
         }
         const last = history[history.length - 1];

@@ -15,10 +15,11 @@ class StubGateway implements MarketPriceGateway {
     observedAt: new Date('2026-09-26T00:00:00.000Z'),
   };
   error: Error | null = null;
-  async fetch(): Promise<MarketPriceQuote> {
+  fetch(): Promise<MarketPriceQuote> {
     this.calls += 1;
-    if (this.error) throw this.error;
-    return this.result;
+    return this.error
+      ? Promise.reject(this.error)
+      : Promise.resolve(this.result);
   }
 }
 
@@ -99,7 +100,9 @@ describe('GetMarketPriceUseCase', () => {
       fallback: 'stale',
     });
     expect(JSON.stringify(logger.warn.mock.calls)).not.toContain('secret');
-    expect(JSON.stringify(logger.warn.mock.calls)).not.toContain('provider.test');
+    expect(JSON.stringify(logger.warn.mock.calls)).not.toContain(
+      'provider.test',
+    );
   });
 
   it('returns null without failing the dashboard when no fallback exists', async () => {

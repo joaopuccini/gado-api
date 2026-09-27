@@ -44,6 +44,7 @@ describe('administrative migrations on an empty database', () => {
           'admin_users',
           'assinaturas',
           'convites',
+          'market_price_cache',
           'organizacoes',
           'pagamentos',
           'planos',
