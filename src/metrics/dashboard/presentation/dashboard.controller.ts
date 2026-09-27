@@ -25,7 +25,7 @@ export class FarmDashboardController {
     summary: 'Consultar indicadores reais da fazenda',
   })
   @ApiHerdResponse({ type: DashboardResponseDto })
-  async summary() {
+  async summary(): Promise<DashboardResponseDto> {
     const [dashboard, marketPrice] = await Promise.all([
       this.dashboard.execute(),
       this.marketPrice.execute(),
