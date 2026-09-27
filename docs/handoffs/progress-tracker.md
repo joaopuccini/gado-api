@@ -264,11 +264,11 @@ Plano ativo: `docs/superpowers/plans/2026-09-26-wave-04-herd.md`
 | 4.5 | Unicidade de brinco e compra transacional | `[x]` | RED `b16eed4`; GREEN `d64bb31`; focal 8/8, migrations tenant 2/2 + admin 1/1 em bancos filhos removidos, arquitetura 23/23, lint e build verdes |
 | 4.6 | API autenticada do ciclo de animais | `[x]` | RED `aea4342`; GREEN `e507469`; controller 8/8, arquitetura 23/23, contrato 18/18, lint e build verdes |
 | 4.7 | Contrato gerado e cliente web | `[x]` | Snapshot `deb914c`; RED web `f44043b`; contrato anulável `fb6d538`; GREEN web `50d511f`; focal 3/3, contracts, network, lint, typecheck e API controller 8/8/build verdes |
-| 4.8 | Páginas de raças e lotes | `[ ]` | — |
+| 4.8 | Páginas de raças e lotes | `[x]` | RED web `7f572f9`; GREEN web `213b03e`; focais 6/6, router/layout 3/3, lint, typecheck e build do app verdes |
 | 4.9 | Jornada de animais no `gado-app` | `[ ]` | — |
 | 4.10 | Isolamento concorrente e Gate G3-herd | `[ ]` | — |
 
-**Onda 04 concluída?** `[ ]` | **Próxima task:** 4.8 RED — páginas de raças e lotes
+**Onda 04 concluída?** `[ ]` | **Próxima task:** 4.9 RED — jornada de animais no `gado-app`
 
 ---
 
