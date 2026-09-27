@@ -10,8 +10,16 @@ const command = process.argv.slice(2);
 if (command.length === 0) throw new Error('disposableCommandRequired');
 
 if (!process.env.DATABASE_URL) {
-  const candidates = [resolve(process.cwd(), '.env'), resolve(process.cwd(), '..', '..', '.env')];
-  const envFile = await Promise.any(candidates.map(async (candidate) => { await access(candidate); return candidate; }));
+  const candidates = [
+    resolve(process.cwd(), '.env'),
+    resolve(process.cwd(), '..', '..', '.env'),
+  ];
+  const envFile = await Promise.any(
+    candidates.map(async (candidate) => {
+      await access(candidate);
+      return candidate;
+    }),
+  );
   dotenv.config({ path: envFile, quiet: true });
 }
 
@@ -30,7 +38,16 @@ try {
   const isNpm = command[0] === 'npm';
   const executable = isNpm ? process.execPath : command[0];
   const args = isNpm
-    ? [resolve(dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js'), ...command.slice(1)]
+    ? [
+        resolve(
+          dirname(process.execPath),
+          'node_modules',
+          'npm',
+          'bin',
+          'npm-cli.js',
+        ),
+        ...command.slice(1),
+      ]
     : command.slice(1);
   const child = spawn(executable, args, {
     cwd: process.cwd(),
@@ -45,7 +62,10 @@ try {
   process.exitCode = exitCode;
 } finally {
   if (created) {
-    await pool.query('SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = $1 AND pid <> pg_backend_pid()', [databaseName]);
+    await pool.query(
+      'SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = $1 AND pid <> pg_backend_pid()',
+      [databaseName],
+    );
     await pool.query(`DROP DATABASE IF EXISTS "${databaseName}"`);
     process.stdout.write(`Disposable database removed: ${databaseName}\n`);
   }
