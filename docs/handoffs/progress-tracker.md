@@ -280,7 +280,7 @@ Plano ativo: `docs/superpowers/plans/2026-09-26-wave-04-herd.md`
 
 | Onda | Resumo | Status |
 |---|---|---|
-| 05 — Pesagens e dashboard | Indicadores reais sem mocks | `🟨 plano ativo` |
+| 05 — Pesagens e dashboard | Indicadores reais sem mocks | `✅ concluída` |
 | 06 — Manejo, sanidade, fotos | Movimentações, vacinação, storage | `⬜` |
 | 07 — Comercial e financeiro | Ledger, vendas, custos, caixa | `⬜` |
 | 08 — Admin e billing | gado-admin interno + dashboard SaaS | `⬜` |
@@ -303,9 +303,9 @@ Plano ativo: `docs/superpowers/plans/2026-09-27-wave-05-metrics.md`
 | 5.7 | Indicador CEPEA resiliente | `[x]` | RED `c758dd3`; GREEN `978a25a`; focal 9/9, migration admin 1/1 em banco filho removido, arquitetura 23/23, Prisma validate, lint e build verdes |
 | 5.8 | Dashboard real e OpenAPI | `[x]` | RED `5275685`; GREEN `e625035`; focal 4/4, contrato 19/19, arquitetura 23/23, lint e build verdes; rotas legadas removidas |
 | 5.9 | Cliente e jornadas web | `[x]` | Web RED `d5198b5`; GREEN `a7431cd`; focais/E2E 10/10, contratos, rede, lint, typecheck, arquitetura 7/7 e build do app verdes |
-| 5.10 | Reconciliação e Gate G4-metrics | `[ ]` | — |
+| 5.10 | Reconciliação e Gate G4-metrics | `[x]` | RED `ae8acef`; correção `d091ee1`; API coverage 338, integração 3, isolamento 16, migrations 3; web coverage 118; todos os gates verdes |
 
-**Onda 05 concluída?** `[ ]` | **Próxima task:** 5.10 RED — reconciliação e Gate G4-metrics
+**Onda 05 concluída?** `[x]` | **Handoff criado?** `[x]` (`docs/handoffs/2026-09-27-wave-05-complete.md`) | **Próxima atividade:** integrar Onda 05 e planejar Onda 06
 
 ---
 
@@ -344,6 +344,7 @@ Plano ativo: `docs/superpowers/plans/2026-09-27-wave-05-metrics.md`
 | 2026-09-22 20:22 | Codex GPT-5 | 03 | Onda 03 Task 10 concluída | Onda 03 Task 11 / Gate G2-account | Isolamento RED `eaf9956`/GREEN `c7615a4`; 7/7 testes web, 5/5 testes backend de audiência, builds app/admin, bundles, rede, lint e tipos verdes |
 | 2026-09-22 21:01 | Codex GPT-5 | 03 | Onda 03 completa (G2-account pass) | Planejar Onda 04 — Rebanho básico | Backend: 214 unitários, 23 arquitetura, 18 contrato, 2 integração, 11 isolamento, 3 migrations, coverage 246; frontend: 7 arquitetura, coverage 101, builds/rede/bundles verdes; todos os bancos filhos removidos |
 | 2026-09-27 02:05 | Codex GPT-5 | 04 | Onda 04 completa (G3-herd pass) | Integrar Onda 04 e planejar Onda 05 | API 278 coverage, isolamento 14, migrations 3; web 114 coverage; cobertura >=80%, builds, contratos, rede e bundles verdes; bancos filhos removidos |
+| 2026-09-27 | Codex GPT-5 | 05 | Onda 05 completa (G4-metrics pass) | Integrar Onda 05 e planejar Onda 06 | API 338 coverage, integração 3, isolamento 16, migrations 3; web 118 coverage; contratos, builds, rede e bundles verdes; bancos filhos removidos |
 
 ---
 

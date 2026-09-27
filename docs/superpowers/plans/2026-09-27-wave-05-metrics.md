@@ -220,23 +220,23 @@ em milissegundos para caches; esta onda mantém essas decisões atrás de ports.
 - Create: `docs/handoffs/2026-09-27-wave-05-complete.md`
 - Modify: `docs/handoffs/progress-tracker.md`
 
-- [ ] RED de uma massa conhecida com pesos/lotes/pastos e resultados esperados;
+- [x] RED de uma massa conhecida com pesos/lotes/pastos e resultados esperados;
   tolerância máxima 0,001 kg/GMD e zero para contagens.
-- [ ] Commit RED `test(metrics): reconcile known dashboard fixture`.
-- [ ] API gates: lint, build, unit, architecture, contract, integration,
+- [x] Commit RED `test(metrics): reconcile known dashboard fixture` (`ae8acef`).
+- [x] API gates: lint, build, unit, architecture, contract, integration,
   isolation, migrations, coverage e no-skipped em bancos filhos descartáveis.
-- [ ] Web gates: contracts, lint, typecheck, architecture, coverage, builds,
+- [x] Web gates: contracts, lint, typecheck, architecture, coverage, builds,
   network e bundles.
-- [ ] Confirmar >=80%, nenhum skipped, bancos removidos e worktrees limpas.
-- [ ] Atualizar tracker/evidência/handoff, commit
+- [x] Confirmar >=80%, nenhum skipped e bancos removidos.
+- [x] Atualizar tracker/evidência/handoff, commit
   `docs(metrics): close wave 05 gate` e push da branch nos dois remotos.
 
 ## Gate G4-metrics
 
-- [ ] Pesagens registradas e corrigidas com trilha e atomicidade.
-- [ ] Isolamento por fazenda comprovado sob concorrência.
-- [ ] Dashboard deriva exclusivamente de dados persistidos e fixture conhecida.
-- [ ] CEPEA possui timeout, cache durável, observabilidade e fallback válido.
-- [ ] Contrato gerado é consumido pelo frontend sem tipos duplicados.
-- [ ] Jornada de pesagem atualiza o dashboard no `gado-app`.
-- [ ] Todos os gates finais estão verdes.
+- [x] Pesagens registradas e corrigidas com trilha e atomicidade.
+- [x] Isolamento por fazenda comprovado sob concorrência.
+- [x] Dashboard deriva exclusivamente de dados persistidos e fixture conhecida.
+- [x] CEPEA possui timeout, cache durável, observabilidade e fallback válido.
+- [x] Contrato gerado é consumido pelo frontend sem tipos duplicados.
+- [x] Jornada de pesagem atualiza o dashboard no `gado-app`.
+- [x] Todos os gates finais estão verdes.
