@@ -10,11 +10,6 @@
     "reason": "Conta, fazendas e equipe"
   },
   {
-    "controller": "AnimaisController",
-    "removalWave": "04",
-    "reason": "Rebanho básico"
-  },
-  {
     "controller": "DashboardController",
     "removalWave": "05",
     "reason": "Indicadores reais"

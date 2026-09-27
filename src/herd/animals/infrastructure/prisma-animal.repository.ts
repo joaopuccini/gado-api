@@ -264,6 +264,7 @@ export class PrismaAnimalRepository implements AnimalRepository {
       ...(input.numeroBrinco !== undefined
         ? { numeroBrinco: input.numeroBrinco }
         : {}),
+      ...(input.sexo !== undefined ? { sexo: input.sexo } : {}),
       ...(input.status !== undefined ? { status: input.status } : {}),
       ...(input.pesoAtual !== undefined ? { pesoAtual: input.pesoAtual } : {}),
     };

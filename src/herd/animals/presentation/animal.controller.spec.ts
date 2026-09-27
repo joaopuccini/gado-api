@@ -35,7 +35,9 @@ describe('animal HTTP boundary', () => {
   });
 
   it('rejects an empty update and invalid animal enums', async () => {
-    await expect(validate(plainToInstance(UpdateAnimalDto, {}))).resolves.not.toEqual([]);
+    await expect(
+      validate(plainToInstance(UpdateAnimalDto, {})),
+    ).resolves.not.toEqual([]);
     await expect(
       validate(plainToInstance(UpdateAnimalDto, { sexo: 'X' })),
     ).resolves.not.toEqual([]);
@@ -59,7 +61,9 @@ describe('animal HTTP boundary', () => {
 
   it('delegates protocol values and exposes no seed operation', async () => {
     const useCase = {
-      list: jest.fn().mockResolvedValue({ data: [], page: 1, limit: 20, total: 0 }),
+      list: jest
+        .fn()
+        .mockResolvedValue({ data: [], page: 1, limit: 20, total: 0 }),
       get: jest.fn().mockResolvedValue({ id: 1 }),
       create: jest.fn().mockResolvedValue({ id: 1 }),
       update: jest.fn().mockResolvedValue({ id: 1 }),

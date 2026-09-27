@@ -120,6 +120,9 @@ export class ManageAnimalsUseCase {
       ...(command.numeroBrinco !== undefined
         ? { numeroBrinco: normalizeEarTag(command.numeroBrinco) }
         : {}),
+      ...(command.sexo !== undefined
+        ? { sexo: assertAnimalEnum('sexo', command.sexo, ANIMAL_SEXES) }
+        : {}),
       ...(command.pesoAtual !== undefined
         ? { pesoAtual: command.pesoAtual }
         : {}),

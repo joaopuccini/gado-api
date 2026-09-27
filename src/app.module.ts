@@ -18,7 +18,7 @@ import { GlobalValidationPipe } from './common/pipes/global-validation.pipe';
 
 // Feature modules
 import { AuthModule } from './auth/auth.module';
-import { AnimaisModule } from './animais/animais.module';
+import { AnimalsModule } from './herd/animals/animals.module';
 import { HerdCatalogModule } from './herd/catalog/herd-catalog.module';
 import { PastosModule } from './pastos/pastos.module';
 import { ClientesModule } from './clientes/clientes.module';
@@ -63,7 +63,7 @@ import { AccountModule } from './account/account.module';
     AccountModule,
 
     // Domain Modules
-    AnimaisModule,
+    AnimalsModule,
     HerdCatalogModule,
     PastosModule,
     ClientesModule,
