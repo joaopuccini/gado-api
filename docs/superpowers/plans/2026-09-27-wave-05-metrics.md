@@ -202,15 +202,15 @@ em milissegundos para caches; esta onda mantém essas decisões atrás de ports.
 - Create: `apps/gado-app/src/features/metrics/metrics-journey.e2e.spec.tsx`
 - Modify: `apps/gado-app/src/services/operational-gateway.ts`
 
-- [ ] RED cliente gerado e páginas: loading/vazio/erro/sucesso/sem permissão,
+- [x] RED cliente gerado e páginas: loading/vazio/erro/sucesso/sem permissão,
   registro/correção auditável, métricas, distribuições, alertas e CEPEA stale.
-- [ ] RED E2E: sessão com fazenda -> pesar animal -> dashboard reflete o dado,
+- [x] RED E2E: sessão com fazenda -> pesar animal -> dashboard reflete o dado,
   mockando somente transporte.
-- [ ] Commit RED `test(metrics): specify weight and dashboard journeys`.
-- [ ] Gerar contrato, implementar `MetricsClient`, remover adapter legado de
+- [x] Commit RED `test(metrics): specify weight and dashboard journeys` (`d5198b5`).
+- [x] Gerar contrato, implementar `MetricsClient`, remover adapter legado de
   dashboard/animais e ligar rotas/telas sem `fetch` direto.
-- [ ] Executar focais/E2E, contracts, network, lint, typecheck e build app.
-- [ ] Commit GREEN `feat(metrics): deliver real weight dashboard journeys`.
+- [x] Executar focais/E2E, contracts, network, lint, typecheck e build app.
+- [x] Commit GREEN `feat(metrics): deliver real weight dashboard journeys` (`a7431cd`).
 
 ## Task 10: Reconciliar fixture e encerrar G4-metrics
 

@@ -302,10 +302,10 @@ Plano ativo: `docs/superpowers/plans/2026-09-27-wave-05-metrics.md`
 | 5.6 | Read model zootécnico | `[x]` | RED `e19ba5e`; GREEN `50baf5c`; fixture focal 3/3, arquitetura 23/23 e lint verdes; reconciliação final em 5.10 |
 | 5.7 | Indicador CEPEA resiliente | `[x]` | RED `c758dd3`; GREEN `978a25a`; focal 9/9, migration admin 1/1 em banco filho removido, arquitetura 23/23, Prisma validate, lint e build verdes |
 | 5.8 | Dashboard real e OpenAPI | `[x]` | RED `5275685`; GREEN `e625035`; focal 4/4, contrato 19/19, arquitetura 23/23, lint e build verdes; rotas legadas removidas |
-| 5.9 | Cliente e jornadas web | `[ ]` | — |
+| 5.9 | Cliente e jornadas web | `[x]` | Web RED `d5198b5`; GREEN `a7431cd`; focais/E2E 10/10, contratos, rede, lint, typecheck, arquitetura 7/7 e build do app verdes |
 | 5.10 | Reconciliação e Gate G4-metrics | `[ ]` | — |
 
-**Onda 05 concluída?** `[ ]` | **Próxima task:** 5.9 RED — cliente e jornadas web
+**Onda 05 concluída?** `[ ]` | **Próxima task:** 5.10 RED — reconciliação e Gate G4-metrics
 
 ---
 
