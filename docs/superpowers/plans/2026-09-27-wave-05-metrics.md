@@ -67,12 +67,14 @@ em milissegundos para caches; esta onda mantém essas decisões atrás de ports.
 - Create: `src/metrics/weights/application/use-cases/manage-weights.use-case.ts`
 - Create: `src/metrics/weights/application/use-cases/manage-weights.use-case.spec.ts`
 
-- [ ] RED para listar/detalhar, registrar, corrigir com motivo, animal ausente,
+- [x] RED para listar/detalhar, registrar, corrigir com motivo, animal ausente,
   data anterior à entrada, concorrência lógica e falha sem contexto tenant.
-- [ ] Commit RED `test(metrics): specify auditable weight use cases`.
-- [ ] Implementar UseCase derivando `farmId`/ator somente do contexto.
-- [ ] Executar focal, arquitetura e lint.
-- [ ] Commit GREEN `feat(metrics): implement auditable weight use cases`.
+- [x] Commit RED `test(metrics): specify auditable weight use cases`
+  (`08a6b75`).
+- [x] Implementar UseCase derivando `farmId`/ator somente do contexto.
+- [x] Executar focal, arquitetura, lint e build.
+- [x] Commit GREEN `feat(metrics): implement auditable weight use cases`
+  (`f147f4f`).
 
 ## Task 3: Migrar persistência e atomicidade
 
