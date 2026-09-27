@@ -266,9 +266,9 @@ Plano ativo: `docs/superpowers/plans/2026-09-26-wave-04-herd.md`
 | 4.7 | Contrato gerado e cliente web | `[x]` | Snapshot `deb914c`; RED web `f44043b`; contrato anulável `fb6d538`; GREEN web `50d511f`; focal 3/3, contracts, network, lint, typecheck e API controller 8/8/build verdes |
 | 4.8 | Páginas de raças e lotes | `[x]` | RED web `7f572f9`; GREEN web `213b03e`; focais 6/6, router/layout 3/3, lint, typecheck e build do app verdes |
 | 4.9 | Jornada de animais no `gado-app` | `[x]` | RED web `8c1dc25`; GREEN web `f8d1dee`; focais/E2E/cliente 26/26, router 2/2, lint, typecheck, contracts, network e build do app verdes |
-| 4.10 | Isolamento concorrente e Gate G3-herd | `[ ]` | — |
+| 4.10 | Isolamento concorrente e Gate G3-herd | `[x]` | Persistência RED/aceite `ef8b35f`; isolamento 14/14; API 278 coverage e web 114 coverage; todos os gates verdes |
 
-**Onda 04 concluída?** `[ ]` | **Próxima task:** 4.10 RED — isolamento concorrente e Gate G3-herd
+**Onda 04 concluída?** `[x]` | **Handoff criado?** `[x]` (`docs/handoffs/2026-09-26-wave-04-complete.md`) | **Próxima atividade:** integrar Onda 04 e planejar Onda 05
 
 ---
 
@@ -324,6 +324,7 @@ Plano ativo: `docs/superpowers/plans/2026-09-26-wave-04-herd.md`
 | 2026-09-22 20:15 | Codex GPT-5 | 03 | Onda 03 Task 9 concluída | Onda 03 Task 10 RED | Correção backend RED `ed658bd`/GREEN `805c797`, migrations 3/3 em banco filho removido; páginas RED `95d2f7c`, `d843f86`, `a083432`; GREEN `09ec654`, `18c45a0`, `ca7a4b0`; cliente de equipe RED `97b3893`/GREEN `c123166`; 16/16, lint, tipos, build, contratos e rede verdes |
 | 2026-09-22 20:22 | Codex GPT-5 | 03 | Onda 03 Task 10 concluída | Onda 03 Task 11 / Gate G2-account | Isolamento RED `eaf9956`/GREEN `c7615a4`; 7/7 testes web, 5/5 testes backend de audiência, builds app/admin, bundles, rede, lint e tipos verdes |
 | 2026-09-22 21:01 | Codex GPT-5 | 03 | Onda 03 completa (G2-account pass) | Planejar Onda 04 — Rebanho básico | Backend: 214 unitários, 23 arquitetura, 18 contrato, 2 integração, 11 isolamento, 3 migrations, coverage 246; frontend: 7 arquitetura, coverage 101, builds/rede/bundles verdes; todos os bancos filhos removidos |
+| 2026-09-27 02:05 | Codex GPT-5 | 04 | Onda 04 completa (G3-herd pass) | Integrar Onda 04 e planejar Onda 05 | API 278 coverage, isolamento 14, migrations 3; web 114 coverage; cobertura >=80%, builds, contratos, rede e bundles verdes; bancos filhos removidos |
 
 ---
 
