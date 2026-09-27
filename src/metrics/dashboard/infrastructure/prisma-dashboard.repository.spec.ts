@@ -20,7 +20,13 @@ describe('PrismaDashboardRepository', () => {
       expect.objectContaining({ where: { fazendaId: 10, ativo: true } }),
     );
     expect(findWeights).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { fazendaId: 10, ativa: true } }),
+      expect.objectContaining({
+        where: {
+          fazendaId: 10,
+          ativa: true,
+          animal: { ativo: true },
+        },
+      }),
     );
   });
 });

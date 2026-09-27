@@ -28,7 +28,7 @@ export class PrismaDashboardRepository implements DashboardRepository {
         },
       }),
       client.pesagem.findMany({
-        where: { fazendaId: farmId, ativa: true },
+        where: { fazendaId: farmId, ativa: true, animal: { ativo: true } },
         orderBy: [{ dataPesagem: 'asc' }, { id: 'asc' }],
         select: { id: true, animalId: true, peso: true, dataPesagem: true },
       }),
