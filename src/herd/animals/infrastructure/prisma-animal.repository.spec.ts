@@ -74,6 +74,8 @@ describe('PrismaAnimalRepository', () => {
       valorCompra: 3500,
     });
     expect(createAnimal).toHaveBeenCalledWith({
+      // Jest asymmetric matchers are typed as any by @types/jest.
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       data: expect.objectContaining({
         fazendaId: 10,
         loteId: 2,
@@ -81,6 +83,7 @@ describe('PrismaAnimalRepository', () => {
         tipoEntrada: 'COMPRA_OLHO',
         valorCompra: 3500,
       }),
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       select: expect.any(Object),
     });
     expect(createCash).toHaveBeenCalledWith({

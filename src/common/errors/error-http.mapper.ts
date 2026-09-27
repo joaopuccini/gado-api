@@ -44,6 +44,7 @@ const statusByCode: Readonly<Record<ErrorCode, number>> = {
   resourceInUse: HttpStatus.CONFLICT,
   animalNotFound: HttpStatus.NOT_FOUND,
   animalRelationUnavailable: HttpStatus.UNPROCESSABLE_ENTITY,
+  earTagAlreadyExists: HttpStatus.CONFLICT,
   internalServerError: HttpStatus.INTERNAL_SERVER_ERROR,
   invalidTenantSchemaName: HttpStatus.INTERNAL_SERVER_ERROR,
   migrationChecksumMismatch: HttpStatus.INTERNAL_SERVER_ERROR,

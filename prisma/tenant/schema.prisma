@@ -222,6 +222,7 @@ model Animal {
   transferencias TransferenciaAnimal[]
 
   @@index([fazendaId, status])
+  @@unique([fazendaId, numeroBrinco])
   @@index([loteId])
   @@index([racaId])
   @@index([pastoId])

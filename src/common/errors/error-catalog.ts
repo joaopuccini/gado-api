@@ -33,6 +33,7 @@ export type ErrorCode =
   | 'resourceInUse'
   | 'animalNotFound'
   | 'animalRelationUnavailable'
+  | 'earTagAlreadyExists'
   | 'internalServerError'
   | 'invalidTenantSchemaName'
   | 'migrationChecksumMismatch'
