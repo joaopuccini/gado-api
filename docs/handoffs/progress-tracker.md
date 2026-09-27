@@ -300,12 +300,12 @@ Plano ativo: `docs/superpowers/plans/2026-09-27-wave-05-metrics.md`
 | 5.4 | API autenticada de pesagens | `[x]` | RED `2c795f2`; GREEN `7ee2df1`; focal 7/7, contrato 18/18, arquitetura 23/23, lint e build verdes |
 | 5.5 | Isolamento concorrente | `[x]` | Prova `372e9bb`; 2/2 em banco filho removido; retry confirmou timeout transitório inicial sem lacuna de produção; lint verde |
 | 5.6 | Read model zootécnico | `[x]` | RED `e19ba5e`; GREEN `50baf5c`; fixture focal 3/3, arquitetura 23/23 e lint verdes; reconciliação final em 5.10 |
-| 5.7 | Indicador CEPEA resiliente | `[ ]` | — |
+| 5.7 | Indicador CEPEA resiliente | `[x]` | RED `c758dd3`; GREEN `978a25a`; focal 9/9, migration admin 1/1 em banco filho removido, arquitetura 23/23, Prisma validate, lint e build verdes |
 | 5.8 | Dashboard real e OpenAPI | `[ ]` | — |
 | 5.9 | Cliente e jornadas web | `[ ]` | — |
 | 5.10 | Reconciliação e Gate G4-metrics | `[ ]` | — |
 
-**Onda 05 concluída?** `[ ]` | **Próxima task:** 5.7 RED — indicador CEPEA resiliente
+**Onda 05 concluída?** `[ ]` | **Próxima task:** 5.8 RED — dashboard real e OpenAPI
 
 ---
 

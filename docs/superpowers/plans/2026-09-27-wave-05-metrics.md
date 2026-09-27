@@ -157,13 +157,13 @@ em milissegundos para caches; esta onda mantém essas decisões atrás de ports.
 - Create: `src/integrations/market-price/infrastructure/cepea-market-price.gateway.spec.ts`
 - Create: `src/integrations/market-price/infrastructure/prisma-market-price-cache.repository.ts`
 
-- [ ] RED para cache hit, refresh, timeout 2 s, payload inválido, fallback stale,
+- [x] RED para cache hit, refresh, timeout 2 s, payload inválido, fallback stale,
   ausência de fallback e logs sem URL/query/body sensível.
-- [ ] Commit RED `test(metrics): specify resilient cepea gateway`.
-- [ ] Implementar `fetch` atrás do port com `AbortController`, parser ancorado
+- [x] Commit RED `test(metrics): specify resilient cepea gateway` (`c758dd3`).
+- [x] Implementar `fetch` atrás do port com `AbortController`, parser ancorado
   em conteúdo (nunca offsets fixos), cache admin durável e observabilidade.
-- [ ] Executar focais, admin migration descartável, lint e build.
-- [ ] Commit GREEN `feat(metrics): add resilient cepea indicator`.
+- [x] Executar focais, admin migration descartável, arquitetura, lint e build.
+- [x] Commit GREEN `feat(metrics): add resilient cepea indicator` (`978a25a`).
 
 ## Task 8: Substituir dashboard legado e publicar OpenAPI
 
