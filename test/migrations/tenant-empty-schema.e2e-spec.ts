@@ -148,5 +148,111 @@ describe('tenant migrations on an empty schema', () => {
     expect(weightAuditColumns.rows.map(({ columnName }) => columnName)).toEqual(
       ['ativa', 'corrige_pesagem_id', 'motivo_correcao', 'registrado_por_id'],
     );
+
+    const handlingColumns = await pool.query<{
+      tableName: string;
+      columnName: string;
+    }>(
+      `
+      SELECT table_name AS "tableName", column_name AS "columnName"
+      FROM information_schema.columns
+      WHERE table_schema = $1
+        AND (
+          (table_name = 'movimentos_pasto' AND column_name = 'registrado_por_id')
+          OR (table_name = 'movimentos_lote' AND column_name = 'registrado_por_id')
+          OR (table_name = 'transferencia_animais' AND column_name = 'registrado_por_id')
+          OR (table_name = 'manejo_reproducao' AND column_name IN (
+            'tipo_evento', 'status_ciclo', 'data_evento', 'ciclo_id', 'registrado_por_id'
+          ))
+          OR (table_name = 'vacinacoes' AND column_name IN (
+            'protocolo', 'dose', 'unidade_dose', 'proxima_dose', 'registrado_por_id', 'ativa'
+          ))
+          OR (table_name = 'fotos' AND column_name IN (
+            'object_key', 'mime_type', 'tamanho_bytes', 'checksum_sha256',
+            'status_storage', 'registrado_por_id'
+          ))
+        )
+      ORDER BY table_name, column_name
+      `,
+      [schemaName],
+    );
+    expect(handlingColumns.rows).toEqual([
+      { tableName: 'fotos', columnName: 'checksum_sha256' },
+      { tableName: 'fotos', columnName: 'mime_type' },
+      { tableName: 'fotos', columnName: 'object_key' },
+      { tableName: 'fotos', columnName: 'registrado_por_id' },
+      { tableName: 'fotos', columnName: 'status_storage' },
+      { tableName: 'fotos', columnName: 'tamanho_bytes' },
+      { tableName: 'manejo_reproducao', columnName: 'ciclo_id' },
+      { tableName: 'manejo_reproducao', columnName: 'data_evento' },
+      { tableName: 'manejo_reproducao', columnName: 'registrado_por_id' },
+      { tableName: 'manejo_reproducao', columnName: 'status_ciclo' },
+      { tableName: 'manejo_reproducao', columnName: 'tipo_evento' },
+      { tableName: 'movimentos_lote', columnName: 'registrado_por_id' },
+      { tableName: 'movimentos_pasto', columnName: 'registrado_por_id' },
+      { tableName: 'transferencia_animais', columnName: 'registrado_por_id' },
+      { tableName: 'vacinacoes', columnName: 'ativa' },
+      { tableName: 'vacinacoes', columnName: 'dose' },
+      { tableName: 'vacinacoes', columnName: 'protocolo' },
+      { tableName: 'vacinacoes', columnName: 'proxima_dose' },
+      { tableName: 'vacinacoes', columnName: 'registrado_por_id' },
+      { tableName: 'vacinacoes', columnName: 'unidade_dose' },
+    ]);
+
+    const handlingConstraints = await pool.query<{ name: string }>(
+      `
+      SELECT constraint_record.conname AS name
+      FROM pg_constraint constraint_record
+      JOIN pg_namespace namespace_record
+        ON namespace_record.oid = constraint_record.connamespace
+      WHERE namespace_record.nspname = $1
+        AND constraint_record.conname IN (
+          'pastos_geojson_polygon_valid',
+          'pastos_tamanho_hectares_positive',
+          'movimentos_pasto_distinct_locations',
+          'movimentos_lote_distinct_locations',
+          'transferencia_animais_distinct_farms',
+          'vacinacoes_dose_positive',
+          'fotos_tamanho_bytes_positive'
+        )
+      ORDER BY constraint_record.conname
+      `,
+      [schemaName],
+    );
+    expect(handlingConstraints.rows.map(({ name }) => name)).toEqual([
+      'fotos_tamanho_bytes_positive',
+      'movimentos_lote_distinct_locations',
+      'movimentos_pasto_distinct_locations',
+      'pastos_geojson_polygon_valid',
+      'pastos_tamanho_hectares_positive',
+      'transferencia_animais_distinct_farms',
+      'vacinacoes_dose_positive',
+    ]);
+
+    const handlingIndexes = await pool.query<{ name: string }>(
+      `
+      SELECT indexname AS name
+      FROM pg_indexes
+      WHERE schemaname = $1
+        AND indexname IN (
+          'movimentos_pasto_fazenda_animal_data_id_idx',
+          'movimentos_lote_fazenda_animal_data_id_idx',
+          'transferencia_animais_origem_animal_data_id_idx',
+          'manejo_reproducao_fazenda_vaca_data_id_idx',
+          'vacinacoes_fazenda_animal_proxima_dose_idx',
+          'fotos_fazenda_animal_created_at_idx'
+        )
+      ORDER BY indexname
+      `,
+      [schemaName],
+    );
+    expect(handlingIndexes.rows.map(({ name }) => name)).toEqual([
+      'fotos_fazenda_animal_created_at_idx',
+      'manejo_reproducao_fazenda_vaca_data_id_idx',
+      'movimentos_lote_fazenda_animal_data_id_idx',
+      'movimentos_pasto_fazenda_animal_data_id_idx',
+      'transferencia_animais_origem_animal_data_id_idx',
+      'vacinacoes_fazenda_animal_proxima_dose_idx',
+    ]);
   });
 });

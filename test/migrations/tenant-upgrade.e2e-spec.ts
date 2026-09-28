@@ -63,6 +63,7 @@ describe('tenant schema upgrade and retry', () => {
       '202609220001_harden_farm_hierarchy',
       '202609220002_scope_custom_profiles',
       '202609260001_wave04_herd',
+      '202609270001_wave05_weights',
       TENANT_CURRENT_VERSION,
     ]);
     await repository.apply(schema, migrations[0]);
@@ -92,8 +93,8 @@ describe('tenant schema upgrade and retry', () => {
     `);
 
     expect(retry.rows).toEqual(firstApplication.rows);
-    expect(retry.rows).toHaveLength(9);
-    expect(logger.info.mock.calls).toHaveLength(9);
+    expect(retry.rows).toHaveLength(10);
+    expect(logger.info.mock.calls).toHaveLength(10);
 
     await expect(
       repository.apply(schema, {
