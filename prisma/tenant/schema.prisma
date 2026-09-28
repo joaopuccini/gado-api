@@ -42,7 +42,7 @@ model Perfil {
 
   permissoes PerfilPermissao[]
   usuarios   Usuario[]
-  fazenda    Fazenda?            @relation(fields: [fazendaId], references: [id], onDelete: Cascade)
+  fazenda    Fazenda?          @relation(fields: [fazendaId], references: [id], onDelete: Cascade)
 
   @@unique([fazendaId, nome], map: "perfis_fazenda_id_nome_key")
   @@map("perfis")
@@ -89,15 +89,20 @@ model Usuario {
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamp(6)
 
-  perfil         Perfil?               @relation(fields: [perfilId], references: [id])
-  permissoes     UsuarioPermissao[]
-  fazendas       UsuarioFazenda[]
-  custos         Custo[]               @relation("UsuarioCusto")
-  vendas         Venda[]               @relation("UsuarioVenda")
-  caixas         Caixa[]               @relation("UsuarioCaixa")
-  pedidosCompra  PedidoCompra[]        @relation("UsuarioPedido")
-  transferencias TransferenciaAnimal[] @relation("UsuarioTransferencia")
-  pesagens       Pesagem[]             @relation("UsuarioPesagem")
+  perfil                Perfil?               @relation(fields: [perfilId], references: [id])
+  permissoes            UsuarioPermissao[]
+  fazendas              UsuarioFazenda[]
+  custos                Custo[]               @relation("UsuarioCusto")
+  vendas                Venda[]               @relation("UsuarioVenda")
+  caixas                Caixa[]               @relation("UsuarioCaixa")
+  pedidosCompra         PedidoCompra[]        @relation("UsuarioPedido")
+  transferencias        TransferenciaAnimal[] @relation("UsuarioTransferencia")
+  pesagens              Pesagem[]             @relation("UsuarioPesagem")
+  vacinacoesRegistradas Vacinacao[]           @relation("UsuarioVacinacao")
+  fotosRegistradas      Foto[]                @relation("UsuarioFoto")
+  manejosRegistrados    ManejoReproducao[]    @relation("UsuarioManejoReproducao")
+  movimentosPasto       MovimentoPasto[]      @relation("UsuarioMovimentoPasto")
+  movimentosLote        MovimentoLote[]       @relation("UsuarioMovimentoLote")
 
   @@map("usuarios")
 }
@@ -107,21 +112,21 @@ model Fazenda {
   parentId          Int?     @map("parent_id")
   provisioningRunId String?  @unique @map("provisioning_run_id") @db.Uuid
   nome              String   @db.VarChar(200)
-  nomeProprietario String?  @map("nome_proprietario") @db.VarChar(200)
-  cpfCnpj          String?  @unique @map("cpf_cnpj") @db.VarChar(18)
-  celular          String?  @db.VarChar(20)
-  cep              String?  @db.VarChar(10)
-  endereco         String?  @db.VarChar(300)
-  bairro           String?  @db.VarChar(100)
-  cidade           String?  @db.VarChar(100)
-  estado           String?  @db.VarChar(2)
-  numero           String?  @db.VarChar(10)
-  observacao       String?
-  geojson          Json?
-  tamanhoHectares  Decimal? @map("tamanho_hectares") @db.Decimal(10, 2)
-  ativo            Boolean  @default(true)
-  createdAt        DateTime @default(now()) @db.Timestamp(6)
-  updatedAt        DateTime @updatedAt @db.Timestamp(6)
+  nomeProprietario  String?  @map("nome_proprietario") @db.VarChar(200)
+  cpfCnpj           String?  @unique @map("cpf_cnpj") @db.VarChar(18)
+  celular           String?  @db.VarChar(20)
+  cep               String?  @db.VarChar(10)
+  endereco          String?  @db.VarChar(300)
+  bairro            String?  @db.VarChar(100)
+  cidade            String?  @db.VarChar(100)
+  estado            String?  @db.VarChar(2)
+  numero            String?  @db.VarChar(10)
+  observacao        String?
+  geojson           Json?
+  tamanhoHectares   Decimal? @map("tamanho_hectares") @db.Decimal(10, 2)
+  ativo             Boolean  @default(true)
+  createdAt         DateTime @default(now()) @db.Timestamp(6)
+  updatedAt         DateTime @updatedAt @db.Timestamp(6)
 
   usuarios        UsuarioFazenda[]
   perfis          Perfil[]
@@ -222,8 +227,8 @@ model Animal {
   itensVenda     ItemVenda[]
   transferencias TransferenciaAnimal[]
 
-  @@index([fazendaId, status])
   @@unique([fazendaId, numeroBrinco])
+  @@index([fazendaId, status])
   @@index([loteId])
   @@index([racaId])
   @@index([pastoId])
@@ -250,10 +255,11 @@ model Lote {
   createdAt DateTime @default(now()) @db.Timestamp(6)
   updatedAt DateTime @updatedAt @db.Timestamp(6)
 
-  fazenda           Fazenda         @relation(fields: [fazendaId], references: [id])
-  animais           Animal[]
-  movimentosOrigem  MovimentoLote[] @relation("LoteOrigem")
-  movimentosDestino MovimentoLote[] @relation("LoteDestino")
+  fazenda               Fazenda               @relation(fields: [fazendaId], references: [id])
+  animais               Animal[]
+  movimentosOrigem      MovimentoLote[]       @relation("LoteOrigem")
+  movimentosDestino     MovimentoLote[]       @relation("LoteDestino")
+  transferenciasDestino TransferenciaAnimal[] @relation("TransferenciaLoteDestino")
 
   @@index([fazendaId])
   @@map("lotes")
@@ -269,10 +275,11 @@ model Pasto {
   createdAt       DateTime @default(now()) @db.Timestamp(6)
   updatedAt       DateTime @updatedAt @db.Timestamp(6)
 
-  fazenda           Fazenda          @relation(fields: [fazendaId], references: [id])
-  animais           Animal[]
-  movimentosOrigem  MovimentoPasto[] @relation("PastoOrigem")
-  movimentosDestino MovimentoPasto[] @relation("PastoDestino")
+  fazenda               Fazenda               @relation(fields: [fazendaId], references: [id])
+  animais               Animal[]
+  movimentosOrigem      MovimentoPasto[]      @relation("PastoOrigem")
+  movimentosDestino     MovimentoPasto[]      @relation("PastoDestino")
+  transferenciasDestino TransferenciaAnimal[] @relation("TransferenciaPastoDestino")
 
   @@index([fazendaId])
   @@map("pastos")
@@ -454,98 +461,118 @@ model Pesagem {
 // ─── DOMÍNIO: VACINAÇÃO ─────────────────────────────────────────
 
 model Vacinacao {
-  id            Int      @id @default(autoincrement())
-  fazendaId     Int      @map("fazenda_id")
-  animalId      Int      @map("animal_id")
-  descricao     String?  @db.VarChar(200)
-  dataVacinacao DateTime @default(now()) @map("data_vacinacao") @db.Date
-  observacao    String?
-  createdAt     DateTime @default(now()) @db.Timestamp(6)
+  id              Int       @id @default(autoincrement())
+  fazendaId       Int       @map("fazenda_id")
+  animalId        Int       @map("animal_id")
+  registradoPorId Int?      @map("registrado_por_id")
+  protocolo       String    @db.VarChar(200)
+  descricao       String?   @db.VarChar(200)
+  dose            Decimal?  @db.Decimal(10, 3)
+  unidadeDose     String?   @map("unidade_dose") @db.VarChar(20)
+  dataVacinacao   DateTime  @default(now()) @map("data_vacinacao") @db.Date
+  proximaDose     DateTime? @map("proxima_dose") @db.Date
+  observacao      String?
+  ativa           Boolean   @default(true)
+  createdAt       DateTime  @default(now()) @db.Timestamp(6)
 
-  fazenda Fazenda @relation(fields: [fazendaId], references: [id])
-  animal  Animal  @relation(fields: [animalId], references: [id])
+  fazenda       Fazenda  @relation(fields: [fazendaId], references: [id])
+  animal        Animal   @relation(fields: [animalId], references: [id])
+  registradoPor Usuario? @relation("UsuarioVacinacao", fields: [registradoPorId], references: [id], onDelete: SetNull)
 
-  @@index([fazendaId])
-  @@index([animalId])
+  @@index([fazendaId, animalId, proximaDose], map: "vacinacoes_fazenda_animal_proxima_dose_idx")
   @@map("vacinacoes")
 }
 
 // ─── DOMÍNIO: FOTOS ─────────────────────────────────────────────
 
 model Foto {
-  id        Int       @id @default(autoincrement())
-  fazendaId Int       @map("fazenda_id")
-  animalId  Int       @map("animal_id")
-  descricao String?   @db.VarChar(200)
-  caminho   String    @db.VarChar(500)
-  dataFoto  DateTime? @map("data_foto") @db.Date
-  createdAt DateTime  @default(now()) @db.Timestamp(6)
+  id              Int               @id @default(autoincrement())
+  fazendaId       Int               @map("fazenda_id")
+  animalId        Int               @map("animal_id")
+  registradoPorId Int?              @map("registrado_por_id")
+  descricao       String?           @db.VarChar(200)
+  objectKey       String            @unique @map("object_key") @db.VarChar(500)
+  mimeType        String            @map("mime_type") @db.VarChar(100)
+  tamanhoBytes    Int?              @map("tamanho_bytes")
+  checksumSha256  String?           @map("checksum_sha256") @db.Char(64)
+  statusStorage   StatusStorageFoto @default(ATIVO) @map("status_storage")
+  dataFoto        DateTime?         @map("data_foto") @db.Date
+  createdAt       DateTime          @default(now()) @db.Timestamp(6)
 
-  fazenda Fazenda @relation(fields: [fazendaId], references: [id])
-  animal  Animal  @relation(fields: [animalId], references: [id])
+  fazenda       Fazenda  @relation(fields: [fazendaId], references: [id])
+  animal        Animal   @relation(fields: [animalId], references: [id])
+  registradoPor Usuario? @relation("UsuarioFoto", fields: [registradoPorId], references: [id], onDelete: SetNull)
 
+  @@index([fazendaId, animalId, createdAt], map: "fotos_fazenda_animal_created_at_idx")
   @@map("fotos")
 }
 
 // ─── DOMÍNIO: MANEJO REPRODUTIVO ────────────────────────────────
 
 model ManejoReproducao {
-  id         Int      @id @default(autoincrement())
-  fazendaId  Int      @map("fazenda_id")
-  vacaId     Int      @map("vaca_id")
-  boiId      Int      @map("boi_id")
-  dataCorre  DateTime @default(now()) @map("data_corre") @db.Date
-  observacao String?
-  createdAt  DateTime @default(now()) @db.Timestamp(6)
+  id              Int                    @id @default(autoincrement())
+  fazendaId       Int                    @map("fazenda_id")
+  vacaId          Int                    @map("vaca_id")
+  boiId           Int?                   @map("boi_id")
+  registradoPorId Int?                   @map("registrado_por_id")
+  cicloId         String                 @default(uuid()) @map("ciclo_id") @db.Uuid
+  tipoEvento      TipoEventoReprodutivo  @default(COBERTURA) @map("tipo_evento")
+  statusCiclo     StatusCicloReprodutivo @default(ABERTO) @map("status_ciclo")
+  dataEvento      DateTime               @default(now()) @map("data_evento") @db.Date
+  observacao      String?
+  createdAt       DateTime               @default(now()) @db.Timestamp(6)
 
-  fazenda Fazenda @relation(fields: [fazendaId], references: [id])
-  vaca    Animal  @relation("AnimalVaca", fields: [vacaId], references: [id])
-  boi     Animal  @relation("AnimalBoi", fields: [boiId], references: [id])
+  fazenda       Fazenda  @relation(fields: [fazendaId], references: [id])
+  vaca          Animal   @relation("AnimalVaca", fields: [vacaId], references: [id])
+  boi           Animal?  @relation("AnimalBoi", fields: [boiId], references: [id])
+  registradoPor Usuario? @relation("UsuarioManejoReproducao", fields: [registradoPorId], references: [id], onDelete: SetNull)
 
-  @@index([fazendaId])
-  @@index([vacaId])
+  @@index([fazendaId, vacaId, dataEvento, id], map: "manejo_reproducao_fazenda_vaca_data_id_idx")
+  @@index([cicloId, dataEvento, id], map: "manejo_reproducao_ciclo_data_id_idx")
   @@map("manejo_reproducao")
 }
 
 // ─── DOMÍNIO: MOVIMENTAÇÕES ─────────────────────────────────────
 
 model MovimentoPasto {
-  id             Int      @id @default(autoincrement())
-  fazendaId      Int      @map("fazenda_id")
-  animalId       Int      @map("animal_id")
-  pastoOrigemId  Int      @map("pasto_origem_id")
-  pastoDestinoId Int      @map("pasto_destino_id")
-  dataMovimento  DateTime @default(now()) @map("data_movimento") @db.Date
-  observacao     String?
-  createdAt      DateTime @default(now()) @db.Timestamp(6)
+  id              Int      @id @default(autoincrement())
+  fazendaId       Int      @map("fazenda_id")
+  animalId        Int      @map("animal_id")
+  pastoOrigemId   Int      @map("pasto_origem_id")
+  pastoDestinoId  Int      @map("pasto_destino_id")
+  registradoPorId Int?     @map("registrado_por_id")
+  dataMovimento   DateTime @default(now()) @map("data_movimento") @db.Date
+  observacao      String?
+  createdAt       DateTime @default(now()) @db.Timestamp(6)
 
-  fazenda      Fazenda @relation(fields: [fazendaId], references: [id])
-  animal       Animal  @relation(fields: [animalId], references: [id])
-  pastoOrigem  Pasto   @relation("PastoOrigem", fields: [pastoOrigemId], references: [id])
-  pastoDestino Pasto   @relation("PastoDestino", fields: [pastoDestinoId], references: [id])
+  fazenda       Fazenda  @relation(fields: [fazendaId], references: [id])
+  animal        Animal   @relation(fields: [animalId], references: [id])
+  pastoOrigem   Pasto    @relation("PastoOrigem", fields: [pastoOrigemId], references: [id])
+  pastoDestino  Pasto    @relation("PastoDestino", fields: [pastoDestinoId], references: [id])
+  registradoPor Usuario? @relation("UsuarioMovimentoPasto", fields: [registradoPorId], references: [id], onDelete: SetNull)
 
-  @@index([fazendaId])
-  @@index([animalId])
+  @@index([fazendaId, animalId, dataMovimento, id], map: "movimentos_pasto_fazenda_animal_data_id_idx")
   @@map("movimentos_pasto")
 }
 
 model MovimentoLote {
-  id            Int      @id @default(autoincrement())
-  fazendaId     Int      @map("fazenda_id")
-  animalId      Int      @map("animal_id")
-  loteOrigemId  Int      @map("lote_origem_id")
-  loteDestinoId Int      @map("lote_destino_id")
-  dataMovimento DateTime @default(now()) @map("data_movimento") @db.Date
-  observacao    String?
-  createdAt     DateTime @default(now()) @db.Timestamp(6)
+  id              Int      @id @default(autoincrement())
+  fazendaId       Int      @map("fazenda_id")
+  animalId        Int      @map("animal_id")
+  loteOrigemId    Int      @map("lote_origem_id")
+  loteDestinoId   Int      @map("lote_destino_id")
+  registradoPorId Int?     @map("registrado_por_id")
+  dataMovimento   DateTime @default(now()) @map("data_movimento") @db.Date
+  observacao      String?
+  createdAt       DateTime @default(now()) @db.Timestamp(6)
 
-  fazenda     Fazenda @relation(fields: [fazendaId], references: [id])
-  animal      Animal  @relation(fields: [animalId], references: [id])
-  loteOrigem  Lote    @relation("LoteOrigem", fields: [loteOrigemId], references: [id])
-  loteDestino Lote    @relation("LoteDestino", fields: [loteDestinoId], references: [id])
+  fazenda       Fazenda  @relation(fields: [fazendaId], references: [id])
+  animal        Animal   @relation(fields: [animalId], references: [id])
+  loteOrigem    Lote     @relation("LoteOrigem", fields: [loteOrigemId], references: [id])
+  loteDestino   Lote     @relation("LoteDestino", fields: [loteDestinoId], references: [id])
+  registradoPor Usuario? @relation("UsuarioMovimentoLote", fields: [registradoPorId], references: [id], onDelete: SetNull)
 
-  @@index([fazendaId])
-  @@index([animalId])
+  @@index([fazendaId, animalId, dataMovimento, id], map: "movimentos_lote_fazenda_animal_data_id_idx")
   @@map("movimentos_lote")
 }
 
@@ -565,9 +592,11 @@ model TransferenciaAnimal {
   fazendaOrigem  Fazenda  @relation("TransferenciaOrigem", fields: [fazendaOrigemId], references: [id])
   fazendaDestino Fazenda  @relation("TransferenciaDestino", fields: [fazendaDestinoId], references: [id])
   registradoPor  Usuario? @relation("UsuarioTransferencia", fields: [registradoPorId], references: [id])
+  pastoDestino   Pasto?   @relation("TransferenciaPastoDestino", fields: [pastoDestinoId], references: [id])
+  loteDestino    Lote?    @relation("TransferenciaLoteDestino", fields: [loteDestinoId], references: [id])
 
   @@index([animalId])
-  @@index([fazendaOrigemId])
+  @@index([fazendaOrigemId, animalId, dataTransferencia, id], map: "transferencia_animais_origem_animal_data_id_idx")
   @@index([fazendaDestinoId])
   @@map("transferencia_animais")
 }
@@ -868,6 +897,26 @@ model Manutencao {
 enum SexoAnimal {
   MACHO
   FEMEA
+}
+
+enum TipoEventoReprodutivo {
+  COBERTURA
+  INSEMINACAO
+  DIAGNOSTICO_GESTACAO
+  PARTO
+  ENCERRAMENTO_CICLO
+}
+
+enum StatusCicloReprodutivo {
+  ABERTO
+  PRENHE
+  ENCERRADO
+}
+
+enum StatusStorageFoto {
+  PENDENTE
+  ATIVO
+  REMOCAO_PENDENTE
 }
 
 enum StatusAnimal {
