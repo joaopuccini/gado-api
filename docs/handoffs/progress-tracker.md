@@ -317,7 +317,7 @@ Plano ativo: `docs/superpowers/plans/2026-09-27-wave-06-handling.md`
 |---|---|---|---|
 | 6.1 | Modelo persistente e migration versionada | `[x]` | RED `9ad0835`; GREEN `8816877`; migrations 3/3 em banco filho removido, Prisma validate/generate, lint e build verdes |
 | 6.2 | Pastos e mapa seguros | `[x]` | RED `5d1084e`; GREEN `a3d76df`; focais 15/15, arquitetura 23/23, contrato 19/19, lint e build verdes |
-| 6.3 | Movimentos de pasto/lote atômicos | `[ ]` | Pendente |
+| 6.3 | Movimentos de pasto/lote atômicos | `[x]` | RED `143c7b6`; GREEN neste commit; unit 330/330, integração concorrente 1/1 em banco filho removido, arquitetura 23/23, contrato 19/19, no-skipped, lint e build verdes |
 | 6.4 | Transferência entre fazendas | `[ ]` | Pendente |
 | 6.5 | Ciclo reprodutivo | `[ ]` | Pendente |
 | 6.6 | Protocolos e aplicações de vacinação | `[ ]` | Pendente |
@@ -326,7 +326,7 @@ Plano ativo: `docs/superpowers/plans/2026-09-27-wave-06-handling.md`
 | 6.9 | Jornadas reais no `gado-app` | `[ ]` | Pendente |
 | 6.10 | Isolamento, reconciliação e Gate G5 | `[ ]` | Pendente |
 
-**Onda 06 concluída?** `[ ]` | **Handoff criado?** `[ ]` | **Próxima atividade:** Task 6.3 RED
+**Onda 06 concluída?** `[ ]` | **Handoff criado?** `[ ]` | **Próxima atividade:** Task 6.4 RED
 
 ---
 

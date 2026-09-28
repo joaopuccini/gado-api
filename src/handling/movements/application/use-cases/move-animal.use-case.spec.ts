@@ -30,6 +30,13 @@ class InMemoryMovementUnitOfWork implements MovementUnitOfWork {
     active: true,
   };
   readonly movements: AtomicMovementRecord[] = [];
+  listHistory = jest.fn().mockResolvedValue({
+    data: [],
+    page: 1,
+    pageSize: 20,
+    totalItems: 0,
+    totalPages: 0,
+  });
 
   findAnimalLocation(animalId: number, farmId: number) {
     return Promise.resolve(
@@ -119,5 +126,38 @@ describe('atomic animal movements', () => {
       ),
     ).rejects.toMatchObject({ code: 'animalNotFound' });
     expect(unitOfWork.movements).toEqual([]);
+  });
+
+  it('fails closed when movement permission is absent', async () => {
+    await expect(
+      context.run({ ...CONTEXT, permissions: [] }, () =>
+        useCase.toPasture({
+          animalId: 5,
+          destinationPastureId: 8,
+          movementDate: '2026-09-28',
+        }),
+      ),
+    ).rejects.toMatchObject({ code: 'forbidden' });
+    expect(unitOfWork.movements).toEqual([]);
+  });
+
+  it('lists only authorized farm history with canonical pagination', async () => {
+    unitOfWork.listHistory = jest.fn().mockResolvedValue({
+      data: [],
+      page: 2,
+      pageSize: 5,
+      totalItems: 0,
+      totalPages: 0,
+    });
+    await expect(
+      context.run({ ...CONTEXT, permissions: ['movimentacoes:ler'] }, () =>
+        useCase.history({ animalId: 5, page: 2, pageSize: 5 }),
+      ),
+    ).resolves.toMatchObject({ page: 2, pageSize: 5 });
+    expect(unitOfWork.listHistory).toHaveBeenCalledWith(10, {
+      animalId: 5,
+      page: 2,
+      pageSize: 5,
+    });
   });
 });

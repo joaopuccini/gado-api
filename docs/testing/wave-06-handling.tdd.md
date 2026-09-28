@@ -78,7 +78,41 @@ build                               PASS
 
 `PastosController` foi removido da composition root e da quarentena legada.
 
+## Task 6.3 — Movimentos de pasto e lote atômicos
+
+### RED — `143c7b6`
+
+O teste comportamental passou a exigir origem derivada do estado persistido,
+ator e fazenda derivados do contexto verificado, rejeição de origem igual ao
+destino e uma única operação atômica para histórico e posição atual. A suíte
+falhou pela ausência de `MoveAnimalUseCase`.
+
+### GREEN — este commit
+
+O fluxo legado foi substituído por `Controller -> UseCase -> Port -> Adapter`.
+O adapter Prisma valida o destino no escopo da fazenda e executa atualização
+condicional da origem e criação do histórico numa transação curta
+`Serializable`. Conflitos/deadlocks `P2034` recebem no máximo três tentativas;
+outros erros não são repetidos. A comparação da origem persistida impede lost
+update e faz a segunda movimentação concorrente falhar sem criar uma cadeia
+inconsistente.
+
+```text
+movements focais                              15/15 PASS
+unit completa                               330/330 PASS
+atomic movement integration                    1/1 PASS
+architecture                                  23/23 PASS
+contract                                      19/19 PASS
+no-skipped                                          PASS
+lint:check                                          PASS
+build                                               PASS
+```
+
+A integração usou o banco filho
+`gado_wave00_test_995c1a664137`, removido pelo runner mesmo após a execução.
+Nenhum `db push`, `migrate reset` ou banco/schema não descartável foi usado.
+As rotas legadas e suas entradas na quarentena foram removidas.
+
 ## Próximo RED
 
-Task 6.3: movimentos de pasto e lote com origem persistida, histórico e posição
-atual alterados atomicamente.
+Task 6.4: transferência de animais entre fazendas autorizadas.

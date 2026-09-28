@@ -22,13 +22,13 @@ import { AnimalsModule } from './herd/animals/animals.module';
 import { WeightsModule } from './metrics/weights/weights.module';
 import { HerdCatalogModule } from './herd/catalog/herd-catalog.module';
 import { PasturesModule } from './handling/pastures/pastures.module';
+import { MovementsModule } from './handling/movements/movements.module';
 import { ClientesModule } from './clientes/clientes.module';
 import { CustosModule } from './custos/custos.module';
 import { VendasModule } from './vendas/vendas.module';
 import { CaixaModule } from './caixa/caixa.module';
 import { VacinacaoModule } from './vacinacao/vacinacao.module';
 import { ManejoModule } from './manejo/manejo.module';
-import { MovimentacoesModule } from './movimentacoes/movimentacoes.module';
 import { FotosModule } from './fotos/fotos.module';
 import { DashboardModule } from './metrics/dashboard/dashboard.module';
 import { AdminModule } from './admin/admin.module';
@@ -68,13 +68,13 @@ import { AccountModule } from './account/account.module';
     WeightsModule,
     HerdCatalogModule,
     PasturesModule,
+    MovementsModule,
     ClientesModule,
     CustosModule,
     VendasModule,
     CaixaModule,
     VacinacaoModule,
     ManejoModule,
-    MovimentacoesModule,
     FotosModule,
     DashboardModule,
     AdminModule,

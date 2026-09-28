@@ -25,16 +25,6 @@
     "reason": "Fotos e storage"
   },
   {
-    "controller": "MovimentoPastoController",
-    "removalWave": "06",
-    "reason": "Movimentações atômicas"
-  },
-  {
-    "controller": "MovimentoLoteController",
-    "removalWave": "06",
-    "reason": "Movimentações atômicas"
-  },
-  {
     "controller": "ClientesController",
     "removalWave": "07",
     "reason": "Parceiros e comercial"
