@@ -34,17 +34,17 @@
 
 ### RED
 
-- [ ] Escrever testes que exijam: pasto com GeoJSON e escopo de fazenda; movimentos com origem/destino, ator e timestamp; transferência entre fazendas; reprodução com tipo/status/ciclo; vacinação com protocolo, dose aplicada e próxima dose; foto com object key, MIME, tamanho e checksum.
-- [ ] Exigir índices compostos por fazenda/animal/data e constraints que impeçam origem igual ao destino e valores inválidos.
-- [ ] Rodar `npm run test:migrations -- --runInBand` contra banco filho descartável e registrar a falha pretendida.
-- [ ] Commit: `test(handling): specify wave 06 persistence`
+- [x] Escrever testes que exijam: pasto com GeoJSON e escopo de fazenda; movimentos com origem/destino, ator e timestamp; transferência entre fazendas; reprodução com tipo/status/ciclo; vacinação com protocolo, dose aplicada e próxima dose; foto com object key, MIME, tamanho e checksum.
+- [x] Exigir índices compostos por fazenda/animal/data e constraints que impeçam origem igual ao destino e valores inválidos.
+- [x] Rodar `npm run test:migrations -- --runInBand` contra banco filho descartável e registrar a falha pretendida.
+- [x] Commit: `test(handling): specify wave 06 persistence` (`9ad0835`)
 
 ### GREEN
 
-- [ ] Evoluir o schema sem editar migrations publicadas e escrever SQL versionado idempotente para upgrade.
-- [ ] Preservar dados legados compatíveis; novos campos obrigatórios devem ter estratégia explícita de backfill/nullable-then-enforce.
-- [ ] Rodar `npm run prisma:generate:tenant`, `npx prisma validate --schema prisma/tenant/schema.prisma` e os três cenários de migration em banco filho descartável.
-- [ ] Commit: `feat(handling): migrate wave 06 persistence`
+- [x] Evoluir o schema sem editar migrations publicadas e escrever SQL versionado para upgrade.
+- [x] Preservar dados legados compatíveis; novos campos obrigatórios usam backfill antes do `NOT NULL`.
+- [x] Rodar Prisma generate/validate e os três cenários de migration em banco filho descartável, além de lint e build.
+- [x] Commit: `feat(handling): migrate wave 06 persistence` (`8816877`)
 
 ## Task 6.2 — Entregar pastos e mapa por arquitetura nova
 
