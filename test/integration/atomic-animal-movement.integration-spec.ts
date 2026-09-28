@@ -147,4 +147,85 @@ describe('atomic animal movement persistence', () => {
       pastoDestinoId: persistedAnimal.pastoId,
     });
   });
+
+  it('keeps batch history consistent under concurrent moves', async () => {
+    const client = factory.create(schema);
+    const farm = await client.fazenda.create({ data: { nome: 'Fazenda B' } });
+    const user = await client.usuario.create({
+      data: {
+        nome: 'Operador de lote',
+        email: `${randomUUID()}@example.test`,
+        globalUserId: randomUUID(),
+      },
+    });
+    const breed = await client.raca.create({ data: { descricao: 'Angus' } });
+    const pasture = await client.pasto.create({
+      data: { fazendaId: farm.id, descricao: 'Pasto único' },
+    });
+    const [origin, destinationA, destinationB] = await Promise.all([
+      client.lote.create({
+        data: { fazendaId: farm.id, descricao: 'Origem' },
+      }),
+      client.lote.create({
+        data: { fazendaId: farm.id, descricao: 'Destino A' },
+      }),
+      client.lote.create({
+        data: { fazendaId: farm.id, descricao: 'Destino B' },
+      }),
+    ]);
+    const animal = await client.animal.create({
+      data: {
+        fazendaId: farm.id,
+        loteId: origin.id,
+        racaId: breed.id,
+        pastoId: pasture.id,
+      },
+    });
+    const operational: ExecutionContextData = {
+      ...identity,
+      localUserId: user.id,
+      farmId: farm.id,
+      accessibleFarmIds: [farm.id],
+      permissions: ['movimentacoes:criar'],
+    };
+    const unitOfWork = new PrismaMovementUnitOfWork(
+      new TenantPrismaService(context, factory),
+    );
+    const useCase = new MoveAnimalUseCase(unitOfWork, context);
+
+    const outcomes = await context.run(operational, () =>
+      Promise.allSettled([
+        useCase.toBatch({
+          animalId: animal.id,
+          destinationBatchId: destinationA.id,
+          movementDate: '2026-09-28',
+        }),
+        useCase.toBatch({
+          animalId: animal.id,
+          destinationBatchId: destinationB.id,
+          movementDate: '2026-09-28',
+        }),
+      ]),
+    );
+
+    expect(
+      outcomes.filter(({ status }) => status === 'fulfilled'),
+    ).toHaveLength(1);
+    expect(outcomes.filter(({ status }) => status === 'rejected')).toHaveLength(
+      1,
+    );
+    const persistedAnimal = await client.animal.findUniqueOrThrow({
+      where: { id: animal.id },
+      select: { loteId: true },
+    });
+    const history = await client.movimentoLote.findMany({
+      where: { animalId: animal.id },
+      select: { loteOrigemId: true, loteDestinoId: true },
+    });
+    expect(history).toHaveLength(1);
+    expect(history[0]).toEqual({
+      loteOrigemId: origin.id,
+      loteDestinoId: persistedAnimal.loteId,
+    });
+  });
 });
