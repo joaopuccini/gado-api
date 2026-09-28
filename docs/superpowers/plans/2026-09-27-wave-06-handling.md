@@ -69,16 +69,16 @@
 
 ### RED
 
-- [ ] Especificar GeoJSON Polygon válido e fechado, área positiva, nomes não vazios e paginação envelopada.
-- [ ] Especificar allow/deny para `pastos:ler` e `pastos:gerenciar`, escopo da fazenda selecionada e exclusão bloqueada quando houver animal ou histórico dependente.
-- [ ] Commit: `test(pastures): specify secured pasture lifecycle`
+- [x] Especificar GeoJSON Polygon válido e fechado, área positiva, nomes não vazios e paginação envelopada.
+- [x] Especificar allow/deny para `pastos:ler` e `pastos:gerenciar`, escopo da fazenda selecionada e exclusão bloqueada quando houver animal ou histórico dependente.
+- [x] Commit: `test(pastures): specify secured pasture lifecycle` (`5d1084e`)
 
 ### GREEN
 
-- [ ] Implementar domínio puro, UseCase, repository Prisma contextual, DTOs `camelCase`, Swagger completo e controller sem regra de negócio.
-- [ ] Manter rotas `/api/v1/pastures` como contrato novo; a rota legada `/pastos` só sai da quarentena depois do client migrado.
-- [ ] Rodar focais, `npm run test:architecture -- --runInBand`, `npm run test:contract -- --runInBand`, `npm run lint:check` e `npm run build`.
-- [ ] Commit: `feat(pastures): deliver secured pasture lifecycle`
+- [x] Implementar domínio puro, UseCase, repository Prisma contextual, DTOs `camelCase`, Swagger completo e controller sem regra de negócio.
+- [x] Publicar `/api/v1/pastures` e remover a rota/controller legado da composition root e quarentena.
+- [x] Rodar focais, arquitetura, contrato, lint e build.
+- [x] Commit: `feat(pastures): deliver secured pasture lifecycle` (`a3d76df`)
 
 ## Task 6.3 — Tornar movimentos de pasto e lote atômicos
 

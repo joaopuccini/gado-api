@@ -52,7 +52,33 @@ O gate completo usou o banco filho
 `gado_wave00_test_f07e1a4c39bd`, removido pelo runner após as três suites.
 Nenhum `db push`, `migrate reset` ou schema não descartável foi usado.
 
+## Task 6.2 — Pastos e mapa seguros
+
+### RED — `5d1084e`
+
+O teste comportamental fixou GeoJSON Polygon fechado, área positiva, escopo
+derivado da fazenda selecionada, falha fechada fora de contexto tenant e
+desativação bloqueada por animais ou histórico. A suíte falhou pela ausência de
+`ManagePasturesUseCase` e da porta correspondente.
+
+### GREEN — `a3d76df`
+
+O CRUD legado foi substituído por domínio, UseCase, port, adapter Prisma,
+controller autenticado e DTOs `camelCase`. A rota canônica `/pastures` exige
+`pastos:ler`/`pastos:gerenciar`, consulta sempre no escopo da fazenda e mantém
+exclusão lógica protegida por dependências.
+
+```text
+pastures focal                 15/15 PASS
+architecture                  23/23 PASS
+contract                      19/19 PASS
+lint:check                          PASS
+build                               PASS
+```
+
+`PastosController` foi removido da composition root e da quarentena legada.
+
 ## Próximo RED
 
-Task 6.2: domínio e ciclo autenticado de pastos, incluindo GeoJSON, permissões,
-escopo de fazenda e exclusão protegida por dependências.
+Task 6.3: movimentos de pasto e lote com origem persistida, histórico e posição
+atual alterados atomicamente.
