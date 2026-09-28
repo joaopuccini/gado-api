@@ -41,6 +41,7 @@ const statusByCode: Readonly<Record<ErrorCode, number>> = {
   systemProfileImmutable: HttpStatus.CONFLICT,
   breedNotFound: HttpStatus.NOT_FOUND,
   batchNotFound: HttpStatus.NOT_FOUND,
+  pastureNotFound: HttpStatus.NOT_FOUND,
   resourceInUse: HttpStatus.CONFLICT,
   animalNotFound: HttpStatus.NOT_FOUND,
   animalRelationUnavailable: HttpStatus.UNPROCESSABLE_ENTITY,

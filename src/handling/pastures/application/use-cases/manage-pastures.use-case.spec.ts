@@ -167,9 +167,19 @@ describe('pasture management', () => {
   });
 
   it('fails closed without a verified tenant context', async () => {
-    await expect(useCase.list({ page: 1, limit: 20 })).rejects.toMatchObject({
-      code: 'tenantContextMissing',
-    });
+    await expect(
+      context.run(
+        {
+          requestId: 'public-request',
+          traceId: 'public-trace',
+          contextType: 'public',
+          startedAt: 1,
+          accessibleFarmIds: [],
+          permissions: [],
+        },
+        () => useCase.list({ page: 1, limit: 20 }),
+      ),
+    ).rejects.toMatchObject({ code: 'tenantContextMissing' });
   });
 
   it('lists and loads only pastures from the selected farm', async () => {

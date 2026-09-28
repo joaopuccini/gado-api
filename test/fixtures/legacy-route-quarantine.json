@@ -10,11 +10,6 @@
     "reason": "Conta, fazendas e equipe"
   },
   {
-    "controller": "PastosController",
-    "removalWave": "06",
-    "reason": "Manejo e pastagens"
-  },
-  {
     "controller": "ManejoController",
     "removalWave": "06",
     "reason": "Manejo reprodutivo"

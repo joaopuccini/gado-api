@@ -30,6 +30,7 @@ export type ErrorCode =
   | 'systemProfileImmutable'
   | 'breedNotFound'
   | 'batchNotFound'
+  | 'pastureNotFound'
   | 'resourceInUse'
   | 'animalNotFound'
   | 'animalRelationUnavailable'

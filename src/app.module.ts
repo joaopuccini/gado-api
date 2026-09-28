@@ -21,7 +21,7 @@ import { AuthModule } from './auth/auth.module';
 import { AnimalsModule } from './herd/animals/animals.module';
 import { WeightsModule } from './metrics/weights/weights.module';
 import { HerdCatalogModule } from './herd/catalog/herd-catalog.module';
-import { PastosModule } from './pastos/pastos.module';
+import { PasturesModule } from './handling/pastures/pastures.module';
 import { ClientesModule } from './clientes/clientes.module';
 import { CustosModule } from './custos/custos.module';
 import { VendasModule } from './vendas/vendas.module';
@@ -67,7 +67,7 @@ import { AccountModule } from './account/account.module';
     AnimalsModule,
     WeightsModule,
     HerdCatalogModule,
-    PastosModule,
+    PasturesModule,
     ClientesModule,
     CustosModule,
     VendasModule,
