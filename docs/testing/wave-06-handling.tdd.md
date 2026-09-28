@@ -82,12 +82,13 @@ build                               PASS
 
 ### RED — `143c7b6`
 
-O teste comportamental passou a exigir origem derivada do estado persistido,
-ator e fazenda derivados do contexto verificado, rejeição de origem igual ao
-destino e uma única operação atômica para histórico e posição atual. A suíte
-falhou pela ausência de `MoveAnimalUseCase`.
+O único arquivo desse RED foi o teste do `MoveAnimalUseCase`. Ele exigiu origem
+derivada do estado persistido, ator e fazenda derivados do contexto verificado,
+rejeição de origem igual ao destino e delegação de um comando ao unit of work.
+A suíte falhou pela ausência de `MoveAnimalUseCase`. Esse RED não provou
+rollback, concorrência, envelope HTTP nem normalização da falha `P2034`.
 
-### GREEN — este commit
+### GREEN inicial — `1f1583e`
 
 O fluxo legado foi substituído por `Controller -> UseCase -> Port -> Adapter`.
 O adapter Prisma valida o destino no escopo da fazenda e executa atualização
@@ -97,19 +98,57 @@ outros erros não são repetidos. A comparação da origem persistida impede los
 update e faz a segunda movimentação concorrente falhar sem criar uma cadeia
 inconsistente.
 
+Os testes de adapter, controller e integração de concorrência de pasto foram
+adicionados no próprio GREEN, e não no RED `143c7b6`. Portanto, eles forneceram
+cobertura posterior, mas não constituíram um ciclo RED válido para rollback e
+concorrência. A revisão também identificou envelope paginado aninhado,
+`P2034` crua após o último retry e ausência de provas equivalentes para lote.
+
+### RED corretivo — `ea54912`
+
+O ciclo corretivo adicionou antes da produção:
+
+- teste do interceptor exigindo itens em `data` e paginação em `meta`;
+- contrato OpenAPI exigindo `data` como array e metadados canônicos;
+- teste exigindo normalização da terceira `P2034` como `DomainError`;
+- rollback explícito quando `animal.updateMany` falha;
+- adapter atômico e concorrência persistida também para lote.
+
+Resultados RED observados:
+
 ```text
-movements focais                              15/15 PASS
-unit completa                               330/330 PASS
-atomic movement integration                    1/1 PASS
+interceptor + adapter      2 FAIL, 6 PASS
+contract movement OpenAPI  1 FAIL
+integration pasto+lote     2/2 PASS (comportamento atômico já existia)
+```
+
+As falhas foram, respectivamente, o envelope `{data:{data,...}}`, o schema
+OpenAPI referenciando `MovementHistoryPageResponseDto` dentro de `data` e o
+erro Prisma `P2034` sendo relançado sem normalização. A integração usou e
+removeu o banco filho `gado_wave00_test_e56743479c1e`.
+
+### GREEN corretivo — este commit
+
+O interceptor global agora reconhece o resultado paginado canônico e publica
+a lista diretamente em `data`, com `page`, `pageSize`, `totalItems` e
+`totalPages` em `meta` junto ao `requestId`. O decorador OpenAPI existente foi
+estendido para descrever o mesmo envelope, sem resposta alternativa. Após três
+tentativas, `P2034` é convertida em `DomainError` com código estável `conflict`,
+mensagem pública e causa apenas interna.
+
+```text
+movements focais                              19/19 PASS
+unit completa                               334/334 PASS
+atomic movement integration                    2/2 PASS
 architecture                                  23/23 PASS
-contract                                      19/19 PASS
+contract                                      20/20 PASS
 no-skipped                                          PASS
 lint:check                                          PASS
 build                                               PASS
 ```
 
-A integração usou o banco filho
-`gado_wave00_test_995c1a664137`, removido pelo runner mesmo após a execução.
+A integração GREEN usou o banco filho
+`gado_wave00_test_13bde878b766`, removido pelo runner após a execução.
 Nenhum `db push`, `migrate reset` ou banco/schema não descartável foi usado.
 As rotas legadas e suas entradas na quarentena foram removidas.
 

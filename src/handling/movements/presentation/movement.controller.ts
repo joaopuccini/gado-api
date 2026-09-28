@@ -7,7 +7,6 @@ import { ApiHerdResponse } from '../../../herd/catalog/presentation/herd-api-res
 import { MoveAnimalUseCase } from '../application/use-cases/move-animal.use-case';
 import {
   BatchMovementDto,
-  MovementHistoryPageResponseDto,
   MovementHistoryQueryDto,
   MovementResponseDto,
   PastureMovementDto,
@@ -56,7 +55,7 @@ export class MovementController {
     operationId: 'listAnimalMovementHistory',
     summary: 'Listar histórico paginado de movimentações',
   })
-  @ApiHerdResponse({ type: MovementHistoryPageResponseDto })
+  @ApiHerdResponse({ type: MovementResponseDto, paginated: true })
   history(@Query() query: MovementHistoryQueryDto) {
     return this.movements.history({
       page: query.page,

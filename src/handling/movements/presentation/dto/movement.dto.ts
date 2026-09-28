@@ -87,12 +87,3 @@ export class MovementResponseDto {
   @ApiProperty({ type: String, nullable: true }) notes!: string | null;
   @ApiProperty({ format: 'date-time' }) createdAt!: string;
 }
-
-export class MovementHistoryPageResponseDto {
-  @ApiProperty({ type: MovementResponseDto, isArray: true })
-  data!: MovementResponseDto[];
-  @ApiProperty() page!: number;
-  @ApiProperty() pageSize!: number;
-  @ApiProperty() totalItems!: number;
-  @ApiProperty() totalPages!: number;
-}

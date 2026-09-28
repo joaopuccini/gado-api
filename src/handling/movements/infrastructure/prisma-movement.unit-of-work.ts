@@ -165,8 +165,16 @@ export class PrismaMovementUnitOfWork implements MovementUnitOfWork {
       try {
         return await client.$transaction(work, TRANSACTION_OPTIONS);
       } catch (error: unknown) {
-        if (!isP2034(error) || attempt === MAX_TRANSACTION_ATTEMPTS) {
+        if (!isP2034(error)) {
           throw error;
+        }
+        if (attempt === MAX_TRANSACTION_ATTEMPTS) {
+          throw new DomainError(
+            'conflict',
+            'A movimentação conflitou com outra operação.',
+            undefined,
+            error,
+          );
         }
       }
     }
