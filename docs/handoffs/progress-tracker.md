@@ -281,7 +281,7 @@ Plano ativo: `docs/superpowers/plans/2026-09-26-wave-04-herd.md`
 | Onda | Resumo | Status |
 |---|---|---|
 | 05 — Pesagens e dashboard | Indicadores reais sem mocks | `✅ concluída` |
-| 06 — Manejo, sanidade, fotos | Movimentações, vacinação, storage | `⬜` |
+| 06 — Manejo, sanidade, fotos | Movimentações, vacinação, storage | `🚧 em andamento` |
 | 07 — Comercial e financeiro | Ledger, vendas, custos, caixa | `⬜` |
 | 08 — Admin e billing | gado-admin interno + dashboard SaaS | `⬜` |
 | 09 — ETL e reconciliação | Migração repetível por tenant | `⬜` |
@@ -306,6 +306,27 @@ Plano ativo: `docs/superpowers/plans/2026-09-27-wave-05-metrics.md`
 | 5.10 | Reconciliação e Gate G4-metrics | `[x]` | RED `ae8acef`; correção `d091ee1`; API coverage 338, integração 3, isolamento 16, migrations 3; web coverage 118; todos os gates verdes |
 
 **Onda 05 concluída?** `[x]` | **Handoff criado?** `[x]` (`docs/handoffs/2026-09-27-wave-05-complete.md`) | **Próxima atividade:** integrar Onda 05 e planejar Onda 06
+
+---
+
+### Onda 06 — Manejo, sanidade, fotos e movimentações
+
+Plano ativo: `docs/superpowers/plans/2026-09-27-wave-06-handling.md`
+
+| Task | Entrega | Status | Evidência |
+|---|---|---|---|
+| 6.1 | Modelo persistente e migration versionada | `[ ]` | Próximo RED: testes de criação limpa, upgrade e provisionamento |
+| 6.2 | Pastos e mapa seguros | `[ ]` | Pendente |
+| 6.3 | Movimentos de pasto/lote atômicos | `[ ]` | Pendente |
+| 6.4 | Transferência entre fazendas | `[ ]` | Pendente |
+| 6.5 | Ciclo reprodutivo | `[ ]` | Pendente |
+| 6.6 | Protocolos e aplicações de vacinação | `[ ]` | Pendente |
+| 6.7 | Fotos com object storage autorizado | `[ ]` | Pendente |
+| 6.8 | OpenAPI e client central | `[ ]` | Pendente |
+| 6.9 | Jornadas reais no `gado-app` | `[ ]` | Pendente |
+| 6.10 | Isolamento, reconciliação e Gate G5 | `[ ]` | Pendente |
+
+**Onda 06 concluída?** `[ ]` | **Handoff criado?** `[ ]` | **Próxima atividade:** Task 6.1 RED
 
 ---
 
